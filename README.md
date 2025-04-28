@@ -1,6 +1,6 @@
 # ✍️ OnlyPens.xyz
 
-**OnlyPens.xyz** is a decentralized ghostwriting marketplace tailored for creators. It connects creators with skilled ghostwriters, ensuring trustless transactions through smart contracts and enhancing user experience with AI-driven matchmaking.
+**OnlyPens.xyz** is a decentralized ghostwriting matchmaking service tailored for creators. It connects creators with skilled ghostwriters, ensuring trustless transactions through smart contracts and enhancing user experience with AI-driven matchmaking.
 
 ---
 
