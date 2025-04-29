@@ -15,6 +15,8 @@ import {
   MantineProvider,
 } from "@mantine/core";
 import { theme } from "@/theme";
+import { Menu } from "@/components";
+import { WalletProvider } from "@/providers/wallet.provider";
 
 const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
   ? process.env.NEXT_PUBLIC_SITE_URL
@@ -93,9 +95,12 @@ export default function RootLayout({
       </head>
       <body>
         <MantineProvider theme={theme}>
-          <Box component="main" className={classes.main}>
-            {children}
-          </Box>
+          <WalletProvider>
+            <Menu />
+            <Box component="main" className={classes.main}>
+              <Box className={classes.wrapper}>{children}</Box>
+            </Box>
+          </WalletProvider>
         </MantineProvider>
       </body>
     </html>

@@ -11,7 +11,7 @@ export const theme = createTheme({
       "#f5e9ff",
       "#e3cfff",
       "#c39bff",
-      "#a264ff", // Main purple
+      "#a264ff", // Main purple - 3
       "#8636fe",
       "#7419fe",
       "#6b09ff",
@@ -24,7 +24,7 @@ export const theme = createTheme({
       "#cde0ff",
       "#9bbeff",
       "#649aff",
-      "#387bfe", // Main blue
+      "#387bfe", // Main blue - 4
       "#1d68fe",
       "#095eff",
       "#004fe4",
@@ -33,7 +33,7 @@ export const theme = createTheme({
     ],
     gray: [
       "#f1f5fc",
-      "#e4e6ea", // Main white
+      "#e4e6ea", // Main white - 1
       "#c8cbd1",
       "#aaaeb8",
       "#9096a2",
@@ -53,7 +53,7 @@ export const theme = createTheme({
       "#586b8a",
       "#4d5f7c",
       "#3f526f",
-      "#0D1117", // Main black
+      "#0D1117", // Main black - 9
     ],
     green: [
       "#e4fef5",
@@ -62,7 +62,7 @@ export const theme = createTheme({
       "#80e3bf",
       "#5cdbac",
       "#44d6a0",
-      "#35d399", // Main green
+      "#35d399", // Main green - 6
       "#24bb85",
       "#14a675",
       "#009063",
@@ -71,7 +71,7 @@ export const theme = createTheme({
       "#ffe8e8",
       "#ffd0d0",
       "#fba0a0",
-      "#f86c6c", // Main red
+      "#f86c6c", // Main red - 3
       "#f54040",
       "#f32524",
       "#f31515",
@@ -116,5 +116,12 @@ export const theme = createTheme({
         fontWeight: "bold",
       },
     },
+  },
+  fontSizes: {
+    xs: "1rem",
+    sm: "1.25rem",
+    md: "1.75rem",
+    lg: "2.5rem",
+    xl: "3rem",
   },
 });

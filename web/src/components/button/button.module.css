@@ -1,0 +1,123 @@
+.button {
+  position: relative;
+  transition: all 0.2s;
+  border-radius: 20px;
+  width: fit-content;
+}
+
+.button:hover {
+  transform: scale(1.03);
+  filter: brightness(1.05);
+  box-shadow: 0px 0px 12px rgba(255, 255, 255, 0.4),
+    0px 0px 20px rgba(102, 176, 255, 0.6);
+}
+
+.button:active {
+  transform: scale(0.95);
+  filter: brightness(0.9);
+  box-shadow: 0px 0px 8px rgba(255, 255, 255, 0.2),
+    0px 0px 12px rgba(102, 176, 255, 0.4);
+}
+
+.button.fullWidth {
+  width: 100%;
+}
+
+.button.primary {
+  box-shadow: 4px 12px 16px rgba(102, 176, 255, 0.48);
+}
+
+.button.secondary {
+  box-shadow: 4px 12px 16px rgba(102, 176, 255, 0.16);
+}
+
+.button.blue {
+  box-shadow: 4px 12px 16px rgba(0, 108, 255, 0.48);
+}
+
+.button.green {
+  box-shadow: 4px 12px 16px rgba(0, 163, 92, 0.48);
+}
+
+.button.red {
+  box-shadow: 4px 12px 16px rgba(255, 0, 0, 0.48);
+}
+
+.button.midnight {
+  box-shadow: 4px 12px 16px rgba(0, 0, 0, 0.48);
+}
+
+.foreground {
+  position: absolute;
+  margin: auto;
+  width: calc(100% - 8px);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  height: 100%;
+  z-index: 20;
+}
+
+.foreground.primary {
+  filter: brightness(1.5);
+  background: rgba(32, 136, 205, 0.48);
+  box-shadow: 0px 4px 4px rgba(102, 176, 255, 0.48) inset,
+    0px -4px 4px rgba(0, 0, 0, 0.16) inset;
+}
+
+.foreground.secondary {
+  width: calc(100% - 8px);
+  height: calc(100% - 8px);
+  box-shadow: 0px -4px 8px rgba(0, 100, 144, 0.32) inset;
+}
+
+.foreground.blue {
+  filter: brightness(1.3);
+  background: rgba(0, 108, 255, 0.2);
+  box-shadow: 0px 4px 4px rgba(0, 108, 255, 0.48) inset,
+    0px -4px 4px rgba(0, 0, 0, 0.16) inset;
+}
+
+.foreground.green {
+  filter: brightness(1.3);
+  background: rgba(0, 163, 92, 0.2);
+  box-shadow: 0px 4px 4px rgba(0, 163, 92, 0.48) inset,
+    0px -4px 4px rgba(0, 0, 0, 0.16) inset;
+}
+
+.foreground.red {
+  filter: brightness(1.3);
+  background: rgba(255, 0, 0, 0.2);
+  box-shadow: 0px 4px 4px rgba(255, 0, 0, 0.48) inset,
+    0px -4px 4px rgba(0, 0, 0, 0.16) inset;
+}
+
+.foreground.midnight {
+  filter: brightness(1.3);
+  background: rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.48) inset,
+    0px -4px 4px rgba(0, 0, 0, 0.16) inset;
+}
+
+.foreground.default {
+  border-radius: 18px;
+}
+
+.foreground.small {
+  border-radius: 14px;
+}
+
+.foreground.icon {
+  border-radius: 9999px;
+}
+
+/* Hide foreground for certain variants */
+.foreground.outline,
+.foreground.ghost,
+.foreground.white {
+  display: none;
+}

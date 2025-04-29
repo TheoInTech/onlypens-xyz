@@ -4,6 +4,10 @@
   background: radial-gradient(circle at 25% 50%, #0a1025 0%, #000510 100%);
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
 }
 
 .home::before {
@@ -38,4 +42,12 @@
   filter: blur(15px);
   border-radius: 50%;
   z-index: 0;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }

@@ -1,0 +1,58 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  margin: 16px 24px;
+  min-height: 80px;
+  padding-left: var(--mantine-spacing-md);
+  padding-right: var(--mantine-spacing-md);
+  background-color: rgba(0, 0, 0, 0.25);
+  padding: 16px 40px;
+  border-radius: var(--mantine-radius-xl);
+  box-shadow: var(--mantine-shadow-md);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.logoText {
+  font-family: var(--mantine-font-family-headings);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--mantine-color-white);
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-left: var(--mantine-spacing-md);
+  padding-right: var(--mantine-spacing-md);
+  text-decoration: none;
+  color: var(--mantine-color-white);
+  font-weight: 500;
+  font-size: var(--mantine-font-size-sm);
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    height: 42px;
+    width: 100%;
+  }
+
+  @mixin hover {
+    background-color: var(--mantine-color-midnight-8);
+    color: var(--mantine-color-purple-0);
+    transition: all 0.3s ease;
+    padding: 8px 24px;
+    border-radius: var(--mantine-radius-md);
+  }
+}
+
+.logo {
+  width: 60px;
+  height: 60px;
+}
+
+.drawer {
+  background-color: var(--mantine-color-midnight-9);
+}
