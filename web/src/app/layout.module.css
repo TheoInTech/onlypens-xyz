@@ -1,0 +1,6 @@
+.main {
+  min-height: 100vh;
+  min-width: 100vw;
+  background-color: var(--mantine-color-black);
+  color: var(--mantine-color-white);
+}
