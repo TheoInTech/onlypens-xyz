@@ -93,6 +93,11 @@ export const ConnectWallet = ({ size = "default" }: IConnectWallet) => {
 
       // Navigate directly to onboarding instead of reloading
       router.push("/onboarding");
+    } else if (!account.isConnected) {
+      // If wallet disconnects, redirect back to home page
+      deleteCookie("wallet-connected");
+      deleteCookie("wallet-address");
+      router.push("/");
     }
   }, [account.isConnected, account.address, router]);
 
