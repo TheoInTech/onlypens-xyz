@@ -8,12 +8,22 @@
   min-height: 80px;
   padding-left: var(--mantine-spacing-md);
   padding-right: var(--mantine-spacing-md);
-  background-color: rgba(0, 0, 0, 0.25);
+  background-color: rgba(162, 100, 255, 0.05);
   padding: 16px 40px;
   border-radius: var(--mantine-radius-xl);
   box-shadow: var(--mantine-shadow-md);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+}
+
+.buttonLogo {
+  cursor: pointer;
+  background-color: transparent;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
 }
 
 .logoText {
@@ -32,7 +42,7 @@
   text-decoration: none;
   color: var(--mantine-color-white);
   font-weight: 500;
-  font-size: var(--mantine-font-size-sm);
+  font-size: var(--mantine-font-size-xs);
 
   @media (max-width: $mantine-breakpoint-sm) {
     height: 42px;
@@ -40,10 +50,10 @@
   }
 
   @mixin hover {
-    background-color: var(--mantine-color-midnight-8);
+    background-color: var(--mantine-color-purple-9);
     color: var(--mantine-color-purple-0);
     transition: all 0.3s ease;
-    padding: 8px 24px;
+    padding: 8px 16px;
     border-radius: var(--mantine-radius-md);
   }
 }
