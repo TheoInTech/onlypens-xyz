@@ -1,0 +1,19 @@
+.tabsList {
+  margin-right: 1.5rem;
+  gap: 1rem;
+}
+
+.tab {
+  border: 1px solid var(--mantine-color-gray-8);
+  transition: all 0.2s ease-in-out;
+
+  &:hover:not([data-active]) {
+    background-color: var(--mantine-color-midnight-8);
+  }
+
+  &[data-active] {
+    border: 1px solid transparent;
+    box-shadow: 0 0 0 2px var(--mantine-color-purple-8),
+      inset 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+  }
+}

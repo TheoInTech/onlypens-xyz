@@ -13,7 +13,7 @@ import { useDisclosure } from "@mantine/hooks";
 import Image from "next/image";
 import classes from "./menu.module.css";
 import Link from "next/link";
-import { ConnectWallet } from "@/components/connect-wallet";
+import { ConnectWallet } from "@/components";
 import { useAccount } from "wagmi";
 
 export function Menu() {

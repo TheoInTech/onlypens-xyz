@@ -62,7 +62,7 @@ const sizeClasses: SizeClassType = {
 const variantStyles: VariantStyleType = {
   primary: {
     bg: "var(--mantine-color-purple-3)",
-    color: "var(--mantine-color-white)",
+    color: "#FFFFFF",
     shadow:
       "0px -4px 4px rgba(0,0,0,0.20) inset, 0px 0px 4px rgba(0,0,0,0.20) inset",
   },
@@ -204,9 +204,10 @@ export const Button = React.forwardRef<HTMLButtonElement, IButtonProps>(
               justifyContent: "center",
               gap: 8,
               whiteSpace: "nowrap",
-              fontWeight: 500,
+              fontWeight: 600,
               transition: "all 0.2s",
               position: "relative",
+              zIndex: 2,
               cursor:
                 effectiveVariant === "disabled" ? "not-allowed" : "pointer",
               "&:hover": {
@@ -219,6 +220,24 @@ export const Button = React.forwardRef<HTMLButtonElement, IButtonProps>(
               },
               "&:focus": {
                 outline: "none",
+              },
+            },
+            label: {
+              position: "relative",
+              zIndex: 20,
+              textShadow:
+                effectiveVariant === "primary"
+                  ? "0 2px 4px rgba(0,0,0,0.5), 0 0 6px rgba(255,255,255,0.3)"
+                  : undefined,
+              fontWeight: effectiveVariant === "primary" ? 700 : 600,
+              letterSpacing:
+                effectiveVariant === "primary" ? "0.02em" : undefined,
+              transition: "all 0.2s ease",
+              "&:hover": {
+                textShadow:
+                  effectiveVariant === "primary"
+                    ? "0 2px 4px rgba(0,0,0,0.5), 0 0 8px rgba(255,255,255,0.7)"
+                    : undefined,
               },
             },
           }}

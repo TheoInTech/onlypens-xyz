@@ -1,12 +1,11 @@
 .home {
   width: 100%;
-  min-height: calc(100vh - 160px);
+  min-height: calc(100vh - 180px);
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 40px;
 }
 
 .home::before {
