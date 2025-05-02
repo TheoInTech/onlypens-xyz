@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
     request.cookies.get("wallet-connected")?.value === "true";
 
   // Hardcoded profile check (will be replaced with actual check later with Supabase profile check)
-  const profileExists = false;
+  const profileExists = true;
 
   // Public routes are accessible to everyone
   if (publicRoutes.some((route) => path === route)) {

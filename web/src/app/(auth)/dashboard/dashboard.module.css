@@ -1,0 +1,19 @@
+.valueWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+}
+
+.amount {
+  font-size: var(--mantine-font-size-xl);
+  font-weight: 700;
+}
+
+.currency {
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 400;
+}
+
+.card {
+  width: 100%;
+}

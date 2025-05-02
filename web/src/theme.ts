@@ -83,7 +83,7 @@ export const theme = createTheme({
   cursorType: "pointer",
   focusRing: "never",
   black: "#0D1117",
-  white: "#e4e6ea",
+  white: "#FAFAFA",
   fontSmoothing: true,
   fontFamily: "'Inter', sans-serif",
   headings: {

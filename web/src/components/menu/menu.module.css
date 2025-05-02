@@ -49,9 +49,9 @@
     width: 100%;
   }
 
-  @mixin hover {
-    background-color: var(--mantine-color-purple-9);
-    color: var(--mantine-color-purple-0);
+  &:hover:not(.linkActive) {
+    background-color: var(--mantine-color-purple-1);
+    color: var(--mantine-color-purple-9);
     transition: all 0.3s ease;
     padding: 8px 16px;
     border-radius: var(--mantine-radius-md);
@@ -65,4 +65,44 @@
 
 .drawer {
   background-color: var(--mantine-color-midnight-9);
+}
+
+.linkActive {
+  background-color: var(--mantine-color-purple-9);
+  color: var(--mantine-color-purple-0);
+  border-radius: var(--mantine-radius-md);
+  padding: 8px 16px;
+}
+
+.roleIndicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--mantine-color-green-9);
+  box-shadow: 0 0 8px 2px var(--mantine-color-green-5);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 8px 2px var(--mantine-color-green-5);
+  }
+  50% {
+    box-shadow: 0 0 12px 4px var(--mantine-color-green-4);
+  }
+  100% {
+    box-shadow: 0 0 8px 2px var(--mantine-color-green-5);
+  }
+}
+
+.role {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 500;
+  color: var(--mantine-color-white);
+  font-weight: 700;
+  text-transform: capitalize;
 }
