@@ -1,11 +1,46 @@
 import classes from "./dashboard.module.css";
-import { Box, Group, Text } from "@mantine/core";
-import { GlassCard, GlassCardTitle } from "@/components";
+import { Grid, GridCol, Group, Stack, Text } from "@mantine/core";
+import {
+  Button,
+  GlassCard,
+  GlassCardTitle,
+  GradientBanner,
+  Table,
+} from "@/components";
 import React from "react";
+import { mockActivityLogs } from "@/schema/activity-log.schema";
+import { timestampAgo } from "@/lib/utils";
 
-const DashboardPage = () => {
+const fetchActivityLogs = async () => {
+  const response = mockActivityLogs.map((log) => ({
+    ...log,
+    createdAt: timestampAgo(log.createdAt),
+  }));
+
+  return response;
+};
+
+const DashboardPage = async () => {
+  const activityLogs = await fetchActivityLogs();
+
   return (
-    <Box w="100%">
+    <Stack gap="md" w="100%">
+      <GradientBanner variant="blue-purple">
+        <Group justify="space-between" align="center">
+          <div>
+            <Text size="md" fw={700} c="white">
+              Need something written?
+            </Text>
+            <Text c="white" opacity={0.9} size="xs">
+              Post your next gig and let AI match you with the perfect
+              ghostwriter.
+            </Text>
+          </div>
+          <Button variant="white" size="small">
+            Post a Gig
+          </Button>
+        </Group>
+      </GradientBanner>
       <Group justify="space-between" align="center" gap="md" wrap="nowrap">
         <GlassCard className={classes.card}>
           <GlassCardTitle>Total Gigs</GlassCardTitle>
@@ -29,7 +64,27 @@ const DashboardPage = () => {
           </Text>
         </GlassCard>
       </Group>
-    </Box>
+      <Grid>
+        <GridCol span={12}>
+          <GlassCard>
+            <GlassCardTitle>Recent Gig Updates</GlassCardTitle>
+            <Table
+              columns={[
+                { key: "title", label: "Title" },
+                { key: "activity", label: "Gig" },
+                { key: "createdAt", label: "When?" },
+              ]}
+              data={activityLogs}
+            />
+          </GlassCard>
+        </GridCol>
+        <GridCol span={6}>
+          <GlassCard>
+            <GlassCardTitle>Drafts Waiting for Approval</GlassCardTitle>
+          </GlassCard>
+        </GridCol>
+      </Grid>
+    </Stack>
   );
 };
 

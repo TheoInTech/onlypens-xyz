@@ -6,3 +6,5 @@ export { Input } from "./input";
 export { Textarea } from "./textarea";
 export { Checkbox } from "./checkbox";
 export { GlassCard, GlassCardTitle } from "./glass-card";
+export { GradientBanner } from "./gradient-banner";
+export { Table } from "./table";

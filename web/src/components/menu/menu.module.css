@@ -51,7 +51,7 @@
 
   &:hover:not(.linkActive) {
     background-color: var(--mantine-color-purple-1);
-    color: var(--mantine-color-purple-9);
+    color: var(--mantine-color-midnight-9);
     transition: all 0.3s ease;
     padding: 8px 16px;
     border-radius: var(--mantine-radius-md);
@@ -96,6 +96,7 @@
 }
 
 .role {
+  margin-left: 24px;
   display: flex;
   align-items: center;
   justify-content: center;

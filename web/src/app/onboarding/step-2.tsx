@@ -11,7 +11,7 @@ import {
   EContentTypes,
   ENicheKeywords,
   EToneKeywords,
-} from "@/stores/onboarding.slice";
+} from "@/schema/enum.schema";
 
 export const OnboardingStep2 = () => {
   const {

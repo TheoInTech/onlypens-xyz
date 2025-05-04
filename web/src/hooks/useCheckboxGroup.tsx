@@ -3,7 +3,7 @@ import {
   EToneKeywords,
   ENicheKeywords,
   EContentTypes,
-} from "@/stores/onboarding.slice";
+} from "@/schema/enum.schema";
 import { Group } from "@mantine/core";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Checkbox } from "@/components";
