@@ -1,4 +1,4 @@
-import { EActivityStatus } from "@/schema/enum.schema";
+import { EContentTypes } from "@/schema/enum.schema";
 import { clsx, type ClassValue } from "clsx";
 
 export function cn(...inputs: ClassValue[]) {
@@ -36,19 +36,37 @@ export function timestampAgo(timestamp: string): string {
   return `${diffDays} days ago`;
 }
 
-export function getStatusColor(status: EActivityStatus) {
-  switch (status) {
-    case EActivityStatus.SUCCESS:
-      return "purple.9";
-    case EActivityStatus.INFO:
-      return "blue.4";
-    case EActivityStatus.PENDING:
-      return "yellow.7";
-    case EActivityStatus.WARNING:
-      return "orange.7";
-    case EActivityStatus.ERROR:
-      return "red.7";
+export function getAmountFromDecimals(amount: string, decimals: number) {
+  return Number(amount) / 10 ** decimals;
+}
+
+export function unixTimestampToDate(timestamp: number) {
+  const date = new Date(timestamp * 1000);
+  const year = date.getFullYear();
+  const month = date.toLocaleString("default", { month: "short" });
+  const day = date.getDate().toString().padStart(2, "0");
+  return `${year} ${month} ${day}`;
+}
+
+export function getContentTypeIcon(contentType: string) {
+  switch (contentType) {
+    case EContentTypes.BLOG_NEWSLETTER:
+      return "blog-newsletter.png";
+    case EContentTypes.PRODUCT_MARKETING:
+      return "product-copy.png";
+    case EContentTypes.SOCIAL_POST:
+      return "social-post.png";
+    case EContentTypes.SOCIAL_THREAD:
+      return "social-thread.png";
+    case EContentTypes.SHORT_CAPTION:
+      return "short-caption.png";
+    case EContentTypes.WEBSITE_LANDING:
+      return "website-headline.png";
+    case EContentTypes.SCRIPT_DIALOGUE:
+      return "script-dialogue.png";
+    case EContentTypes.PERSONAL_BIO:
+      return "short-bio.png";
     default:
-      return "midnight.9";
+      return "/placeholder.png";
   }
 }

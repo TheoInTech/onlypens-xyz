@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  EActivityType,
   EContentTypes,
   ENicheKeywords,
   ESubmissionStatus,
@@ -17,11 +18,21 @@ export enum GigStatus {
   AUTO_RELEASED = 6,
 }
 
+export const GigStatusLabels = {
+  [GigStatus.PENDING]: "Waiting for invites",
+  [GigStatus.INVITED]: "Invited ghostwriter",
+  [GigStatus.ASSIGNED]: "Assigned ghostwriter",
+  [GigStatus.SUBMITTED]: "Draft submitted",
+  [GigStatus.APPROVED]: "Work paid out",
+  [GigStatus.REJECTED]: "Work rejected",
+  [GigStatus.AUTO_RELEASED]: "Auto-released",
+};
+
 // Schema for onchain gig data as returned from the smart contract
 export const OnchainGigSchema = z.object({
   gigId: z.string(),
-  creator: z.string(), // ethereum address
-  writer: z.string().optional(), // ethereum address, optional for pending gigs
+  creator: z.string(), // base eth address
+  writer: z.string().nullish(), // base eth address, optional for pending gigs
   amount: z.string(), // USDC amount in smallest units; string to avoid JS’s safe integer range
   status: z.nativeEnum(GigStatus),
   createdAt: z.number(), // unix timestamp
@@ -33,13 +44,13 @@ export type IOnchainGig = z.infer<typeof OnchainGigSchema>;
 // Schema for offchain gig metadata stored in Firebase
 export const GigMetadataSchema = z.object({
   title: z.string(),
-  description: z.string().optional(),
+  description: z.string().nullish(),
   contentType: z.nativeEnum(EContentTypes),
   toneKeywords: z.array(z.nativeEnum(EToneKeywords)),
   nicheKeywords: z.array(z.nativeEnum(ENicheKeywords)),
-  wordCount: z.number().optional(),
-  deadline: z.number().optional(), // unix timestamp
-  invitedGhostwriters: z.array(z.string()).optional(),
+  wordCount: z.number().nullish(),
+  deadline: z.number().nullish(), // unix timestamp
+  invitedGhostwriters: z.array(z.string()).nullish(),
   submissions: z
     .array(
       z.object({
@@ -48,20 +59,28 @@ export const GigMetadataSchema = z.object({
         previewLink: z.string(),
         status: z.nativeEnum(ESubmissionStatus),
         submittedAt: z.string(),
-        feedback: z.string().optional(),
+        feedback: z.string().nullish(),
       })
     )
-    .optional(),
+    .nullish(),
   history: z
     .array(
       z.object({
         event: z.string(),
         timestamp: z.number(),
-        by: z.string().optional(),
-        details: z.record(z.string()).optional(),
+        by: z.string().nullish(),
+        details: z.record(z.string()).nullish(),
       })
     )
-    .optional(),
+    .nullish(),
 });
 
 export type IGigMetadata = z.infer<typeof GigMetadataSchema>;
+
+export const GigSchema = z.object({
+  onchainGig: OnchainGigSchema,
+  metadata: GigMetadataSchema,
+  event: z.nativeEnum(EActivityType),
+});
+
+export type IGig = z.infer<typeof GigSchema>;

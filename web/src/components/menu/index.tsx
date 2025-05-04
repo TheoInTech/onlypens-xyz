@@ -26,7 +26,7 @@ export function Menu() {
   const pathname = usePathname();
 
   const account = useAccount();
-  const profile = true; // TODO: get profile from Supabase
+  const profile = process.env.NEXT_PUBLIC_PROFILE_EXISTS === "true"; // TODO: get profile from Supabase
   const role = ERoles.CREATOR; // TODO: get role from Supabase
 
   return (
@@ -54,7 +54,7 @@ export function Menu() {
                 href="/about"
                 className={cx(
                   classes.link,
-                  pathname === "/about" && classes.linkActive
+                  pathname.includes("/about") && classes.linkActive
                 )}
               >
                 About OnlyPens
@@ -62,10 +62,11 @@ export function Menu() {
 
               {account.isConnected && account.address && !profile && (
                 <Link
-                  href="/onboarding"
+                  href={`/${account.address}/onboarding`}
                   className={cx(
                     classes.link,
-                    pathname === "/onboarding" && classes.linkActive
+                    pathname === `/${account.address}/onboarding` &&
+                      classes.linkActive
                   )}
                 >
                   Onboarding
@@ -75,28 +76,31 @@ export function Menu() {
               {account.isConnected && account.address && profile && (
                 <>
                   <Link
-                    href="/dashboard"
+                    href={`/${account.address}/dashboard`}
                     className={cx(
                       classes.link,
-                      pathname === "/dashboard" && classes.linkActive
+                      pathname.includes(`/${account.address}/dashboard`) &&
+                        classes.linkActive
                     )}
                   >
                     Dashboard
                   </Link>
                   <Link
-                    href="/gigs"
+                    href={`/${account.address}/gigs`}
                     className={cx(
                       classes.link,
-                      pathname === "/gigs" && classes.linkActive
+                      pathname.includes(`/${account.address}/gigs`) &&
+                        classes.linkActive
                     )}
                   >
                     My Gigs
                   </Link>
                   <Link
-                    href="/profile"
+                    href={`/${account.address}/profile`}
                     className={cx(
                       classes.link,
-                      pathname === "/profile" && classes.linkActive
+                      pathname.includes(`/${account.address}/profile`) &&
+                        classes.linkActive
                     )}
                   >
                     Profile
@@ -137,7 +141,7 @@ export function Menu() {
                 href="/about"
                 className={cx(
                   classes.link,
-                  pathname === "/about" && classes.linkActive
+                  pathname.includes("/about") && classes.linkActive
                 )}
               >
                 About OnlyPens

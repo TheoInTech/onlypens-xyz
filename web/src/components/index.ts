@@ -8,3 +8,4 @@ export { Checkbox } from "./checkbox";
 export { GlassCard, GlassCardTitle } from "./glass-card";
 export { GradientBanner } from "./gradient-banner";
 export { Table } from "./table";
+export { GigCard } from "./gig-card";

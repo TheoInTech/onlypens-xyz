@@ -5,10 +5,10 @@ import {
   ESubmissionStatus,
   ENicheKeywords,
 } from "@/schema/enum.schema";
-import { GigStatus, IGigMetadata } from "@/schema/gig.schema";
+import { GigStatus, IGigMetadata, IOnchainGig } from "@/schema/gig.schema";
 
 // Mock onchain data (representing what we'd get from blockchain)
-export const mockOnchainGigs = {
+export const mockOnchainGigs: Record<string, IOnchainGig[]> = {
   // Gigs for creator1
   "0x6F77340aE4D1933B5fd1b7eCC034298833Ec68CE": [
     {
