@@ -12,10 +12,11 @@ import {
 import { SiweMessage } from "siwe";
 import { cbWalletConnector } from "@/lib/wagmi";
 import Button from "@/components/button";
-import { Group, Text } from "@mantine/core";
-import { IconLogout } from "@tabler/icons-react";
+import { Group, Menu, Text } from "@mantine/core";
+import { IconCopy, IconLogout } from "@tabler/icons-react";
 import { shortenAddress } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import classes from "./connect-wallet.module.css";
 
 interface IConnectWallet {
   size?: "default" | "small";
@@ -33,6 +34,7 @@ const deleteCookie = (name: string) => {
 export const ConnectWallet = ({ size = "default" }: IConnectWallet) => {
   const router = useRouter();
   const { disconnect } = useDisconnect();
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
   const { connect } = useConnect({
     mutation: {
@@ -76,16 +78,13 @@ export const ConnectWallet = ({ size = "default" }: IConnectWallet) => {
   }, [signature, account]);
 
   const handleConnect = async () => {
-    if (account.isConnected) {
-      await disconnect();
-      deleteCookie("wallet-connected");
-      deleteCookie("wallet-address");
-    } else {
-      await connect({ connector: cbWalletConnector });
-    }
+    await connect({ connector: cbWalletConnector });
+    setMenuOpen(false);
   };
 
   useEffect(() => {
+    setMenuOpen(false);
+
     if (account.isConnected && account.address) {
       // Set cookies for middleware to use (24 hours expiry)
       setCookie("wallet-connected", "true", 60 * 60 * 24);
@@ -101,16 +100,64 @@ export const ConnectWallet = ({ size = "default" }: IConnectWallet) => {
     }
   }, [account.isConnected, account.address, router]);
 
+  const handleDisconnect = async () => {
+    await disconnect();
+    deleteCookie("wallet-connected");
+    deleteCookie("wallet-address");
+    setMenuOpen(false);
+  };
+
+  const handleCopyAddress = () => {
+    if (account.address) {
+      navigator.clipboard.writeText(account.address);
+    }
+  };
+
+  if (account.isConnected && !!account.address) {
+    return (
+      <Menu
+        opened={menuOpen}
+        onChange={setMenuOpen}
+        position="bottom-end"
+        offset={4}
+        shadow="md"
+        width={200}
+        radius="md"
+        withinPortal
+        zIndex={99999999}
+      >
+        <Menu.Target>
+          <Button variant="secondary" size={size}>
+            <Group gap="xs">
+              <Text size="xs">{shortenAddress(account.address)}</Text>
+              <IconLogout size={16} />
+            </Group>
+          </Button>
+        </Menu.Target>
+
+        <Menu.Dropdown className={classes.menuDropdown}>
+          <Menu.Item
+            onClick={handleCopyAddress}
+            className={classes.menuItem}
+            rightSection={<IconCopy size={12} />}
+          >
+            Copy Address
+          </Menu.Item>
+          <Menu.Item
+            onClick={handleDisconnect}
+            className={classes.menuItem}
+            rightSection={<IconLogout size={12} />}
+          >
+            Disconnect
+          </Menu.Item>
+        </Menu.Dropdown>
+      </Menu>
+    );
+  }
+
   return (
     <Button variant="secondary" onClick={handleConnect} size={size}>
-      {account.isConnected && !!account.address ? (
-        <Group>
-          <Text size="xs">{shortenAddress(account.address)}</Text>
-          <IconLogout size={24} />
-        </Group>
-      ) : (
-        "Connect Smart Wallet"
-      )}
+      Connect Smart Wallet
     </Button>
   );
 };

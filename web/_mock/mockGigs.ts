@@ -10,10 +10,10 @@ import { GigStatus, IGigMetadata } from "@/schema/gig.schema";
 // Mock onchain data (representing what we'd get from blockchain)
 export const mockOnchainGigs = {
   // Gigs for creator1
-  "0xCreator1...": [
+  "0x6F77340aE4D1933B5fd1b7eCC034298833Ec68CE": [
     {
       gigId: "1",
-      creator: "0xCreator1...",
+      creator: "0x6F77340aE4D1933B5fd1b7eCC034298833Ec68CE",
       writer: "0xWriter1...",
       amount: "120000000", // 120 USDC (with 6 decimals)
       status: GigStatus.ASSIGNED,
@@ -22,7 +22,7 @@ export const mockOnchainGigs = {
     },
     {
       gigId: "2",
-      creator: "0xCreator1...",
+      creator: "0x6F77340aE4D1933B5fd1b7eCC034298833Ec68CE",
       writer: null,
       amount: "90000000", // 90 USDC
       status: GigStatus.PENDING,
@@ -31,7 +31,7 @@ export const mockOnchainGigs = {
     },
     {
       gigId: "3",
-      creator: "0xCreator1...",
+      creator: "0x6F77340aE4D1933B5fd1b7eCC034298833Ec68CE",
       writer: "0xWriter2...",
       amount: "150000000", // 150 USDC
       status: GigStatus.SUBMITTED,
@@ -57,7 +57,7 @@ export const mockOnchainGigs = {
   "0xWriter1...": [
     {
       gigId: "1",
-      creator: "0xCreator1...",
+      creator: "0x6F77340aE4D1933B5fd1b7eCC034298833Ec68CE",
       writer: "0xWriter1...",
       amount: "120000000",
       status: GigStatus.ASSIGNED,
@@ -79,7 +79,7 @@ export const mockOnchainGigs = {
   "0xWriter2...": [
     {
       gigId: "3",
-      creator: "0xCreator1...",
+      creator: "0x6F77340aE4D1933B5fd1b7eCC034298833Ec68CE",
       writer: "0xWriter2...",
       amount: "150000000",
       status: GigStatus.SUBMITTED,
@@ -114,7 +114,7 @@ export const mockGigMetadata: Record<string, IGigMetadata> = {
       },
       {
         event: EGigEvent.INVITE_SENT,
-        by: "0xCreator1...",
+        by: "0x6F77340aE4D1933B5fd1b7eCC034298833Ec68CE",
         timestamp: 1715330300, // 5 minutes after creation
         details: { writer: "0xWriter1..." },
       },
@@ -179,7 +179,7 @@ export const mockGigMetadata: Record<string, IGigMetadata> = {
       },
       {
         event: EGigEvent.INVITE_SENT,
-        by: "0xCreator1...",
+        by: "0x6F77340aE4D1933B5fd1b7eCC034298833Ec68CE",
         timestamp: 1714401600,
         details: { writer: "0xWriter2..." },
       },
