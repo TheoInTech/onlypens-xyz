@@ -3,6 +3,7 @@ import { Stack, Group, Text, Grid, GridCol } from "@mantine/core";
 import { getGigs } from "@/services/gigs.service";
 import { GigCard } from "@/components";
 import Link from "next/link";
+import classes from "./gigs.module.css";
 
 interface IMyGigsPage {
   params: {
@@ -28,9 +29,9 @@ const MyGigsPage = async ({ params }: IMyGigsPage) => {
               <GridCol span={3} key={gig.onchainGig.gigId}>
                 <Link
                   href={`/${address}/gigs/${gig.onchainGig.gigId}`}
-                  style={{ textDecoration: "none" }}
+                  style={{ textDecoration: "none", padding: 0 }}
                 >
-                  <GigCard {...gig} />
+                  <GigCard className={classes.gigItem} gig={gig} />
                 </Link>
               </GridCol>
             ))}
