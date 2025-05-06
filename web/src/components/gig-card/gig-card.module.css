@@ -48,38 +48,3 @@
   background-color: var(--mantine-color-midnight-9);
   color: var(--mantine-color-white);
 }
-
-.amount {
-  font-size: 12px;
-  font-weight: 700;
-  background: linear-gradient(
-    135deg,
-    var(--mantine-color-gray-4) 0%,
-    var(--mantine-color-white) 60%,
-    var(--mantine-color-gray-5) 100%
-  );
-  color: var(--mantine-color-black);
-  padding: 4px 8px;
-  border-radius: 32px;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
-
-.status {
-  font-size: 12px;
-  font-weight: 700;
-  background: linear-gradient(
-    135deg,
-    var(--mantine-color-blue-9) 0%,
-    var(--mantine-color-blue-6) 60%,
-    var(--mantine-color-blue-9) 100%
-  );
-  color: var(--mantine-color-white);
-  padding: 4px 8px;
-  border-radius: 32px;
-  width: 100%;
-  text-align: center;
-}

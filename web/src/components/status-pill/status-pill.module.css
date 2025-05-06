@@ -1,0 +1,90 @@
+.status {
+  font-weight: 700;
+  color: var(--mantine-color-white);
+  border-radius: 32px;
+  text-align: center;
+  width: fit-content;
+}
+
+/* Size variants */
+.sm {
+  font-size: 12px;
+  padding: 4px 12px;
+}
+
+.md {
+  font-size: 14px;
+  padding: 6px 20px;
+}
+
+.lg {
+  font-size: 16px;
+  padding: 8px 24px;
+}
+
+.pending {
+  background: linear-gradient(
+    135deg,
+    var(--mantine-color-yellow-8) 0%,
+    var(--mantine-color-yellow-7) 60%,
+    var(--mantine-color-yellow-8) 100%
+  );
+}
+
+.invited {
+  background: linear-gradient(
+    135deg,
+    var(--mantine-color-violet-9) 0%,
+    var(--mantine-color-violet-6) 60%,
+    var(--mantine-color-violet-9) 100%
+  );
+}
+
+.assigned {
+  background: linear-gradient(
+    135deg,
+    var(--mantine-color-blue-9) 0%,
+    var(--mantine-color-blue-6) 60%,
+    var(--mantine-color-blue-9) 100%
+  );
+}
+
+.submitted {
+  background: linear-gradient(
+    135deg,
+    var(--mantine-color-cyan-9) 0%,
+    var(--mantine-color-cyan-6) 60%,
+    var(--mantine-color-cyan-9) 100%
+  );
+}
+
+.approved {
+  background: linear-gradient(
+    135deg,
+    var(--mantine-color-green-9) 0%,
+    var(--mantine-color-green-6) 60%,
+    var(--mantine-color-green-9) 100%
+  );
+}
+
+.rejected {
+  background: linear-gradient(
+    135deg,
+    var(--mantine-color-red-9) 0%,
+    var(--mantine-color-red-6) 60%,
+    var(--mantine-color-red-9) 100%
+  );
+}
+
+.auto-released {
+  background: linear-gradient(
+    135deg,
+    var(--mantine-color-cyan-9) 0%,
+    var(--mantine-color-cyan-6) 60%,
+    var(--mantine-color-cyan-9) 100%
+  );
+}
+
+.fullWidth {
+  width: 100%;
+}

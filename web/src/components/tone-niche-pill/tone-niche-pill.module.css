@@ -1,0 +1,37 @@
+.toneNichePill {
+  font-weight: 400;
+  color: var(--mantine-color-white);
+  text-align: center;
+  width: fit-content;
+  background: linear-gradient(
+    135deg,
+    var(--mantine-color-midnight-8) 0%,
+    var(--mantine-color-midnight-7) 60%,
+    var(--mantine-color-midnight-8) 100%
+  );
+  border-radius: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+/* Size variants */
+.sm {
+  font-size: 8px;
+  padding: 2px 8px;
+}
+
+.md {
+  font-size: 12px;
+  padding: 4px 18px;
+}
+
+.lg {
+  font-size: 16px;
+  padding: 6px 24px;
+}

@@ -40,6 +40,35 @@ export function getAmountFromDecimals(amount: string, decimals: number) {
   return Number(amount) / 10 ** decimals;
 }
 
+export function getTimeUntil(timestamp: number) {
+  const now = Date.now();
+  const diffTime = timestamp - now;
+
+  // Return a message if the timestamp has already passed
+  if (diffTime <= 0) {
+    return "Expired";
+  }
+
+  const diffSeconds = Math.floor(diffTime / 1000) % 60;
+  const diffMinutes = Math.floor(diffTime / (1000 * 60)) % 60;
+  const diffHours = Math.floor(diffTime / (1000 * 60 * 60)) % 24;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays > 0) {
+    return `${diffDays}d ${diffHours}h ${diffMinutes}m`;
+  }
+
+  if (diffHours > 0) {
+    return `${diffHours}h ${diffMinutes}m`;
+  }
+
+  if (diffMinutes > 0) {
+    return `${diffMinutes}m ${diffSeconds}s`;
+  }
+
+  return `${diffSeconds}s`;
+}
+
 export function unixTimestampToDate(timestamp: number) {
   const date = new Date(timestamp * 1000);
   const year = date.getFullYear();

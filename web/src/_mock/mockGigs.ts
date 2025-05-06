@@ -95,7 +95,7 @@ export const mockGigMetadata: Record<string, IGigMetadata> = {
   "1": {
     title: "Launch Tweet Thread for AI Tool",
     description:
-      "Create a compelling thread announcing our new AI tool focusing on key features and benefits",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit",
     contentType: EContentTypes.SOCIAL_THREAD,
     toneKeywords: [
       EToneKeywords.WITTY,
@@ -129,7 +129,7 @@ export const mockGigMetadata: Record<string, IGigMetadata> = {
   "2": {
     title: "About Me Bio for Creator Portfolio",
     description:
-      "Professional bio for my personal website highlighting my expertise in digital content creation",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit",
     contentType: EContentTypes.PERSONAL_BIO,
     toneKeywords: [
       EToneKeywords.PROFESSIONAL,
@@ -152,7 +152,7 @@ export const mockGigMetadata: Record<string, IGigMetadata> = {
   "3": {
     title: "Cryptocurrency Market Analysis Article",
     description:
-      "In-depth analysis of recent market trends with focus on DeFi innovations",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit",
     contentType: EContentTypes.BLOG_NEWSLETTER,
     toneKeywords: [
       EToneKeywords.ANALYTICAL,

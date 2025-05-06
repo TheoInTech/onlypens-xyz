@@ -9,3 +9,6 @@ export { GlassCard, GlassCardTitle } from "./glass-card";
 export { GradientBanner } from "./gradient-banner";
 export { Table } from "./table";
 export { GigCard } from "./gig-card";
+export { StatusPill } from "./status-pill";
+export { AmountPill } from "./amount-pill";
+export { ToneNichePill } from "./tone-niche-pill";

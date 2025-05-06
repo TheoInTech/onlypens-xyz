@@ -1,11 +1,13 @@
 import React from "react";
 import classes from "./gig-card.module.css";
 import { GlassCard } from "@/components/glass-card";
-import { Box, Stack, Text, Tooltip } from "@mantine/core";
+import { Stack, Text, Tooltip } from "@mantine/core";
 import Image from "next/image";
-import { GigStatusLabels, IGig } from "@/schema/gig.schema";
-import { getAmountFromDecimals, getContentTypeIcon } from "@/lib/utils";
+import { IGig } from "@/schema/gig.schema";
+import { getContentTypeIcon } from "@/lib/utils";
 import cx from "clsx";
+import { StatusPill } from "@/components/status-pill";
+import { AmountPill } from "@/components/amount-pill";
 
 interface IGigCard {
   gig: IGig;
@@ -15,7 +17,6 @@ interface IGigCard {
 export const GigCard = ({ gig, className }: IGigCard) => {
   const { onchainGig, metadata } = gig;
   const icon = getContentTypeIcon(metadata.contentType);
-  const amount = getAmountFromDecimals(onchainGig.amount, 6);
 
   return (
     <GlassCard className={cx(classes.gigCard, className)}>
@@ -41,18 +42,8 @@ export const GigCard = ({ gig, className }: IGigCard) => {
               {metadata.title}
             </Text>
           </Tooltip>
-          <Box className={classes.status}>
-            {GigStatusLabels[onchainGig.status]}
-          </Box>
-          <Box className={classes.amount}>
-            {amount}{" "}
-            <Image
-              src="/assets/icons/usdc.png"
-              alt="USDC"
-              width={16}
-              height={16}
-            />
-          </Box>
+          <StatusPill status={onchainGig.status} fullWidth />
+          <AmountPill amount={onchainGig.amount} fullWidth />
         </Stack>
       </Stack>
     </GlassCard>
