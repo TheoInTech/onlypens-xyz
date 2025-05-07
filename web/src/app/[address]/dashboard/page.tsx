@@ -10,6 +10,7 @@ import {
 import React from "react";
 import { mockActivityLogs } from "@/schema/activity-log.schema";
 import { timestampAgo } from "@/lib/utils";
+import Link from "next/link";
 
 const fetchActivityLogs = async () => {
   const response = mockActivityLogs.map((log) => ({
@@ -20,7 +21,14 @@ const fetchActivityLogs = async () => {
   return response;
 };
 
-const DashboardPage = async () => {
+interface IDashboardPage {
+  params: {
+    address: string;
+  };
+}
+
+const DashboardPage = async ({ params }: IDashboardPage) => {
+  const { address } = await params;
   const activityLogs = await fetchActivityLogs();
 
   return (
@@ -36,7 +44,12 @@ const DashboardPage = async () => {
               ghostwriter.
             </Text>
           </div>
-          <Button variant="white" size="small">
+          <Button
+            variant="white"
+            size="small"
+            component={Link}
+            href={`/${address}/gigs/create`}
+          >
             Post a Gig
           </Button>
         </Group>

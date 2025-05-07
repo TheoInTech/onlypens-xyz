@@ -3,8 +3,8 @@
 import React from "react";
 import { Container, Group } from "@mantine/core";
 import { useGlobalStore } from "@/stores";
-import { OnboardingStep1 } from "@/app/onboarding/step-1";
-import { OnboardingStep2 } from "@/app/onboarding/step-2";
+import { OnboardingStep1 } from "@/app/[address]/onboarding/step-1";
+import { OnboardingStep2 } from "@/app/[address]/onboarding/step-2";
 import { Button } from "@/components";
 import { IconArrowLeftDashed, IconArrowRightDashed } from "@tabler/icons-react";
 import classes from "./onboarding.module.css";

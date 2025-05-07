@@ -1,18 +1,21 @@
 import React from "react";
-import { Input as MantineInput, InputProps } from "@mantine/core";
-import classes from "./input.module.css";
+import {
+  NumberInput as MantineNumberInput,
+  NumberInputProps,
+} from "@mantine/core";
+import classes from "./number-input.module.css";
 
-export interface IInputProps extends Omit<InputProps, "onChange"> {
+export interface INumberInputProps extends Omit<NumberInputProps, "onChange"> {
   placeholder?: string;
   label?: React.ReactNode;
   description?: React.ReactNode;
   error?: React.ReactNode;
   withAsterisk?: boolean;
   required?: boolean;
-  onChange?: (value: string) => void;
+  onChange?: (value: string | number) => void;
 }
 
-export const Input = ({
+export const NumberInput = ({
   variant = "filled",
   size = "sm",
   radius = "md",
@@ -26,54 +29,47 @@ export const Input = ({
   classNames,
   onChange,
   ...props
-}: IInputProps) => {
+}: INumberInputProps) => {
   // Always call the hook, regardless of conditions
   const generatedId = React.useId();
   // Use provided id or generated one
   const inputId = id || generatedId;
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange?.(event.currentTarget.value);
+  // Handle the NumberInput onChange correctly
+  const handleChange = (value: string | number) => {
+    onChange?.(value);
   };
 
-  // If we have any wrapper-related props, use Input.Wrapper
+  // If we have any wrapper-related props, use wrapperProps from Mantine
   if (label || description || error) {
     return (
-      <MantineInput.Wrapper
+      <MantineNumberInput
+        variant={variant}
+        size={size}
+        radius={radius}
+        placeholder={placeholder}
+        id={inputId}
+        error={error}
         label={label}
         description={description}
-        error={error}
         withAsterisk={withAsterisk}
         required={required}
-        id={inputId}
         classNames={{
           root: classes.wrapper,
           label: classes.label,
           description: classes.description,
+          input: classes.input,
           ...(classNames || {}),
         }}
-      >
-        <MantineInput
-          variant={variant}
-          size={size}
-          radius={radius}
-          placeholder={placeholder}
-          id={inputId}
-          error={!!error}
-          classNames={{
-            input: classes.input,
-            ...(classNames || {}),
-          }}
-          onChange={onChange ? handleChange : undefined}
-          {...props}
-        />
-      </MantineInput.Wrapper>
+        onChange={handleChange}
+        {...props}
+      />
     );
   }
 
   // Otherwise, just render the input
   return (
-    <MantineInput
+    <MantineNumberInput
       variant={variant}
       size={size}
       radius={radius}
@@ -84,10 +80,10 @@ export const Input = ({
         input: classes.input,
         ...(classNames || {}),
       }}
-      onChange={onChange ? handleChange : undefined}
+      onChange={handleChange}
       {...props}
     />
   );
 };
 
-Input.displayName = "Input";
+NumberInput.displayName = "NumberInput";
