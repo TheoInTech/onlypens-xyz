@@ -1,7 +1,7 @@
 import React from "react";
 import { Stack, Group, Text, Grid, GridCol } from "@mantine/core";
 import { getGigs } from "@/services/gigs.service";
-import { GigCard } from "@/components";
+import { Button, GigCard } from "@/components";
 import Link from "next/link";
 import classes from "./gigs.module.css";
 
@@ -18,8 +18,11 @@ const MyGigsPage = async ({ params }: IMyGigsPage) => {
   return (
     <Stack>
       {/* Filters, Sorting, Search*/}
-      <Group>
+      <Group align="center" justify="space-between">
         <Text>My Gigs ({gigs.length})</Text>
+        <Button size="small" component={Link} href={`/${address}/gigs/create`}>
+          Post a Gig
+        </Button>
       </Group>
       {/* Gigs List */}
       <Stack>

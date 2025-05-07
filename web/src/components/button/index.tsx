@@ -4,13 +4,13 @@ import * as React from "react";
 import {
   Button as MantineButton,
   type ButtonProps as MantineButtonProps,
+  createPolymorphicComponent,
 } from "@mantine/core";
 import styles from "./button.module.css";
 import { cn } from "@/lib/utils";
 
-export interface IButtonProps extends Omit<MantineButtonProps, "fullWidth"> {
-  fullWidth?: boolean;
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+// Custom Button Props
+interface CustomButtonProps extends MantineButtonProps {
   variant?:
     | "primary"
     | "secondary"
@@ -23,6 +23,7 @@ export interface IButtonProps extends Omit<MantineButtonProps, "fullWidth"> {
     | "red"
     | "midnight";
   size?: "default" | "small" | "icon";
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 type SizeClassType = {
@@ -115,7 +116,8 @@ const variantStyles: VariantStyleType = {
   },
 };
 
-export const Button = React.forwardRef<HTMLButtonElement, IButtonProps>(
+// Create the base button component
+const _Button = React.forwardRef<HTMLButtonElement, CustomButtonProps>(
   (
     {
       className,
@@ -250,6 +252,11 @@ export const Button = React.forwardRef<HTMLButtonElement, IButtonProps>(
   }
 );
 
-Button.displayName = "Button";
+_Button.displayName = "Button";
+
+// Create the polymorphic Button component
+export const Button = createPolymorphicComponent<"button", CustomButtonProps>(
+  _Button
+);
 
 export default Button;
