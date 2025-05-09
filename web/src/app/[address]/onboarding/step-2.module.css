@@ -17,3 +17,19 @@
       inset 0 4px 6px -4px rgba(0, 0, 0, 0.5);
   }
 }
+
+.buttonGroup {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background-color: var(--mantine-color-midnight-8);
+  z-index: 100;
+}
+
+.errorText {
+  color: var(--mantine-color-red-5);
+  font-size: 18px;
+  margin-top: 0;
+}

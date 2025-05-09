@@ -162,6 +162,7 @@ const _Button = React.forwardRef<HTMLButtonElement, CustomButtonProps>(
 
     // Helper to determine if foreground should be shown
     const shouldShowForeground = () => {
+      if (disabled) return false;
       const noForegroundVariants = ["outline", "ghost", "white"];
       return !noForegroundVariants.includes(effectiveVariant);
     };
@@ -170,8 +171,10 @@ const _Button = React.forwardRef<HTMLButtonElement, CustomButtonProps>(
       <div
         className={cn(styles.button, styles[effectiveVariant], {
           [styles.fullWidth]: fullWidth,
+          [styles.disabled]: disabled,
         })}
-        onClick={handleClick}
+        onClick={disabled ? undefined : handleClick}
+        style={disabled ? { pointerEvents: "none", opacity: 0.7 } : undefined}
       >
         {/* Foreground element */}
         {shouldShowForeground() && (

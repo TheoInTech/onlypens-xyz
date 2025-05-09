@@ -10,13 +10,3 @@
   border-radius: var(--mantine-radius-lg);
   border: 1px dashed var(--mantine-color-gray-8);
 }
-
-.buttonGroup {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1rem;
-  background-color: var(--mantine-color-midnight-8);
-  z-index: 100;
-}

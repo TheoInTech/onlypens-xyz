@@ -7,14 +7,14 @@ import {
   EToneKeywords,
 } from "@/schema/enum.schema";
 
-// Define the GigStatus enum to match the Solidity contract
+// Define the GigStatus enum to match the smart contract's PackageStatus
 export enum GigStatus {
   PENDING = 0,
   INVITED = 1,
   ASSIGNED = 2,
-  SUBMITTED = 3,
-  APPROVED = 4,
-  REJECTED = 5,
+  IN_PROGRESS = 3, // Changed from SUBMITTED to IN_PROGRESS
+  COMPLETED = 4, // Changed from APPROVED to COMPLETED
+  CANCELLED = 5, // Changed from REJECTED to CANCELLED
   AUTO_RELEASED = 6,
 }
 
@@ -22,9 +22,9 @@ export const GigStatusLabels = {
   [GigStatus.PENDING]: "Waiting for invites",
   [GigStatus.INVITED]: "Invited ghostwriter",
   [GigStatus.ASSIGNED]: "Assigned ghostwriter",
-  [GigStatus.SUBMITTED]: "Draft submitted",
-  [GigStatus.APPROVED]: "Work paid out",
-  [GigStatus.REJECTED]: "Work rejected",
+  [GigStatus.IN_PROGRESS]: "Work in progress", // Updated label
+  [GigStatus.COMPLETED]: "Gig completed", // Updated label
+  [GigStatus.CANCELLED]: "Gig cancelled", // Updated label
   [GigStatus.AUTO_RELEASED]: "Auto-released",
 };
 
@@ -33,10 +33,14 @@ export const OnchainGigSchema = z.object({
   gigId: z.string(),
   creator: z.string(), // base eth address
   writer: z.string().nullish(), // base eth address, optional for pending gigs
-  amount: z.string(), // USDC amount in smallest units; string to avoid JS’s safe integer range
+  amount: z.string(), // USDC amount in smallest units; string to avoid JS's safe integer range
   status: z.nativeEnum(GigStatus),
   createdAt: z.number(), // unix timestamp
   lastUpdated: z.number(), // unix timestamp
+  expiresAt: z.number().nullish(), // Optional expiry timestamp
+  numDeliverables: z.number().optional(), // Total number of deliverables
+  numApproved: z.number().optional(), // Number of approved deliverables
+  amountReleased: z.string().optional(), // Amount released so far
 });
 
 export type IOnchainGig = z.infer<typeof OnchainGigSchema>;
@@ -66,7 +70,7 @@ export const GigMetadataSchema = z.object({
   history: z
     .array(
       z.object({
-        event: z.string(),
+        event: z.nativeEnum(EActivityType), // Changed from string to EActivityType
         timestamp: z.number(),
         by: z.string().nullish(),
         details: z.record(z.string()).nullish(),

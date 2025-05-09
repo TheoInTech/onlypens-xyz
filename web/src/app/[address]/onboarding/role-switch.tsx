@@ -7,8 +7,8 @@ import { useGlobalStore } from "@/stores";
 import { ERoles } from "@/stores/constants";
 
 export const RoleSwitch = () => {
-  const [checked, setChecked] = useState<boolean>(false);
-  const { setRole } = useGlobalStore();
+  const { role, setRole } = useGlobalStore();
+  const [checked, setChecked] = useState<boolean>(role === ERoles.CREATOR);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setChecked(event.currentTarget.checked);

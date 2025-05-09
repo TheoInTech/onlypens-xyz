@@ -1,19 +1,54 @@
 "use client";
 
-import { Stack, Title, Text, Tabs, InputLabel } from "@mantine/core";
-import React from "react";
-import { Input, Textarea } from "@/components";
-import { IconNumber1, IconNumber2, IconNumber3 } from "@tabler/icons-react";
+import { Stack, Title, Text, Tabs, InputLabel, Group } from "@mantine/core";
+import React, { useEffect } from "react";
+import { Button, Input, Textarea } from "@/components";
+import {
+  IconArrowLeftDashed,
+  IconArrowRightDashed,
+  IconNumber1,
+  IconNumber2,
+  IconNumber3,
+} from "@tabler/icons-react";
 import classes from "./step-2.module.css";
 import { useCheckboxGroup } from "@/hooks/useCheckboxGroup";
+import { useForm, zodResolver } from "@mantine/form";
+import { DefaultCreatorForm, IUser, UserSchema } from "@/schema/user.schema";
+import { useGlobalStore } from "@/stores";
 
 export const OnboardingStep2Creator = () => {
+  const { selectedToneKeywords, selectedNicheKeywords, setStep } =
+    useGlobalStore();
+
   const {
     toneCheckboxes,
     nicheCheckboxes,
     toneWarningVisible,
     nicheWarningVisible,
   } = useCheckboxGroup();
+
+  const form = useForm<IUser>({
+    mode: "uncontrolled",
+    initialValues: DefaultCreatorForm,
+    validate: zodResolver(UserSchema),
+  });
+
+  useEffect(() => {
+    form.setFieldValue("toneKeywords", selectedToneKeywords);
+    form.setFieldValue("nicheKeywords", selectedNicheKeywords);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedToneKeywords, selectedNicheKeywords]);
+
+  const handleBack = () => {
+    setStep(1);
+  };
+
+  const handleSubmit = (values: IUser) => {
+    // Save user data
+    console.log("Saving user data: ", values);
+    alert("submitted");
+  };
 
   return (
     <Stack gap="xl" align="center" justify="center" h="100%">
@@ -29,17 +64,21 @@ export const OnboardingStep2Creator = () => {
           Helps our AI find ghostwriters that match your writing style and tone
         </Text>
       </Stack>
-      <form style={{ width: "600px" }}>
+      <form onSubmit={form.onSubmit(handleSubmit)} style={{ width: "600px" }}>
         <Stack gap="xl" w={"100%"}>
           <Input
             label="Preferred Name / Alias"
             placeholder="Satoshi Nakamoto"
+            key={form.key("displayName")}
+            {...form.getInputProps("displayName")}
           />
           <Textarea
             label="About Me"
             placeholder={
               "Creator who explains DeFi like I'm explaining to my grandma why her JPEGs are worth mortgage payments. Making crypto make sense since my last rugpull."
             }
+            key={form.key("about")}
+            {...form.getInputProps("about")}
           />
 
           {/* Sample writing style */}
@@ -79,6 +118,8 @@ export const OnboardingStep2Creator = () => {
                 <Textarea
                   placeholder="Blockchain isn't just a buzzword I throw around at parties to sound smart... okay, maybe sometimes. But when I write about it, even my cat seems interested. Or maybe that's just the cursor movement?"
                   h={240}
+                  key={form.key("samples.0")}
+                  {...form.getInputProps("samples.0")}
                 />
               </Tabs.Panel>
 
@@ -86,6 +127,8 @@ export const OnboardingStep2Creator = () => {
                 <Textarea
                   placeholder="Blockchain isn't just a buzzword I throw around at parties to sound smart... okay, maybe sometimes. But when I write about it, even my cat seems interested. Or maybe that's just the cursor movement?"
                   h={240}
+                  key={form.key("samples.1")}
+                  {...form.getInputProps("samples.1")}
                 />
               </Tabs.Panel>
 
@@ -93,6 +136,8 @@ export const OnboardingStep2Creator = () => {
                 <Textarea
                   placeholder="Blockchain isn't just a buzzword I throw around at parties to sound smart... okay, maybe sometimes. But when I write about it, even my cat seems interested. Or maybe that's just the cursor movement?"
                   h={240}
+                  key={form.key("samples.2")}
+                  {...form.getInputProps("samples.2")}
                 />
               </Tabs.Panel>
             </Tabs>
@@ -130,6 +175,29 @@ export const OnboardingStep2Creator = () => {
             )}
           </Stack>
         </Stack>
+        <Group
+          className={classes.buttonGroup}
+          w="100%"
+          justify={"space-between"}
+          align="center"
+        >
+          <Button
+            variant="ghost"
+            size="small"
+            leftSection={<IconArrowLeftDashed />}
+            onClick={handleBack}
+          >
+            Back
+          </Button>
+          <Button
+            variant="primary"
+            size="small"
+            rightSection={<IconArrowRightDashed />}
+            type="submit"
+          >
+            Submit
+          </Button>
+        </Group>
       </form>
     </Stack>
   );

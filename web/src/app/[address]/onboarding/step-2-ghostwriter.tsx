@@ -1,20 +1,66 @@
 "use client";
 
-import { Stack, Title, Text, Tabs, InputLabel } from "@mantine/core";
-import React from "react";
-import { Input, Textarea } from "@/components";
-import { IconNumber1, IconNumber2, IconNumber3 } from "@tabler/icons-react";
+import { Stack, Title, Text, Tabs, InputLabel, Group } from "@mantine/core";
+import React, { useEffect } from "react";
+import { Button, Input, Textarea } from "@/components";
+import {
+  IconArrowLeftDashed,
+  IconArrowRightDashed,
+  IconNumber1,
+  IconNumber2,
+  IconNumber3,
+} from "@tabler/icons-react";
 import classes from "./step-2.module.css";
 import { useCheckboxGroup } from "@/hooks/useCheckboxGroup";
+import { zodResolver } from "@mantine/form";
+import { UserSchema } from "@/schema/user.schema";
+import { useGlobalStore } from "@/stores";
+import { DefaultGhostwriterForm, IUser } from "@/schema/user.schema";
+import { useForm } from "@mantine/form";
 
 export const OnboardingStep2Ghostwriter = () => {
   const {
+    selectedToneKeywords,
+    selectedNicheKeywords,
+    selectedContentTypeKeywords,
+    setStep,
+  } = useGlobalStore();
+
+  const {
     toneCheckboxes,
     nicheCheckboxes,
+    contentTypeCheckboxes,
     toneWarningVisible,
     nicheWarningVisible,
-    contentTypeCheckboxes,
   } = useCheckboxGroup();
+
+  const form = useForm<IUser>({
+    mode: "uncontrolled",
+    initialValues: DefaultGhostwriterForm,
+    validate: zodResolver(UserSchema),
+  });
+
+  useEffect(() => {
+    form.setFieldValue("toneKeywords", selectedToneKeywords);
+    form.setFieldValue("nicheKeywords", selectedNicheKeywords);
+    form.setFieldValue("contentTypeKeywords", selectedContentTypeKeywords);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    selectedToneKeywords,
+    selectedNicheKeywords,
+    selectedContentTypeKeywords,
+  ]);
+
+  const handleBack = () => {
+    setStep(1);
+  };
+
+  const handleSubmit = (values: IUser) => {
+    // Save user data
+    console.log("Saving user data: ", values);
+    alert("submitted");
+  };
 
   return (
     <Stack gap="xl" align="center" justify="center" h="100%">
@@ -30,17 +76,21 @@ export const OnboardingStep2Ghostwriter = () => {
           Helps our AI find creators that match your writing style and tone
         </Text>
       </Stack>
-      <form style={{ width: "600px" }}>
+      <form onSubmit={form.onSubmit(handleSubmit)} style={{ width: "600px" }}>
         <Stack gap="xl" w={"100%"}>
           <Input
             label="Preferred Name / Alias"
             placeholder="Satoshi Nakamoto"
+            key={form.key("displayName")}
+            {...form.getInputProps("displayName")}
           />
           <Textarea
             label="About Me"
             placeholder={
               "Blockchain bard who turns 'wen moon' into Shakespearean sonnets. I've ghostwritten so many whitepapers I'm practically a Web3 poltergeist!"
             }
+            key={form.key("about")}
+            {...form.getInputProps("about")}
           />
 
           {/* Sample writing style */}
@@ -50,6 +100,7 @@ export const OnboardingStep2Ghostwriter = () => {
               <Text size="xs" c="dimmed">
                 Paste 3 previous writing samples to help us match you better
               </Text>
+              <Text className={classes.errorText}>{form.errors.samples}</Text>
             </Stack>
             <Tabs
               variant="pills"
@@ -80,6 +131,8 @@ export const OnboardingStep2Ghostwriter = () => {
                 <Textarea
                   placeholder="Blockchain isn't just a buzzword I throw around at parties to sound smart... okay, maybe sometimes. But when I write about it, even my cat seems interested. Or maybe that's just the cursor movement?"
                   h={240}
+                  key={form.key("samples.0")}
+                  {...form.getInputProps("samples.0")}
                 />
               </Tabs.Panel>
 
@@ -87,6 +140,8 @@ export const OnboardingStep2Ghostwriter = () => {
                 <Textarea
                   placeholder="Blockchain isn't just a buzzword I throw around at parties to sound smart... okay, maybe sometimes. But when I write about it, even my cat seems interested. Or maybe that's just the cursor movement?"
                   h={240}
+                  key={form.key("samples.1")}
+                  {...form.getInputProps("samples.1")}
                 />
               </Tabs.Panel>
 
@@ -94,9 +149,20 @@ export const OnboardingStep2Ghostwriter = () => {
                 <Textarea
                   placeholder="Blockchain isn't just a buzzword I throw around at parties to sound smart... okay, maybe sometimes. But when I write about it, even my cat seems interested. Or maybe that's just the cursor movement?"
                   h={240}
+                  key={form.key("samples.2")}
+                  {...form.getInputProps("samples.2")}
                 />
               </Tabs.Panel>
             </Tabs>
+          </Stack>
+
+          <Stack gap="0">
+            <Input
+              label="Rate per word (USD)"
+              placeholder="5"
+              key={form.key("ratePerWord")}
+              {...form.getInputProps("ratePerWord")}
+            />
           </Stack>
 
           {/* Tone Keywords */}
@@ -106,13 +172,16 @@ export const OnboardingStep2Ghostwriter = () => {
               <Text size="xs" c="dimmed">
                 Choose up to 5 keywords that best describe your writing style
               </Text>
+              <Text className={classes.errorText}>
+                {form.errors.toneKeywords}
+              </Text>
+              {toneWarningVisible && (
+                <Text size="xs" c="red.5">
+                  You&apos;ve selected the maximum of 5 tone keywords
+                </Text>
+              )}
             </Stack>
             {toneCheckboxes}
-            {toneWarningVisible && (
-              <Text size="xs" c="red.5">
-                You&apos;ve selected the maximum of 5 tone keywords
-              </Text>
-            )}
           </Stack>
 
           {/* Industries & Niches Keywords */}
@@ -123,13 +192,16 @@ export const OnboardingStep2Ghostwriter = () => {
                 Choose up to 10 industries and niches you&apos;re most skilled
                 at
               </Text>
+              <Text className={classes.errorText}>
+                {form.errors.nicheKeywords}
+              </Text>
+              {nicheWarningVisible && (
+                <Text size="xs" c="red.5">
+                  You&apos;ve selected the maximum of 10 niche keywords
+                </Text>
+              )}
             </Stack>
             {nicheCheckboxes}
-            {nicheWarningVisible && (
-              <Text size="xs" c="red.5">
-                You&apos;ve selected the maximum of 10 niche keywords
-              </Text>
-            )}
           </Stack>
 
           {/* Content Types */}
@@ -139,10 +211,36 @@ export const OnboardingStep2Ghostwriter = () => {
               <Text size="xs" c="dimmed">
                 Choose the content types you&apos;d like to write for
               </Text>
+              <Text className={classes.errorText}>
+                {form.errors.contentTypeKeywords}
+              </Text>
             </Stack>
             {contentTypeCheckboxes}
           </Stack>
         </Stack>
+        <Group
+          className={classes.buttonGroup}
+          w="100%"
+          justify={"space-between"}
+          align="center"
+        >
+          <Button
+            variant="ghost"
+            size="small"
+            leftSection={<IconArrowLeftDashed />}
+            onClick={handleBack}
+          >
+            Back
+          </Button>
+          <Button
+            variant="primary"
+            size="small"
+            rightSection={<IconArrowRightDashed />}
+            type="submit"
+          >
+            Submit
+          </Button>
+        </Group>
       </form>
     </Stack>
   );

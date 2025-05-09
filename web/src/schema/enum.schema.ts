@@ -90,19 +90,21 @@ export enum EContentTypes {
   PERSONAL_BIO = "Bio / About Me", // Creator intros, brand bios
 }
 
+// Activity types - aligned with contract events for subgraph integration
 export enum EActivityType {
-  GIG_CREATED = "Gig created",
-  INVITE_SENT = "Invite sent",
-  INVITE_ACCEPTED = "Invite accepted",
-  INVITE_DECLINED = "Invite declined",
-  DRAFT_SUBMITTED = "Draft submitted",
-  DRAFT_REVISED = "Draft revised",
-  DRAFT_APPROVED = "Draft approved",
-  DRAFT_REJECTED = "Draft rejected",
-  PAYMENT_RELEASED = "Payment released",
-  PAYMENT_REFUNDED = "Payment refunded",
-  GIG_EXPIRED = "Gig expired",
-  GIG_CANCELLED = "Gig cancelled",
+  GIG_CREATED = "GIG_CREATED",
+  INVITE_SENT = "INVITE_SENT",
+  INVITE_ACCEPTED = "INVITE_ACCEPTED",
+  INVITE_DECLINED = "INVITE_DECLINED",
+  DRAFT_SUBMITTED = "DRAFT_SUBMITTED",
+  DRAFT_REVISED = "DRAFT_REVISED",
+  DRAFT_APPROVED = "DRAFT_APPROVED",
+  DRAFT_REJECTED = "DRAFT_REJECTED",
+  PAYMENT_RELEASED = "PAYMENT_RELEASED",
+  GIG_COMPLETED = "GIG_COMPLETED",
+  GIG_CANCELLED = "GIG_CANCELLED",
+  GIG_EXPIRED = "GIG_EXPIRED",
+  PAYMENT_REFUNDED = "PAYMENT_REFUNDED", // For UI display (not a contract event)
 }
 
 // Submission status types
