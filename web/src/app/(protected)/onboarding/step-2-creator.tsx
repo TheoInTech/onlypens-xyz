@@ -15,10 +15,16 @@ import { useCheckboxGroup } from "@/hooks/useCheckboxGroup";
 import { useForm, zodResolver } from "@mantine/form";
 import { DefaultCreatorForm, IUser, UserSchema } from "@/schema/user.schema";
 import { useGlobalStore } from "@/stores";
+import useOnboarding from "@/hooks/useOnboarding";
+import { useRouter } from "next/navigation";
+import { useAccount } from "wagmi";
 
 export const OnboardingStep2Creator = () => {
-  const { selectedToneKeywords, selectedNicheKeywords, setStep } =
+  const { selectedToneKeywords, selectedNicheKeywords, setStep, setUser } =
     useGlobalStore();
+  const { saveProfile, isSavingProfile } = useOnboarding();
+  const router = useRouter();
+  const { address } = useAccount();
 
   const {
     toneCheckboxes,
@@ -44,10 +50,16 @@ export const OnboardingStep2Creator = () => {
     setStep(1);
   };
 
-  const handleSubmit = (values: IUser) => {
-    // Save user data
-    console.log("Saving user data: ", values);
-    alert("submitted");
+  const handleSubmit = async (values: IUser) => {
+    const response = await saveProfile({
+      ...values,
+      address: address!.toString(),
+    });
+
+    if (response?.success && response.user) {
+      setUser(response.user);
+      router.push("/dashboard");
+    }
   };
 
   return (
@@ -193,6 +205,7 @@ export const OnboardingStep2Creator = () => {
             size="small"
             leftSection={<IconArrowLeftDashed />}
             onClick={handleBack}
+            disabled={isSavingProfile}
           >
             Back
           </Button>
@@ -201,8 +214,10 @@ export const OnboardingStep2Creator = () => {
             size="small"
             rightSection={<IconArrowRightDashed />}
             type="submit"
+            loading={isSavingProfile}
+            disabled={isSavingProfile}
           >
-            Submit
+            {isSavingProfile ? "Saving" : "Submit"}
           </Button>
         </Group>
       </form>

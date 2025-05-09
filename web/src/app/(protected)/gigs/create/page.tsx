@@ -295,8 +295,6 @@ const CreatePackagePage = () => {
       event: EActivityType.GIG_CREATED,
     };
 
-    console.log("Creating gig package:", gigPackageData);
-
     // TODO: Integrate with smart contract
     // 1. Save metadata to Firestore
     // 2. Call smart contract's createGigPackage function

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { Container, Text, Loader } from "@mantine/core";
 import { useGlobalStore } from "@/stores";
 import { OnboardingStep1 } from "@/app/(protected)/onboarding/step-1";
@@ -9,27 +9,9 @@ import { OnboardingStep2Ghostwriter } from "@/app/(protected)/onboarding/step-2-
 import { OnboardingStep2Creator } from "@/app/(protected)/onboarding/step-2-creator";
 import { useSession } from "next-auth/react";
 
-// Extend the Session type to include the address property
-interface ExtendedSession {
-  address?: string;
-  user?: {
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-  };
-  expires: string;
-}
-
 const OnboardingPage = () => {
-  const { step, role, setAddress } = useGlobalStore();
-  const { data: session, status } = useSession();
-
-  // Set the user's wallet address in the store when session is available
-  useEffect(() => {
-    if (session && (session as ExtendedSession).address) {
-      setAddress((session as ExtendedSession).address!);
-    }
-  }, [session, setAddress]);
+  const { step, role } = useGlobalStore();
+  const { status } = useSession();
 
   // Show loading state while session is loading
   if (status === "loading") {
@@ -39,11 +21,13 @@ const OnboardingPage = () => {
         h="100%"
         style={{
           display: "flex",
+          flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
         <Loader color="purple" />
+        <Text>Fetching your profile...</Text>
       </Container>
     );
   }

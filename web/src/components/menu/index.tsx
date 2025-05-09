@@ -18,16 +18,14 @@ import { ConnectWallet } from "@/components";
 import { useAccount } from "wagmi";
 import cx from "clsx";
 import { usePathname } from "next/navigation";
-import { ERoles } from "@/stores/constants";
+import { useGlobalStore } from "@/stores";
 
 export function Menu() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
   const pathname = usePathname();
-
   const account = useAccount();
-  const profile = process.env.NEXT_PUBLIC_PROFILE_EXISTS === "true"; // TODO: get profile from Supabase
-  const role = ERoles.CREATOR; // TODO: get role from Supabase
+  const { user } = useGlobalStore();
 
   return (
     <>
@@ -60,7 +58,7 @@ export function Menu() {
                 About OnlyPens
               </Link>
 
-              {account.isConnected && account.address && !profile && (
+              {account.isConnected && account.address && !user && (
                 <Link
                   href={`/onboarding`}
                   className={cx(
@@ -72,7 +70,7 @@ export function Menu() {
                 </Link>
               )}
 
-              {account.isConnected && account.address && profile && (
+              {account.isConnected && account.address && !!user && (
                 <>
                   <Link
                     href={`/dashboard`}
@@ -105,10 +103,12 @@ export function Menu() {
               )}
             </Group>
 
-            <Group className={classes.role}>
-              <Box className={classes.roleIndicator} />
-              {role}
-            </Group>
+            {!!user && (
+              <Group className={classes.role}>
+                <Box className={classes.roleIndicator} />
+                {user.role}
+              </Group>
+            )}
 
             <ConnectWallet size="small" />
             <Burger

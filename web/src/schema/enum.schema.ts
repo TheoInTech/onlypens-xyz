@@ -88,6 +88,8 @@ export enum EContentTypes {
   WEBSITE_LANDING = "Website / Landing Copy", // Headlines, hero copy /
   SCRIPT_DIALOGUE = "Script / Dialogue", // Podcast, video, reels /
   PERSONAL_BIO = "Bio / About Me", // Creator intros, brand bios
+  WHITEPAPER = "Whitepaper", // Technical writing, blockchain, crypto, etc.
+  BOOK = "Book", // Full-length book, chapters, etc.
 }
 
 // Activity types - aligned with contract events for subgraph integration

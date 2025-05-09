@@ -11,8 +11,6 @@ export interface OnboardingSlice {
   setStep: (step: number) => void;
   role: ERoles;
   setRole: (role: ERoles) => void;
-  address: string;
-  setAddress: (address: string) => void;
   selectedToneKeywords: EToneKeywords[];
   setSelectedToneKeywords: (keywords: EToneKeywords[]) => void;
   selectedNicheKeywords: ENicheKeywords[];
@@ -34,10 +32,6 @@ export const createOnboardingSlice: StateCreator<
   role: ERoles.GHOSTWRITER,
   setRole: (role: ERoles) => {
     set(() => ({ role }));
-  },
-  address: "",
-  setAddress: (address: string) => {
-    set(() => ({ address }));
   },
   selectedToneKeywords: [],
   setSelectedToneKeywords: (keywords: EToneKeywords[]) => {

@@ -17,15 +17,20 @@ import { UserSchema } from "@/schema/user.schema";
 import { useGlobalStore } from "@/stores";
 import { DefaultGhostwriterForm, IUser } from "@/schema/user.schema";
 import { useForm } from "@mantine/form";
-
+import useOnboarding from "@/hooks/useOnboarding";
+import { useRouter } from "next/navigation";
+import { useAccount } from "wagmi";
 export const OnboardingStep2Ghostwriter = () => {
   const {
     selectedToneKeywords,
     selectedNicheKeywords,
     selectedContentTypeKeywords,
     setStep,
-    address,
+    setUser,
   } = useGlobalStore();
+  const { address } = useAccount();
+  const { saveProfile, isSavingProfile } = useOnboarding();
+  const router = useRouter();
 
   const {
     toneCheckboxes,
@@ -35,15 +40,9 @@ export const OnboardingStep2Ghostwriter = () => {
     nicheWarningVisible,
   } = useCheckboxGroup();
 
-  // Create a merged initial value with the address from the store
-  const initialValues = {
-    ...DefaultGhostwriterForm,
-    address: address,
-  };
-
   const form = useForm<IUser>({
     mode: "uncontrolled",
-    initialValues,
+    initialValues: DefaultGhostwriterForm,
     validate: zodResolver(UserSchema),
   });
 
@@ -63,10 +62,16 @@ export const OnboardingStep2Ghostwriter = () => {
     setStep(1);
   };
 
-  const handleSubmit = (values: IUser) => {
-    // Save user data
-    console.log("Saving user data: ", values);
-    alert("submitted");
+  const handleSubmit = async (values: IUser) => {
+    const response = await saveProfile({
+      ...values,
+      address: address!.toString(),
+    });
+
+    if (response?.success && response.user) {
+      setUser(response.user);
+      router.push("/dashboard");
+    }
   };
 
   return (
@@ -236,6 +241,7 @@ export const OnboardingStep2Ghostwriter = () => {
             size="small"
             leftSection={<IconArrowLeftDashed />}
             onClick={handleBack}
+            disabled={isSavingProfile}
           >
             Back
           </Button>
@@ -244,8 +250,10 @@ export const OnboardingStep2Ghostwriter = () => {
             size="small"
             rightSection={<IconArrowRightDashed />}
             type="submit"
+            loading={isSavingProfile}
+            disabled={isSavingProfile}
           >
-            Submit
+            {isSavingProfile ? "Saving" : "Submit"}
           </Button>
         </Group>
       </form>

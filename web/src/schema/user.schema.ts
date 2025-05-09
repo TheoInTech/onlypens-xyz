@@ -79,6 +79,16 @@ export const UserSchema = z
 // Type definition
 export type IUser = z.infer<typeof UserSchema>;
 
+export const ApiResponseOnboardingSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+  user: UserSchema,
+});
+
+export type IApiResponseOnboarding = z.infer<
+  typeof ApiResponseOnboardingSchema
+>;
+
 export const DefaultCreatorForm: IUser = {
   role: ERoles.CREATOR,
   address: "",

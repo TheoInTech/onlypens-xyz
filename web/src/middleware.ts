@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+// import { getUserProfile } from "@/services/user.service";
 
 // Public routes that are accessible to everyone
-const publicRoutes = ["/", "/about", "/terms", "/privacy"];
+const publicRoutes = ["/about", "/terms", "/privacy"];
 
 // Routes that need profile check
 const profileRequiredRoutes = [
@@ -35,9 +36,40 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // TODO: This should be fetched from your database or API
-  // For now, using a hardcoded value to prevent the infinite loop
-  const profileExists = process.env.NEXT_PUBLIC_PROFILE_EXISTS === "true"; // Replace with actual profile check logic
+  // Fetch user profile directly
+  let profileExists = false;
+  if (isAuthenticated) {
+    try {
+      const profileResponse = await fetch(
+        new URL("/api/users/me", request.url).toString(),
+        {
+          headers: {
+            // Forward necessary cookies for authentication
+            cookie: request.headers.get("cookie") || "",
+          },
+        }
+      );
+
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json();
+        // Assuming the API returns a non-empty object or a specific field that indicates a profile exists
+        // Adjust this check based on the actual structure of your /api/users/me response
+        profileExists = !!profileData && Object.keys(profileData).length > 0;
+      } else {
+        // Log error or handle cases where the profile API fails
+        console.error("Failed to fetch user profile:", profileResponse.status);
+      }
+    } catch (error) {
+      console.error("Error fetching user profile in middleware:", error);
+      // Decide how to handle this error, e.g., redirect to an error page or allow access
+    }
+  }
+
+  if (path === "/" && profileExists) {
+    return NextResponse.redirect(new URL(`/dashboard`, request.url));
+  } else if (path === "/" && !profileExists) {
+    return NextResponse.redirect(new URL(`/onboarding`, request.url));
+  }
 
   // If the route is in the profileRequiredRoutes array and no profile exists, redirect to onboarding
   if (
