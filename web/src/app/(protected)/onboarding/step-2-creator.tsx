@@ -88,6 +88,7 @@ export const OnboardingStep2Creator = () => {
               <Text size="xs" c="dimmed">
                 Paste 3 previous writing samples to help us match you better
               </Text>
+              <Text className={classes.errorText}>{form.errors.samples}</Text>
             </Stack>
             <Tabs
               variant="pills"
@@ -150,13 +151,16 @@ export const OnboardingStep2Creator = () => {
               <Text size="xs" c="dimmed">
                 Choose up to 5 keywords that best describe your writing style
               </Text>
+              <Text className={classes.errorText}>
+                {form.errors.toneKeywords}
+              </Text>
+              {toneWarningVisible && (
+                <Text size="xs" c="red.5">
+                  You&apos;ve selected the maximum of 5 tone keywords
+                </Text>
+              )}
             </Stack>
             {toneCheckboxes}
-            {toneWarningVisible && (
-              <Text size="xs" c="red.5">
-                You&apos;ve selected the maximum of 5 tone keywords
-              </Text>
-            )}
           </Stack>
 
           {/* Industries & Niches Keywords */}
@@ -166,13 +170,16 @@ export const OnboardingStep2Creator = () => {
               <Text size="xs" c="dimmed">
                 Choose up to 3 industries and niches you&apos;re in
               </Text>
+              <Text className={classes.errorText}>
+                {form.errors.nicheKeywords}
+              </Text>
+              {nicheWarningVisible && (
+                <Text size="xs" c="red.5">
+                  You&apos;ve selected the maximum of 10 niche keywords
+                </Text>
+              )}
             </Stack>
             {nicheCheckboxes}
-            {nicheWarningVisible && (
-              <Text size="xs" c="red.5">
-                You&apos;ve selected the maximum of 10 niche keywords
-              </Text>
-            )}
           </Stack>
         </Stack>
         <Group

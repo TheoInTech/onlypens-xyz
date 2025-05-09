@@ -62,11 +62,10 @@ export function Menu() {
 
               {account.isConnected && account.address && !profile && (
                 <Link
-                  href={`/${account.address}/onboarding`}
+                  href={`/onboarding`}
                   className={cx(
                     classes.link,
-                    pathname === `/${account.address}/onboarding` &&
-                      classes.linkActive
+                    pathname === `/onboarding` && classes.linkActive
                   )}
                 >
                   Onboarding
@@ -76,31 +75,28 @@ export function Menu() {
               {account.isConnected && account.address && profile && (
                 <>
                   <Link
-                    href={`/${account.address}/dashboard`}
+                    href={`/dashboard`}
                     className={cx(
                       classes.link,
-                      pathname.includes(`/${account.address}/dashboard`) &&
-                        classes.linkActive
+                      pathname.includes(`/dashboard`) && classes.linkActive
                     )}
                   >
                     Dashboard
                   </Link>
                   <Link
-                    href={`/${account.address}/gigs`}
+                    href={`/gigs`}
                     className={cx(
                       classes.link,
-                      pathname.includes(`/${account.address}/gigs`) &&
-                        classes.linkActive
+                      pathname.includes(`/gigs`) && classes.linkActive
                     )}
                   >
                     My Gigs
                   </Link>
                   <Link
-                    href={`/${account.address}/profile`}
+                    href={`/profile`}
                     className={cx(
                       classes.link,
-                      pathname.includes(`/${account.address}/profile`) &&
-                        classes.linkActive
+                      pathname.includes(`/profile`) && classes.linkActive
                     )}
                   >
                     Profile

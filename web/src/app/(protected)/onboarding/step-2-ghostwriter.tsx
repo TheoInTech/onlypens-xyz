@@ -24,6 +24,7 @@ export const OnboardingStep2Ghostwriter = () => {
     selectedNicheKeywords,
     selectedContentTypeKeywords,
     setStep,
+    address,
   } = useGlobalStore();
 
   const {
@@ -34,9 +35,15 @@ export const OnboardingStep2Ghostwriter = () => {
     nicheWarningVisible,
   } = useCheckboxGroup();
 
+  // Create a merged initial value with the address from the store
+  const initialValues = {
+    ...DefaultGhostwriterForm,
+    address: address,
+  };
+
   const form = useForm<IUser>({
     mode: "uncontrolled",
-    initialValues: DefaultGhostwriterForm,
+    initialValues,
     validate: zodResolver(UserSchema),
   });
 

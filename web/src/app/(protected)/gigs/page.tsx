@@ -20,7 +20,7 @@ const MyGigsPage = async ({ params }: IMyGigsPage) => {
       {/* Filters, Sorting, Search*/}
       <Group align="center" justify="space-between">
         <Text>My Gigs ({gigs.length})</Text>
-        <Button size="small" component={Link} href={`/${address}/gigs/create`}>
+        <Button size="small" component={Link} href={`/gigs/create`}>
           Post a Gig
         </Button>
       </Group>
@@ -31,7 +31,7 @@ const MyGigsPage = async ({ params }: IMyGigsPage) => {
             {gigs.map((gig) => (
               <GridCol span={3} key={gig.onchainGig.gigId}>
                 <Link
-                  href={`/${address}/gigs/${gig.onchainGig.gigId}`}
+                  href={`/gigs/${gig.onchainGig.gigId}`}
                   style={{ textDecoration: "none", padding: 0 }}
                 >
                   <GigCard className={classes.gigItem} gig={gig} />

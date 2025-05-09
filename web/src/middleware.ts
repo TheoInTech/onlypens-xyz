@@ -1,86 +1,58 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 // Public routes that are accessible to everyone
 const publicRoutes = ["/", "/about", "/terms", "/privacy"];
 
-export function middleware(request: NextRequest) {
+// Routes that need profile check
+const profileRequiredRoutes = [
+  "/dashboard",
+  "/gigs",
+  "/gigs/create",
+  "/gigs/:gigId",
+];
+
+export async function middleware(request: NextRequest) {
   // Get the pathname of the request
   const path = request.nextUrl.pathname;
 
-  // Debug logs
-  console.log("Middleware processing path:", path);
-
-  // Get wallet connection status from cookies
-  const isWalletConnected =
-    request.cookies.get("wallet-connected")?.value === "true";
-
-  // Hardcoded profile check (will be replaced with actual check later with Supabase profile check)
-  const profileExists = process.env.NEXT_PUBLIC_PROFILE_EXISTS === "true";
-
-  // Get wallet address from cookies for redirect purposes
-  const walletAddress = request.cookies.get("wallet-address")?.value;
-
-  // Extract the address from the path
-  const pathSegments = path.split("/").filter(Boolean);
-  const addressParam = pathSegments[0];
-
-  // Handle root path redirect for authenticated users with profiles
-  if (path === "/" && isWalletConnected && profileExists && walletAddress) {
-    console.log("Redirecting from root to dashboard");
-    return NextResponse.redirect(
-      new URL(`/${walletAddress}/dashboard`, request.url)
-    );
-  }
-
-  // Public routes are accessible to everyone (except root which is handled above)
-  if (publicRoutes.some((route) => path === route && route !== "/")) {
+  // Check if the path is in public routes - allow immediate access
+  if (publicRoutes.includes(path)) {
     return NextResponse.next();
   }
 
-  // Only proceed with address-based routing if we have an address parameter
-  if (addressParam) {
-    // Check if this is an onboarding route (second segment is "onboarding")
-    const isOnboardingRoute = pathSegments[1] === "onboarding";
+  // Validate the JWT token properly using next-auth's getToken
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
 
-    // If wallet is not connected, redirect to home
-    if (!isWalletConnected) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
+  const isAuthenticated = !!token;
 
-    // Check if wallet address in URL matches the connected wallet
-    if (walletAddress && addressParam !== walletAddress) {
-      return NextResponse.redirect(
-        new URL(`/${walletAddress}/dashboard`, request.url)
-      );
-    }
-
-    // Handle onboarding route specifically
-    if (isOnboardingRoute) {
-      // If profile already exists, redirect to dashboard
-      if (profileExists) {
-        return NextResponse.redirect(
-          new URL(`/${addressParam}/dashboard`, request.url)
-        );
-      }
-
-      // Allow access to onboarding for users without profiles
-      return NextResponse.next();
-    }
-
-    // For all other address-based routes (dashboard, profile, gigs, etc.)
-    // If no profile exists, redirect to onboarding
-    if (!profileExists) {
-      return NextResponse.redirect(
-        new URL(`/${addressParam}/onboarding`, request.url)
-      );
-    }
-
-    // Allow access to protected routes
-    return NextResponse.next();
+  // If not authenticated, redirect to home
+  if (!isAuthenticated) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // For all other requests, continue
+  // TODO: This should be fetched from your database or API
+  // For now, using a hardcoded value to prevent the infinite loop
+  const profileExists = process.env.NEXT_PUBLIC_PROFILE_EXISTS === "true"; // Replace with actual profile check logic
+
+  // If the route is in the profileRequiredRoutes array and no profile exists, redirect to onboarding
+  if (
+    !profileExists &&
+    profileRequiredRoutes.some((route) => path.startsWith(route))
+  ) {
+    return NextResponse.redirect(new URL(`/onboarding`, request.url));
+  }
+
+  // If no profile exists and not on onboarding, redirect to onboarding
+  if (profileExists && path.startsWith("/onboarding")) {
+    return NextResponse.redirect(new URL(`/dashboard`, request.url));
+  }
+
+  // Allow access to protected routes
   return NextResponse.next();
 }
 
@@ -93,7 +65,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
+     * - api routes
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

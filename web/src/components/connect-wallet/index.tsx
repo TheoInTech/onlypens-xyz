@@ -1,109 +1,64 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import type { Hex } from "viem";
-import {
-  useAccount,
-  useConnect,
-  useDisconnect,
-  usePublicClient,
-  useSignMessage,
-} from "wagmi";
+import { useState } from "react";
+import { useAccount, useConnect, useDisconnect, useSignMessage } from "wagmi";
 import { SiweMessage } from "siwe";
 import { cbWalletConnector } from "@/lib/wagmi";
 import Button from "@/components/button";
 import { Group, Menu, Text } from "@mantine/core";
 import { IconCopy, IconLogout } from "@tabler/icons-react";
 import { shortenAddress } from "@/lib/utils";
-import { useRouter } from "next/navigation";
 import classes from "./connect-wallet.module.css";
+import { getCsrfToken, signIn, signOut, useSession } from "next-auth/react";
+import { baseSepolia } from "viem/chains";
 
 interface IConnectWallet {
   size?: "default" | "small";
 }
 
-// Helper functions to set and delete cookies
-const setCookie = (name: string, value: string, maxAge: number) => {
-  document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Lax`;
-};
-
-const deleteCookie = (name: string) => {
-  document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`;
-};
-
 export const ConnectWallet = ({ size = "default" }: IConnectWallet) => {
-  const router = useRouter();
   const { disconnect } = useDisconnect();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
-  const { connect } = useConnect({
-    mutation: {
-      onSuccess: (data) => {
-        const address = data.accounts[0];
-        const chainId = data.chainId;
-        const m = new SiweMessage({
-          domain: document.location.host,
-          address,
-          chainId,
-          uri: document.location.origin,
-          version: "1",
-          statement: "OnlyPens Smart Wallet",
-          nonce: "12345678",
-        });
-        setMessage(m);
-        signMessage({ message: m.prepareMessage() });
-      },
-    },
-  });
+  const { connect } = useConnect();
   const account = useAccount();
-  const client = usePublicClient();
-  const [signature, setSignature] = useState<Hex | undefined>(undefined);
-  const { signMessage } = useSignMessage({
-    mutation: { onSuccess: (sig) => setSignature(sig) },
-  });
-  const [message, setMessage] = useState<SiweMessage | undefined>(undefined);
+  const { signMessageAsync } = useSignMessage();
+  const { data: session } = useSession();
 
-  const checkValid = useCallback(async () => {
-    if (!signature || !account.address || !client || !message) return;
-
-    client.verifyMessage({
-      address: account.address,
-      message: message.prepareMessage(),
-      signature,
-    });
-  }, [signature, account]);
-
-  useEffect(() => {
-    checkValid();
-  }, [signature, account]);
+  const handleSignin = async () => {
+    try {
+      const callbackUrl = `/onboarding`;
+      const message = new SiweMessage({
+        domain: window.location.host,
+        address: account.address,
+        statement: "Sign in to OnlyPens.",
+        uri: window.location.origin,
+        version: "1",
+        chainId: baseSepolia.id,
+        nonce: await getCsrfToken(),
+      });
+      const signature = await signMessageAsync({
+        message: message.prepareMessage(),
+      });
+      signIn("credentials", {
+        message: JSON.stringify(message),
+        redirect: true,
+        signature,
+        callbackUrl,
+      });
+    } catch (error) {
+      window.alert(error);
+    }
+  };
 
   const handleConnect = async () => {
     await connect({ connector: cbWalletConnector });
     setMenuOpen(false);
   };
 
-  useEffect(() => {
-    setMenuOpen(false);
-
-    if (account.isConnected && account.address) {
-      // Set cookies for middleware to use (24 hours expiry)
-      setCookie("wallet-connected", "true", 60 * 60 * 24);
-      setCookie("wallet-address", account.address, 60 * 60 * 24);
-
-      // Navigate directly to onboarding instead of reloading
-      router.push("/onboarding");
-    } else if (!account.isConnected) {
-      // If wallet disconnects, redirect back to home page
-      deleteCookie("wallet-connected");
-      deleteCookie("wallet-address");
-      router.push("/");
-    }
-  }, [account.isConnected, account.address, router]);
-
   const handleDisconnect = async () => {
     await disconnect();
-    deleteCookie("wallet-connected");
-    deleteCookie("wallet-address");
+    await signOut({ redirect: true, callbackUrl: "/" });
     setMenuOpen(false);
   };
 
@@ -113,7 +68,17 @@ export const ConnectWallet = ({ size = "default" }: IConnectWallet) => {
     }
   };
 
-  if (account.isConnected && !!account.address) {
+  // Connected but not signed in
+  if (account.isConnected && !!account.address && !session) {
+    return (
+      <Button variant="secondary" onClick={handleSignin} size={size}>
+        Sign in
+      </Button>
+    );
+  }
+
+  // Connected and signed in
+  if (account.isConnected && !!account.address && !!session) {
     return (
       <Menu
         opened={menuOpen}
@@ -155,6 +120,7 @@ export const ConnectWallet = ({ size = "default" }: IConnectWallet) => {
     );
   }
 
+  // Not connected
   return (
     <Button variant="secondary" onClick={handleConnect} size={size}>
       Connect Smart Wallet

@@ -48,7 +48,7 @@ const DashboardPage = async ({ params }: IDashboardPage) => {
             variant="white"
             size="small"
             component={Link}
-            href={`/${address}/gigs/create`}
+            href={`/gigs/create`}
           >
             Post a Gig
           </Button>

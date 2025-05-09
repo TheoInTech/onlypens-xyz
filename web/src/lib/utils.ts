@@ -99,3 +99,24 @@ export function getContentTypeIcon(contentType: string) {
       return "/placeholder.png";
   }
 }
+
+// Cookie utility functions
+export const cookie = {
+  set: (name: string, value: string, days = 7) => {
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = `${name}=${encodeURIComponent(
+      value
+    )}; expires=${expires}; path=/`;
+  },
+  get: (name: string) => {
+    const cookieArray = document.cookie.split(";");
+    const cookieValue = cookieArray
+      .find((item) => item.trim().startsWith(`${name}=`))
+      ?.trim()
+      .substring(name.length + 1);
+    return cookieValue ? decodeURIComponent(cookieValue) : null;
+  },
+  delete: (name: string) => {
+    document.cookie = `${name}=; Max-Age=0; path=/; domain=${window.location.hostname}`;
+  },
+};
