@@ -27,6 +27,11 @@ contract OnlyPens is Initializable, Ownable {
         REJECTED
     }
 
+    struct DeliverableInput {
+        string contentType;
+        uint256 amount;
+    }
+
     // Optimized struct - shortened names and removed comments
     struct Deliverable {
         uint256 id;
@@ -126,25 +131,29 @@ contract OnlyPens is Initializable, Ownable {
 
     // Modifiers - shortened error messages
     modifier packageMustExist(uint256 _packageId) {
-        require(packageExists[_packageId], "No package");
+        if (!packageExists[_packageId]) {
+            revert("No package");
+        }
         _;
     }
 
     modifier onlyPackageCreator(uint256 _packageId) {
-        require(
-            packageExists[_packageId] &&
-                msg.sender == packages[_packageId].creator,
-            "Not creator"
-        );
+        if (!packageExists[_packageId]) {
+            revert("No package");
+        }
+        if (msg.sender != packages[_packageId].creator) {
+            revert("Not creator");
+        }
         _;
     }
 
     modifier onlyPackageWriter(uint256 _packageId) {
-        require(
-            packageExists[_packageId] &&
-                msg.sender == packages[_packageId].writer,
-            "Not writer"
-        );
+        if (!packageExists[_packageId]) {
+            revert("No package");
+        }
+        if (msg.sender != packages[_packageId].writer) {
+            revert("Not writer");
+        }
         _;
     }
 
@@ -152,11 +161,12 @@ contract OnlyPens is Initializable, Ownable {
         uint256 _packageId,
         PackageStatus _requiredStatus
     ) {
-        require(
-            packageExists[_packageId] &&
-                packages[_packageId].status == _requiredStatus,
-            "Invalid status"
-        );
+        if (!packageExists[_packageId]) {
+            revert("No package");
+        }
+        if (packages[_packageId].status != _requiredStatus) {
+            revert("Invalid status");
+        }
         _;
     }
 
@@ -165,35 +175,41 @@ contract OnlyPens is Initializable, Ownable {
         PackageStatus _status1,
         PackageStatus _status2
     ) {
-        require(
-            packageExists[_packageId] &&
-                (packages[_packageId].status == _status1 ||
-                    packages[_packageId].status == _status2),
-            "Invalid status"
-        );
+        if (!packageExists[_packageId]) {
+            revert("No package");
+        }
+        if (
+            packages[_packageId].status != _status1 &&
+            packages[_packageId].status != _status2
+        ) {
+            revert("Invalid status");
+        }
         _;
     }
 
     modifier validAddress(address _addr) {
-        require(_addr != address(0), "Invalid addr");
+        if (_addr == address(0)) {
+            revert("Invalid addr");
+        }
         _;
     }
 
     modifier deliverableMustExist(uint256 _packageId, uint256 _deliverableId) {
-        require(
-            packageExists[_packageId] &&
-                deliverableIndexInPackage[_packageId][_deliverableId] > 0,
-            "No deliverable"
-        );
+        if (!packageExists[_packageId]) {
+            revert("No package");
+        }
+        if (deliverableIndexInPackage[_packageId][_deliverableId] == 0) {
+            revert("No deliverable");
+        }
         _;
     }
 
     modifier notExpired(uint256 _packageId) {
-        if (packages[_packageId].expiresAt > 0) {
-            require(
-                block.timestamp <= packages[_packageId].expiresAt,
-                "Expired"
-            );
+        if (
+            packages[_packageId].expiresAt > 0 &&
+            block.timestamp > packages[_packageId].expiresAt
+        ) {
+            revert("Expired");
         }
         _;
     }
@@ -218,27 +234,38 @@ contract OnlyPens is Initializable, Ownable {
         DeliverableInput[] calldata _deliverables,
         uint256 _expiresAt
     ) external validAddress(msg.sender) {
-        require(_totalAmount > 0, "Zero amount");
+        if (_totalAmount == 0) {
+            revert("Zero amount");
+        }
 
-        // If expiry set, ensure future date
-        if (_expiresAt > 0) {
-            require(_expiresAt > block.timestamp, "Past expiry");
+        // Always check if expiry is provided and in the future
+        if (_expiresAt <= block.timestamp) {
+            revert("Past expiry");
         }
 
         // Validate deliverables - use library to reduce contract size
-        require(
-            OnlyPensHelpers.validateDeliverableInputs(
+        if (
+            !OnlyPensHelpers.validateDeliverableInputs(
                 _totalAmount,
                 _deliverables
-            ),
-            "Invalid deliverables"
-        );
+            )
+        ) {
+            revert("Invalid deliverables");
+        }
 
         // Transfer tokens from creator to contract
-        require(
-            usdc.transferFrom(msg.sender, address(this), _totalAmount),
-            "Transfer failed"
-        );
+        bool success = false;
+        try usdc.transferFrom(msg.sender, address(this), _totalAmount) returns (
+            bool transferSuccess
+        ) {
+            success = transferSuccess;
+        } catch {
+            success = false;
+        }
+
+        if (!success) {
+            revert("Transfer failed");
+        }
 
         // Create the package
         uint256 packageId = nextPackageId++;
@@ -295,18 +322,36 @@ contract OnlyPens is Initializable, Ownable {
     function inviteGhostwriter(
         uint256 _packageId,
         address _ghostwriter
-    )
-        external
-        onlyPackageCreator(_packageId)
-        validPackageStatusMultiple(
-            _packageId,
-            PackageStatus.PENDING,
-            PackageStatus.INVITED
-        )
-        validAddress(_ghostwriter)
-        notExpired(_packageId)
-    {
-        require(_ghostwriter != msg.sender, "Self invite");
+    ) external {
+        if (!packageExists[_packageId]) {
+            revert("No package");
+        }
+
+        if (_ghostwriter == address(0)) {
+            revert("Invalid addr");
+        }
+
+        if (msg.sender != packages[_packageId].creator) {
+            revert("Not creator");
+        }
+
+        PackageStatus status = packages[_packageId].status;
+        if (
+            status != PackageStatus.PENDING && status != PackageStatus.INVITED
+        ) {
+            revert("Invalid status");
+        }
+
+        if (
+            packages[_packageId].expiresAt > 0 &&
+            block.timestamp > packages[_packageId].expiresAt
+        ) {
+            revert("Expired");
+        }
+
+        if (_ghostwriter == msg.sender) {
+            revert("Self invite");
+        }
 
         GigPackage storage p = packages[_packageId];
 
@@ -324,21 +369,36 @@ contract OnlyPens is Initializable, Ownable {
     }
 
     /// @notice Ghostwriter accepts an invitation to a gig package
-    function acceptInvitation(
-        uint256 _packageId
-    )
-        external
-        packageMustExist(_packageId)
-        validPackageStatus(_packageId, PackageStatus.INVITED)
-        validAddress(msg.sender)
-        notExpired(_packageId)
-    {
-        GigPackage storage p = packages[_packageId];
-        require(p.writer == address(0), "Already assigned");
+    function acceptInvitation(uint256 _packageId) external {
+        if (!packageExists[_packageId]) {
+            revert("No package");
+        }
 
-        // Efficient check using the mapping
-        require(isInvited[_packageId][msg.sender], "Not invited");
-        require(!inviteeRemoved[_packageId][msg.sender], "Invite removed");
+        if (msg.sender == address(0)) {
+            revert("Invalid addr");
+        }
+
+        GigPackage storage p = packages[_packageId];
+
+        if (p.expiresAt > 0 && block.timestamp > p.expiresAt) {
+            revert("Expired");
+        }
+
+        if (p.writer != address(0)) {
+            revert("Already assigned");
+        }
+
+        if (p.status != PackageStatus.INVITED) {
+            revert("Invalid status");
+        }
+
+        if (!isInvited[_packageId][msg.sender]) {
+            revert("Not invited");
+        }
+
+        if (inviteeRemoved[_packageId][msg.sender]) {
+            revert("Invite removed");
+        }
 
         p.writer = msg.sender;
         p.status = PackageStatus.ASSIGNED;
@@ -350,76 +410,91 @@ contract OnlyPens is Initializable, Ownable {
     }
 
     /// @notice Ghostwriter declines an invitation
-    function declineInvitation(
-        uint256 _packageId
-    )
-        external
-        packageMustExist(_packageId)
-        validPackageStatus(_packageId, PackageStatus.INVITED)
-    {
-        // Check if invited
-        require(isInvited[_packageId][msg.sender], "Not invited");
-        require(!inviteeRemoved[_packageId][msg.sender], "Already declined");
+    function declineInvitation(uint256 _packageId) external {
+        if (!packageExists[_packageId]) {
+            revert("No package");
+        }
+
+        if (packages[_packageId].status != PackageStatus.INVITED) {
+            revert("Invalid status");
+        }
+
+        if (!isInvited[_packageId][msg.sender]) {
+            revert("Not invited");
+        }
+
+        if (inviteeRemoved[_packageId][msg.sender]) {
+            revert("Already declined");
+        }
 
         // Mark as removed (gas efficient)
         inviteeRemoved[_packageId][msg.sender] = true;
 
-        // Update array for frontend display
-        _removeInvitee(_packageId, msg.sender);
+        // Find active invitees count
+        uint256 activeCount = 0;
 
-        emit InvitationDeclined(_packageId, msg.sender);
-    }
-
-    // Extracted this to reduce function size
-    function _removeInvitee(
-        uint256 _packageId,
-        address _invitee
-    ) private returns (bool stillHasActiveInvites) {
+        // First remove the current invitee
         for (uint256 i = 0; i < packageInvitees[_packageId].length; i++) {
-            address invitee = packageInvitees[_packageId][i];
-            if (invitee == _invitee) {
+            if (packageInvitees[_packageId][i] == msg.sender) {
+                // Replace the current element with the last element
                 packageInvitees[_packageId][i] = packageInvitees[_packageId][
                     packageInvitees[_packageId].length - 1
                 ];
                 packageInvitees[_packageId].pop();
-            } else if (!inviteeRemoved[_packageId][invitee]) {
-                stillHasActiveInvites = true;
+                break;
             }
         }
 
-        // If no more active invitees, revert to PENDING
-        if (!stillHasActiveInvites) {
-            GigPackage storage p = packages[_packageId];
-            p.status = PackageStatus.PENDING;
-            p.lastUpdated = block.timestamp;
+        // Count remaining active invitees
+        for (uint256 i = 0; i < packageInvitees[_packageId].length; i++) {
+            if (!inviteeRemoved[_packageId][packageInvitees[_packageId][i]]) {
+                activeCount++;
+            }
         }
 
-        return stillHasActiveInvites;
+        // If all invitees have declined, revert to PENDING
+        if (activeCount == 0) {
+            packages[_packageId].status = PackageStatus.PENDING;
+            packages[_packageId].lastUpdated = block.timestamp;
+        }
+
+        emit InvitationDeclined(_packageId, msg.sender);
     }
 
     /// @notice Ghostwriter submits a deliverable
     function submitDeliverable(
         uint256 _packageId,
         uint256 _deliverableId
-    )
-        external
-        onlyPackageWriter(_packageId)
-        deliverableMustExist(_packageId, _deliverableId)
-        validPackageStatusMultiple(
-            _packageId,
-            PackageStatus.ASSIGNED,
-            PackageStatus.IN_PROGRESS
-        )
-    {
+    ) external {
+        if (!packageExists[_packageId]) {
+            revert("No package");
+        }
+
+        if (msg.sender != packages[_packageId].writer) {
+            revert("Not writer");
+        }
+
+        if (deliverableIndexInPackage[_packageId][_deliverableId] == 0) {
+            revert("No deliverable");
+        }
+
+        PackageStatus status = packages[_packageId].status;
+        if (
+            status != PackageStatus.ASSIGNED &&
+            status != PackageStatus.IN_PROGRESS
+        ) {
+            revert("Invalid status");
+        }
+
         Deliverable storage d = packageDeliverables[_packageId][_deliverableId];
         GigPackage storage p = packages[_packageId];
 
-        // Check if the deliverable is in a valid state
-        require(
-            d.status == DeliverableStatus.PENDING ||
-                d.status == DeliverableStatus.REJECTED,
-            "Already handled"
-        );
+        if (
+            d.status != DeliverableStatus.PENDING &&
+            d.status != DeliverableStatus.REJECTED
+        ) {
+            revert("Already handled");
+        }
 
         DeliverableStatus prevStatus = d.status;
         d.status = DeliverableStatus.SUBMITTED;
@@ -440,29 +515,112 @@ contract OnlyPens is Initializable, Ownable {
         }
     }
 
-    /// @notice Internal function to handle deliverable approval logic
-    function _approveDeliverable(
-        uint256 _packageId,
-        uint256 _deliverableId,
-        GigPackage storage p,
-        bool _batchProcessing
-    ) internal returns (uint256) {
-        Deliverable storage d = packageDeliverables[_packageId][_deliverableId];
-
-        if (d.status != DeliverableStatus.SUBMITTED) {
-            return 0; // Skip if not submitted
+    /// @notice Cancel a gig package (only before assignment)
+    function cancelGigPackage(uint256 _packageId) external {
+        if (!packageExists[_packageId]) {
+            revert("No package");
         }
 
-        d.status = DeliverableStatus.APPROVED;
-        d.approvedAt = block.timestamp;
+        if (msg.sender != packages[_packageId].creator) {
+            revert("Not creator");
+        }
 
-        p.numApproved++;
+        PackageStatus status = packages[_packageId].status;
+        if (
+            status != PackageStatus.PENDING && status != PackageStatus.INVITED
+        ) {
+            revert("Invalid status");
+        }
+
+        GigPackage storage p = packages[_packageId];
+        p.status = PackageStatus.CANCELLED;
         p.lastUpdated = block.timestamp;
 
-        // Emit approval event
-        emit DeliverableApproved(_packageId, _deliverableId, p.writer);
+        // Refund creator
+        require(usdc.transfer(p.creator, p.totalAmount), "Transfer failed");
 
-        return d.amount;
+        emit GigPackageCancelled(_packageId);
+    }
+
+    /// @notice Cancel expired packages
+    function cancelExpiredPackage(uint256 _packageId) external {
+        if (!packageExists[_packageId]) {
+            revert("No package");
+        }
+
+        GigPackage storage p = packages[_packageId];
+
+        if (p.expiresAt == 0) {
+            revert("No expiry");
+        }
+
+        if (block.timestamp <= p.expiresAt) {
+            revert("Not expired");
+        }
+
+        if (
+            p.status == PackageStatus.COMPLETED ||
+            p.status == PackageStatus.CANCELLED
+        ) {
+            revert("Already finalized");
+        }
+
+        // Check if cancellation allowed
+        bool canCancel = (p.numApproved == 0) || (msg.sender == p.creator);
+        require(canCancel, "Can't cancel");
+
+        _finalizeExpiredPackage(_packageId, p);
+    }
+
+    // Helper function to get active invitees
+    function _activeInviteesInternal(
+        uint256 _packageId
+    ) internal view returns (address[] memory) {
+        address[] memory allInvitees = packageInvitees[_packageId];
+
+        // First count active invitees
+        uint256 activeCount = 0;
+        for (uint256 i = 0; i < allInvitees.length; i++) {
+            if (!inviteeRemoved[_packageId][allInvitees[i]]) {
+                activeCount++;
+            }
+        }
+
+        // Create and populate the return array
+        address[] memory activeInvitees = new address[](activeCount);
+        uint256 index = 0;
+        for (uint256 i = 0; i < allInvitees.length; i++) {
+            if (!inviteeRemoved[_packageId][allInvitees[i]]) {
+                activeInvitees[index++] = allInvitees[i];
+            }
+        }
+
+        return activeInvitees;
+    }
+
+    /// @notice Get active invitees for a package
+    function getActiveInvitees(
+        uint256 _packageId
+    ) external view packageMustExist(_packageId) returns (address[] memory) {
+        return _activeInviteesInternal(_packageId);
+    }
+
+    // Extracted to reduce function size
+    function _finalizeExpiredPackage(
+        uint256 _packageId,
+        GigPackage storage p
+    ) private {
+        p.status = PackageStatus.CANCELLED;
+        p.lastUpdated = block.timestamp;
+
+        uint256 refundAmount = p.totalAmount - p.amountReleased;
+
+        if (refundAmount > 0) {
+            require(usdc.transfer(p.creator, refundAmount), "Transfer failed");
+        }
+
+        emit GigPackageExpired(_packageId);
+        emit GigPackageCancelled(_packageId);
     }
 
     /// @notice Handle approval and payment release
@@ -588,117 +746,6 @@ contract OnlyPens is Initializable, Ownable {
         _handleApproval(_packageId, 0, true);
     }
 
-    /// @notice Cancel a gig package (only before assignment)
-    function cancelGigPackage(
-        uint256 _packageId
-    )
-        external
-        onlyPackageCreator(_packageId)
-        validPackageStatusMultiple(
-            _packageId,
-            PackageStatus.PENDING,
-            PackageStatus.INVITED
-        )
-    {
-        GigPackage storage p = packages[_packageId];
-        p.status = PackageStatus.CANCELLED;
-        p.lastUpdated = block.timestamp;
-
-        // Refund creator
-        require(usdc.transfer(p.creator, p.totalAmount), "Transfer failed");
-
-        emit GigPackageCancelled(_packageId);
-    }
-
-    /// @notice Cancel expired packages
-    function cancelExpiredPackage(
-        uint256 _packageId
-    ) external packageMustExist(_packageId) {
-        GigPackage storage p = packages[_packageId];
-
-        require(p.expiresAt > 0, "No expiry");
-        require(block.timestamp > p.expiresAt, "Not expired");
-        require(
-            p.status != PackageStatus.COMPLETED &&
-                p.status != PackageStatus.CANCELLED,
-            "Already finalized"
-        );
-
-        // Check if cancellation allowed
-        bool canCancel = (p.numApproved == 0) || (msg.sender == p.creator);
-        require(canCancel, "Can't cancel");
-
-        _finalizeExpiredPackage(_packageId, p);
-    }
-
-    // Split into separate function
-    function _finalizeExpiredPackage(
-        uint256 _packageId,
-        GigPackage storage p
-    ) private {
-        p.status = PackageStatus.CANCELLED;
-        p.lastUpdated = block.timestamp;
-
-        uint256 refundAmount = p.totalAmount - p.amountReleased;
-
-        if (refundAmount > 0) {
-            require(usdc.transfer(p.creator, refundAmount), "Transfer failed");
-        }
-
-        emit GigPackageExpired(_packageId);
-        emit GigPackageCancelled(_packageId);
-    }
-
-    /// @notice Force release payment after timeout
-    function forceRelease(
-        uint256 _packageId,
-        uint256 _deliverableId
-    )
-        external
-        onlyPackageWriter(_packageId)
-        deliverableMustExist(_packageId, _deliverableId)
-        validPackageStatusMultiple(
-            _packageId,
-            PackageStatus.ASSIGNED,
-            PackageStatus.IN_PROGRESS
-        )
-    {
-        GigPackage storage p = packages[_packageId];
-        Deliverable storage d = packageDeliverables[_packageId][_deliverableId];
-
-        require(d.status == DeliverableStatus.SUBMITTED, "Not submitted");
-        require(
-            block.timestamp >= d.submittedAt + RELEASE_TIMEOUT,
-            "Too early"
-        );
-
-        uint256 amountToRelease = _approveDeliverable(
-            _packageId,
-            _deliverableId,
-            p,
-            false
-        );
-        require(amountToRelease > 0, "No amount");
-
-        p.amountReleased += amountToRelease;
-
-        // Transfer tokens to the writer
-        require(usdc.transfer(p.writer, amountToRelease), "Transfer failed");
-
-        emit GigPackageExpired(_packageId);
-        emit PaymentReleased(
-            _packageId,
-            _deliverableId,
-            p.writer,
-            amountToRelease
-        );
-
-        if (p.numApproved == p.numDeliverables) {
-            p.status = PackageStatus.COMPLETED;
-            emit GigPackageCompleted(_packageId);
-        }
-    }
-
     // View functions
 
     /// @notice Check if package is expired but still active
@@ -711,32 +758,6 @@ contract OnlyPens is Initializable, Ownable {
             block.timestamp > p.expiresAt &&
             p.status != PackageStatus.COMPLETED &&
             p.status != PackageStatus.CANCELLED;
-    }
-
-    /// @notice Get active invitees for a package
-    function getActiveInvitees(
-        uint256 _packageId
-    ) external view packageMustExist(_packageId) returns (address[] memory) {
-        address[] memory allInvitees = packageInvitees[_packageId];
-
-        // First count active invitees
-        uint256 activeCount = 0;
-        for (uint256 i = 0; i < allInvitees.length; i++) {
-            if (!inviteeRemoved[_packageId][allInvitees[i]]) {
-                activeCount++;
-            }
-        }
-
-        // Create and populate the return array
-        address[] memory activeInvitees = new address[](activeCount);
-        uint256 index = 0;
-        for (uint256 i = 0; i < allInvitees.length; i++) {
-            if (!inviteeRemoved[_packageId][allInvitees[i]]) {
-                activeInvitees[index++] = allInvitees[i];
-            }
-        }
-
-        return activeInvitees;
     }
 
     /// @notice Get list of deliverables for a package
