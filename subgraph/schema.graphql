@@ -1,0 +1,111 @@
+type Gig @entity {
+  id: ID! # gigId as string
+  creator: Bytes!
+  writer: Bytes
+  amount: BigInt!
+  status: String!
+  createdAt: BigInt!
+  lastUpdated: BigInt!
+  # relations
+  activities: [Activity!]! @derivedFrom(field: "gig")
+}
+
+type Activity @entity {
+  id: ID! # e.g. `${gigId}-${event}-${timestamp}`
+  gig: Gig!
+  type: String!
+  actor: Bytes
+  amount: BigInt
+  timestamp: BigInt!
+}
+
+type GigPackage @entity {
+  id: ID! # packageId
+  creator: Bytes! # Creator address
+  writer: Bytes # Writer address (optional)
+  totalAmount: BigInt! # Total amount in USDC
+  createdAt: BigInt! # Timestamp when created
+  lastUpdated: BigInt! # Timestamp of last update
+  expiresAt: BigInt # Optional expiry timestamp
+  status: Int! # Matches PackageStatus enum in contract
+  numDeliverables: Int! # Total number of deliverables
+  numApproved: Int! # Number of approved deliverables
+  amountReleased: BigInt! # Amount released so far
+  deliverables: [Deliverable!]! @derivedFrom(field: "package")
+  invitations: [GhostwriterInvitation!]! @derivedFrom(field: "package")
+  events: [ActivityEvent!]! @derivedFrom(field: "package")
+  payments: [PaymentEvent!]! @derivedFrom(field: "package")
+}
+
+type Deliverable @entity {
+  id: ID! # Composite ID: packageId-deliverableId
+  deliverableId: BigInt! # Original deliverable ID
+  package: GigPackage! # Parent package
+  contentType: String! # Content type string
+  status: Int! # Matches DeliverableStatus enum in contract
+  amount: BigInt! # Amount in USDC
+  submittedAt: BigInt # Optional timestamp for submission
+  approvedAt: BigInt # Optional timestamp for approval
+  createdAt: BigInt! # Timestamp when created
+  transactions: [ActivityEvent!]! @derivedFrom(field: "deliverable")
+  payment: PaymentEvent # Associated payment, if approved
+}
+
+type GhostwriterInvitation @entity {
+  id: ID! # Composite ID: packageId-ghostwriterAddress
+  package: GigPackage! # Parent package
+  ghostwriter: Bytes! # Ghostwriter address
+  status: String! # One of: PENDING, ACCEPTED, DECLINED, REMOVED
+  invitedAt: BigInt! # Timestamp of invitation
+  respondedAt: BigInt # Optional response timestamp
+  user: User! # The ghostwriter user entity
+}
+
+type ActivityEvent @entity {
+  id: ID! # Transaction hash + log index
+  package: GigPackage! # Related package
+  eventType: String! # Type of event (matches EActivityType enum)
+  creator: Bytes # Creator address if relevant
+  writer: Bytes # Writer address if relevant
+  deliverable: Deliverable # Related deliverable if relevant
+  amount: BigInt # Amount if relevant
+  timestamp: BigInt! # Event timestamp
+  transactionHash: Bytes! # Transaction hash
+  blockNumber: BigInt! # Block number
+}
+
+type PaymentEvent @entity {
+  id: ID! # Transaction hash + log index
+  package: GigPackage! # Related package
+  deliverable: Deliverable # Related deliverable (null for batch payments)
+  from: Bytes! # Creator address
+  to: Bytes! # Writer address
+  amount: BigInt! # Amount in USDC
+  timestamp: BigInt! # Event timestamp
+  transactionHash: Bytes! # Transaction hash
+  blockNumber: BigInt! # Block number
+}
+
+type User @entity {
+  id: ID! # User address
+  createdPackages: [GigPackage!]! @derivedFrom(field: "creator")
+  assignedPackages: [GigPackage!]! @derivedFrom(field: "writer")
+  invitations: [GhostwriterInvitation!]! @derivedFrom(field: "ghostwriter")
+  totalCreated: Int! # Total number of packages created
+  totalAssigned: Int! # Total number of packages assigned
+  totalEarned: BigInt! # Total amount earned in USDC
+  totalSpent: BigInt! # Total amount spent in USDC
+}
+
+# Aggregated stats for platform analytics
+type GlobalStats @entity {
+  id: ID! # Always "1"
+  totalPackages: Int! # Total packages created
+  totalDeliverables: Int! # Total deliverables created
+  totalAmountLocked: BigInt! # Total amount locked in contract
+  totalAmountReleased: BigInt! # Total amount released to writers
+  activePackages: Int! # Packages not completed or cancelled
+  completedPackages: Int! # Completed packages
+  cancelledPackages: Int! # Cancelled packages
+  lastUpdateTimestamp: BigInt! # Timestamp of last update
+}

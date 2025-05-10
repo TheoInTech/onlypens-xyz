@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.29;
+pragma solidity ^0.8.22;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
@@ -27,12 +27,6 @@ contract OnlyPens is Initializable, Ownable {
         REJECTED
     }
 
-    struct DeliverableInput {
-        string contentType;
-        uint256 amount;
-    }
-
-    // Optimized struct - shortened names and removed comments
     struct Deliverable {
         uint256 id;
         string contentType;
@@ -238,8 +232,8 @@ contract OnlyPens is Initializable, Ownable {
             revert("Zero amount");
         }
 
-        // Always check if expiry is provided and in the future
-        if (_expiresAt <= block.timestamp) {
+        // Allow _expiresAt = 0 for no expiry, otherwise check if in the future
+        if (_expiresAt != 0 && _expiresAt <= block.timestamp) {
             revert("Past expiry");
         }
 
@@ -577,11 +571,15 @@ contract OnlyPens is Initializable, Ownable {
         uint256 _packageId
     ) internal view returns (address[] memory) {
         address[] memory allInvitees = packageInvitees[_packageId];
+        address assignedWriter = packages[_packageId].writer;
 
         // First count active invitees
         uint256 activeCount = 0;
         for (uint256 i = 0; i < allInvitees.length; i++) {
-            if (!inviteeRemoved[_packageId][allInvitees[i]]) {
+            if (
+                !inviteeRemoved[_packageId][allInvitees[i]] &&
+                allInvitees[i] != assignedWriter
+            ) {
                 activeCount++;
             }
         }
@@ -590,7 +588,10 @@ contract OnlyPens is Initializable, Ownable {
         address[] memory activeInvitees = new address[](activeCount);
         uint256 index = 0;
         for (uint256 i = 0; i < allInvitees.length; i++) {
-            if (!inviteeRemoved[_packageId][allInvitees[i]]) {
+            if (
+                !inviteeRemoved[_packageId][allInvitees[i]] &&
+                allInvitees[i] != assignedWriter
+            ) {
                 activeInvitees[index++] = allInvitees[i];
             }
         }
@@ -623,6 +624,29 @@ contract OnlyPens is Initializable, Ownable {
         emit GigPackageCancelled(_packageId);
     }
 
+    // Helper function to approve a single deliverable and return its amount
+    function _approveDeliverable(
+        uint256 _packageId,
+        uint256 _deliverableId,
+        GigPackage storage p
+    ) private returns (uint256 amountToRelease) {
+        Deliverable storage d = packageDeliverables[_packageId][_deliverableId];
+
+        // This function is called after a check for d.status == DeliverableStatus.SUBMITTED (for single approval)
+        // or iterates through deliverables (for approveAll).
+        // We only proceed if the deliverable is currently SUBMITTED.
+        if (d.status == DeliverableStatus.SUBMITTED) {
+            d.status = DeliverableStatus.APPROVED;
+            d.approvedAt = block.timestamp;
+            p.numApproved++;
+            amountToRelease = d.amount;
+
+            emit DeliverableApproved(_packageId, _deliverableId, p.writer);
+            return amountToRelease;
+        }
+        return 0; // Return 0 if not approved (e.g., not in SUBMITTED state)
+    }
+
     /// @notice Handle approval and payment release
     function _handleApproval(
         uint256 _packageId,
@@ -644,12 +668,7 @@ contract OnlyPens is Initializable, Ownable {
             // Batch approval
             uint256[] memory ids = packageDeliverableIds[_packageId];
             for (uint256 i = 0; i < ids.length; i++) {
-                totalReleased += _approveDeliverable(
-                    _packageId,
-                    ids[i],
-                    p,
-                    true
-                );
+                totalReleased += _approveDeliverable(_packageId, ids[i], p);
             }
         } else {
             // Single deliverable approval
@@ -662,8 +681,7 @@ contract OnlyPens is Initializable, Ownable {
             uint256 amountReleased = _approveDeliverable(
                 _packageId,
                 _deliverableId,
-                p,
-                false
+                p
             );
             require(amountReleased > 0, "No release amt");
             totalReleased = amountReleased;

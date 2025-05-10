@@ -240,12 +240,10 @@ describe("OnlyPens", function () {
 
       const pastTime = (await time.latest()) - 3600; // 1 hour ago
 
-      const futureTime = pastTime + 86400 * 7; // 7 days from now
-
       await expect(
         onlyPens
           .connect(creator)
-          .createGigPackage(totalAmount, deliverables, futureTime)
+          .createGigPackage(totalAmount, deliverables, pastTime)
       ).to.be.revertedWith("Past expiry");
     });
 
@@ -1161,24 +1159,24 @@ describe("OnlyPens", function () {
       const totalAmount = ethers.parseUnits("100", 6);
       const deliverables = [{ contentType: "Article", amount: totalAmount }];
 
-      // Using future time instead of 0
-      const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
+      // Using 0 for no expiry as per contract logic
+      // const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
 
       await onlyPens
         .connect(creator)
-        .createGigPackage(totalAmount, deliverables, futureTime);
+        .createGigPackage(totalAmount, deliverables, 0); // Ensure this uses 0
 
       await expect(
-        onlyPens.connect(creator).cancelExpiredPackage(1)
-      ).to.be.revertedWith("No expiry");
+        onlyPens.connect(creator).cancelExpiredPackage(1) // packageId is 1
+      ).to.be.revertedWith("No expiry"); // Expected "No expiry"
     });
 
     it("Should revert when trying to cancel already finalized package", async function () {
       const { onlyPens, creator, writer1, packageId, futureTime } =
         await setupExpiringPackage();
 
-      // Writer accepts invitation
-      await onlyPens.connect(writer1).acceptInvitation(packageId);
+      // DO NOT let Writer1 accept the invitation for this test case
+      // await onlyPens.connect(writer1).acceptInvitation(packageId);
 
       // Creator cancels before expiry (using normal cancel)
       await onlyPens.connect(creator).cancelGigPackage(packageId);
@@ -1216,130 +1214,6 @@ describe("OnlyPens", function () {
       await expect(
         onlyPens.connect(writer1).acceptInvitation(packageId)
       ).to.be.revertedWith("Expired");
-    });
-  });
-
-  describe("Force Release", function () {
-    async function setupSubmittedDeliverable() {
-      const fixture = await loadFixture(deployOnlyPensFixture);
-      const { onlyPens, creator, writer1 } = fixture;
-
-      // Create package
-      const totalAmount = ethers.parseUnits("100", 6);
-      const deliverables = [{ contentType: "Article", amount: totalAmount }];
-
-      const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
-
-      await onlyPens
-        .connect(creator)
-        .createGigPackage(totalAmount, deliverables, futureTime);
-
-      // Invite and accept
-      await onlyPens.connect(creator).inviteGhostwriter(1, writer1.address);
-      await onlyPens.connect(writer1).acceptInvitation(1);
-
-      // Get deliverable ID and submit
-      const deliverableIds = await onlyPens.getPackageDeliverables(1);
-      await onlyPens.connect(writer1).submitDeliverable(1, deliverableIds[0]);
-
-      return { ...fixture, packageId: 1, deliverableId: deliverableIds[0] };
-    }
-
-    it("Should revert when trying to force release before timeout", async function () {
-      const { onlyPens, writer1, packageId, deliverableId } =
-        await setupSubmittedDeliverable();
-
-      await expect(
-        onlyPens.connect(writer1).forceRelease(packageId, deliverableId)
-      ).to.be.revertedWith("Too early");
-    });
-
-    it("Should successfully force release after timeout", async function () {
-      const { onlyPens, writer1, packageId, deliverableId, mockUSDC } =
-        await setupSubmittedDeliverable();
-
-      // Get writer's balance before force release
-      const writerBalanceBefore = await mockUSDC.balanceOf(writer1.address);
-
-      // Move time forward beyond the timeout period (14 days)
-      await time.increase(14 * 24 * 60 * 60 + 1);
-
-      await expect(
-        onlyPens.connect(writer1).forceRelease(packageId, deliverableId)
-      )
-        .to.emit(onlyPens, "DeliverableApproved")
-        .withArgs(packageId, deliverableId, writer1.address)
-        .to.emit(onlyPens, "PaymentReleased")
-        .withArgs(
-          packageId,
-          deliverableId,
-          writer1.address,
-          ethers.parseUnits("100", 6)
-        )
-        .to.emit(onlyPens, "GigPackageExpired")
-        .withArgs(packageId)
-        .to.emit(onlyPens, "GigPackageCompleted")
-        .withArgs(packageId);
-
-      // Check deliverable status
-      const deliverable = await onlyPens.packageDeliverables(
-        packageId,
-        deliverableId
-      );
-      expect(deliverable.status).to.equal(2); // APPROVED
-
-      // Check package status
-      const packageDetails = await onlyPens.getPackageDetails(packageId);
-      expect(packageDetails[6]).to.equal(4); // COMPLETED
-      expect(packageDetails[8]).to.equal(1); // numApproved
-      expect(packageDetails[9]).to.equal(ethers.parseUnits("100", 6)); // amountReleased
-
-      // Check funds were transferred to writer
-      const writerBalanceAfter = await mockUSDC.balanceOf(writer1.address);
-      expect(writerBalanceAfter - writerBalanceBefore).to.equal(
-        ethers.parseUnits("100", 6)
-      );
-    });
-
-    it("Should revert when non-writer tries to force release", async function () {
-      const { onlyPens, otherAccount, packageId, deliverableId } =
-        await setupSubmittedDeliverable();
-
-      // Move time forward beyond the timeout period
-      await time.increase(14 * 24 * 60 * 60 + 1);
-
-      await expect(
-        onlyPens.connect(otherAccount).forceRelease(packageId, deliverableId)
-      ).to.be.revertedWith("Not writer");
-    });
-
-    it("Should revert when trying to force release non-submitted deliverable", async function () {
-      const fixture = await loadFixture(deployOnlyPensFixture);
-      const { onlyPens, creator, writer1 } = fixture;
-
-      // Create package
-      const totalAmount = ethers.parseUnits("100", 6);
-      const deliverables = [{ contentType: "Article", amount: totalAmount }];
-
-      const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
-
-      await onlyPens
-        .connect(creator)
-        .createGigPackage(totalAmount, deliverables, futureTime);
-
-      // Invite and accept
-      await onlyPens.connect(creator).inviteGhostwriter(1, writer1.address);
-      await onlyPens.connect(writer1).acceptInvitation(1);
-
-      // Get deliverable ID (but don't submit)
-      const deliverableIds = await onlyPens.getPackageDeliverables(1);
-
-      // Move time forward
-      await time.increase(14 * 24 * 60 * 60 + 1);
-
-      await expect(
-        onlyPens.connect(writer1).forceRelease(1, deliverableIds[0])
-      ).to.be.revertedWith("Not submitted");
     });
   });
 

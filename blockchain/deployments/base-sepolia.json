@@ -1,0 +1,18 @@
+{
+  "network": "base-sepolia",
+  "onlyPensHelpers": "0x152353F1B6612c4CEC48852bD1f252930A25283A",
+  "onlyPensImpl": "0x2b5543281715CeF4b1bC8cf38613aAD120f3E35E",
+  "proxyAdmin": "0x288397A2463e6E083345B763E76069DC15FBb17E",
+  "proxy": "0x94d4Bc84aBb470Ebb4fa07473cEDdEfD4b8D86b8",
+  "usdcAddress": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+  "gasUsage": {
+    "byContract": {
+      "OnlyPensHelpers": "199130",
+      "OnlyPensImplementation": "3330691",
+      "CustomProxyAdmin": "311003",
+      "CustomTransparentUpgradeableProxy": "789637"
+    },
+    "total": "4630461"
+  },
+  "timestamp": "2025-05-10T03:58:04.194Z"
+}

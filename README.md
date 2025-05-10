@@ -8,16 +8,17 @@
 
 ### 🎯 Core Features
 
-- **User Authentication**: Wallet connect (e.g., Coinbase Smart Wallet) or email login.
-- **Role Selection**: Users choose to be either an Influencer or a Ghostwriter.
+- **User Authentication**: Wallet connect using Coinbase Smart Wallet.
+- **Role Selection**: Users choose to be either a Creator or a Ghostwriter.
+- **Gig Creation**: Create gig packages with an AI-assisted pricing and start inviting the best-matched ghostwriters
 - **Dashboard**:
   - _creators_:
-    - Post new briefs.
+    - Post new gigs in packages (e.g. 2 Thread, 4 short-post, 4 image caption).
     - View and manage submitted drafts.
     - Approve submissions and release payments.
-  - _Ghostwriters_:
-    - Browse available briefs.
-    - Submit drafts for assigned briefs.
+  - _ghostwriters_:
+    - Accept gig invitations from creators
+    - Submit drafts for accepted gigs.
     - Track earnings.
 - **AI-Powered Tone Matching**:
   - creators provide sample content to capture their unique tone.
@@ -28,10 +29,11 @@
 
 ### 🛠️ Tech Stack
 
-- **Frontend**: Next.js
-- **Backend**: Supabase (for storing briefs and AI matchmaking data)
+- **Frontend**: Next.js, Zod, Mantine UI
+- **Backend**: Firebase's Firestore (for storing gigs metadata and AI matchmaking data)
 - **Blockchain**: Base network
 - **Smart Contracts**: Solidity (using Hardhat for development and deployment)
+- **Indexing**: TheGraph Protocol's Subgraph
 
 ---
 
@@ -47,7 +49,8 @@
   - Customizable notification preferences allowing users to filter by opportunity type, budget range, and urgency.
   - Push notifications for mobile users to ensure timely responses to time-sensitive opportunities.
 - **Reputation System**: Implement on-chain reputation scores for both creators and ghostwriters.
-- **Improve AI Matchmaking with Vector**: Improve matchmaking algorithms using advanced AI models and vector databases.
+- **Commission-based Payments**: Implement a flexible royalty system allowing creators to offer ghostwriters a percentage of revenue generated from content, enabling profit-sharing arrangements alongside or instead of fixed payments.
+- **Improved AI Matchmaking with Vector**: Improve matchmaking algorithms using advanced AI models and vector databases.
 
 ---
 
@@ -75,15 +78,20 @@ Develop and deploy smart contracts on the Base network using Hardhat and Solidit
 
 _Reference_: [Deploying Smart Contracts with Hardhat](https://docs.base.org/cookbook/smart-contract-development/hardhat/deploy-with-hardhat)
 
-### 🌾 Earn Component
+---
 
-Integrate Base's Earn component to allow escrowed funds to earn yield until they are released to ghostwriters.
+## 📜 Smart Contracts
 
-- **Benefits**:
-  - Maximizes the utility of idle funds.
-  - Provides additional value to users.
+The OnlyPens platform utilizes the following smart contracts:
 
-_Reference_: [Base Earn Component Documentation](https://docs.base.org/identity/smart-wallet/concepts/what-is-smart-wallet)
+| Contract Name               | Contract Address                           | Description                                                                                             |
+| --------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| OnlyPensHelpers             | 0x152353F1B6612c4CEC48852bD1f252930A25283A | Library contract containing helper functions for deliverable validation and other utility operations    |
+| OnlyPens (Implementation)   | 0x2b5543281715CeF4b1bC8cf38613aAD120f3E35E | Core contract containing the business logic for gig management, deliverables, and payment release       |
+| CustomProxyAdmin            | 0x288397A2463e6E083345B763E76069DC15FBb17E | Admin contract controlling the upgrade mechanism and permissions                                        |
+| TransparentUpgradeableProxy | 0x94d4Bc84aBb470Ebb4fa07473cEDdEfD4b8D86b8 | Proxy contract that users interact with, forwarding calls to the implementation while maintaining state |
+
+The system uses the Transparent Proxy Pattern, allowing for future upgrades while preserving user data and contract state.
 
 ---
 
