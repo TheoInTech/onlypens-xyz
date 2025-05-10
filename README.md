@@ -86,10 +86,10 @@ The OnlyPens platform utilizes the following smart contracts:
 
 | Contract Name               | Contract Address                           | Description                                                                                             |
 | --------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| OnlyPensHelpers             | 0x152353F1B6612c4CEC48852bD1f252930A25283A | Library contract containing helper functions for deliverable validation and other utility operations    |
-| OnlyPens (Implementation)   | 0x2b5543281715CeF4b1bC8cf38613aAD120f3E35E | Core contract containing the business logic for gig management, deliverables, and payment release       |
-| CustomProxyAdmin            | 0x288397A2463e6E083345B763E76069DC15FBb17E | Admin contract controlling the upgrade mechanism and permissions                                        |
-| TransparentUpgradeableProxy | 0x94d4Bc84aBb470Ebb4fa07473cEDdEfD4b8D86b8 | Proxy contract that users interact with, forwarding calls to the implementation while maintaining state |
+| OnlyPensHelpers             | 0x74f6F9aaB65920dE55CD499227Cb99aD86C02964 | Library contract containing helper functions for deliverable validation and other utility operations    |
+| OnlyPens (Implementation)   | 0xC8F769515cf20B8Ba3b195Efc17DAc1Cd3a85b41 | Core contract containing the business logic for gig management, deliverables, and payment release       |
+| CustomProxyAdmin            | 0xf92C590E5d2DF7E795293834d83CCb35a345b826 | Admin contract controlling the upgrade mechanism and permissions                                        |
+| TransparentUpgradeableProxy | 0xAea48688cD175CC4dC269b0ceFB65597B5419900 | Proxy contract that users interact with, forwarding calls to the implementation while maintaining state |
 
 The system uses the Transparent Proxy Pattern, allowing for future upgrades while preserving user data and contract state.
 

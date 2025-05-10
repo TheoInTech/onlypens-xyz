@@ -8,29 +8,34 @@ dataSources:
     name: OnlyPens
     network: base-sepolia
     source:
-      address: "0x2b5543281715CeF4b1bC8cf38613aAD120f3E35E"
+      address: "0xC8F769515cf20B8Ba3b195Efc17DAc1Cd3a85b41"
       abi: OnlyPens
-      startBlock: 25540549
+      startBlock: 25559167
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
       language: wasm/assemblyscript
       entities:
-        - DeliverableApproved
-        - DeliverableCreated
-        - DeliverableRejected
-        - DeliverableRevised
-        - DeliverableSubmitted
-        - GhostwriterInvited
-        - GigPackageCancelled
-        - GigPackageCompleted
-        - GigPackageCreated
-        - GigPackageExpired
-        - Initialized
-        - InvitationAccepted
-        - InvitationDeclined
-        - OwnershipTransferred
-        - PaymentReleased
+        - User
+        - Package
+        - Deliverable
+        - Invitation
+        - Payment
+        - DeliverableApprovedEvent
+        - DeliverableCreatedEvent
+        - DeliverableRejectedEvent
+        - DeliverableRevisedEvent
+        - DeliverableSubmittedEvent
+        - GhostwriterInvitedEvent
+        - GigPackageCancelledEvent
+        - GigPackageCompletedEvent
+        - GigPackageCreatedEvent
+        - GigPackageExpiredEvent
+        - InitializedEvent
+        - InvitationAcceptedEvent
+        - InvitationDeclinedEvent
+        - OwnershipTransferredEvent
+        - PaymentReleasedEvent
       abis:
         - name: OnlyPens
           file: ./abis/OnlyPens.json

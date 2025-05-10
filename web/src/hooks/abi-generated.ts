@@ -336,8 +336,27 @@ export const onlyPensAbi = [
         type: 'uint256',
         indexed: false,
       },
+      {
+        name: 'platformFee',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
     ],
     name: 'PaymentReleased',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'newFeeBps',
+        internalType: 'uint16',
+        type: 'uint16',
+        indexed: false,
+      },
+    ],
+    name: 'PlatformFeeUpdated',
   },
   {
     type: 'function',
@@ -481,6 +500,8 @@ export const onlyPensAbi = [
     type: 'function',
     inputs: [
       { name: '_usdc', internalType: 'contract IERC20', type: 'address' },
+      { name: '_treasury', internalType: 'address', type: 'address' },
+      { name: '_platformFeeBps', internalType: 'uint16', type: 'uint16' },
     ],
     name: 'initialize',
     outputs: [],
@@ -607,6 +628,13 @@ export const onlyPensAbi = [
   },
   {
     type: 'function',
+    inputs: [],
+    name: 'platformFeeBps',
+    outputs: [{ name: '', internalType: 'uint16', type: 'uint16' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
     inputs: [
       { name: '_tokenAddress', internalType: 'address', type: 'address' },
       { name: '_amount', internalType: 'uint256', type: 'uint256' },
@@ -634,6 +662,13 @@ export const onlyPensAbi = [
   },
   {
     type: 'function',
+    inputs: [{ name: '_newFeeBps', internalType: 'uint16', type: 'uint16' }],
+    name: 'setPlatformFee',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
     inputs: [
       { name: '_packageId', internalType: 'uint256', type: 'uint256' },
       { name: '_deliverableId', internalType: 'uint256', type: 'uint256' },
@@ -648,6 +683,13 @@ export const onlyPensAbi = [
     name: 'transferOwnership',
     outputs: [],
     stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'treasury',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
   },
   {
     type: 'function',
@@ -826,6 +868,23 @@ export const useReadOnlyPensPackages = /*#__PURE__*/ createUseReadContract({
 })
 
 /**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"platformFeeBps"`
+ */
+export const useReadOnlyPensPlatformFeeBps =
+  /*#__PURE__*/ createUseReadContract({
+    abi: onlyPensAbi,
+    functionName: 'platformFeeBps',
+  })
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"treasury"`
+ */
+export const useReadOnlyPensTreasury = /*#__PURE__*/ createUseReadContract({
+  abi: onlyPensAbi,
+  functionName: 'treasury',
+})
+
+/**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"usdc"`
  */
 export const useReadOnlyPensUsdc = /*#__PURE__*/ createUseReadContract({
@@ -953,6 +1012,15 @@ export const useWriteOnlyPensRenounceOwnership =
   /*#__PURE__*/ createUseWriteContract({
     abi: onlyPensAbi,
     functionName: 'renounceOwnership',
+  })
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"setPlatformFee"`
+ */
+export const useWriteOnlyPensSetPlatformFee =
+  /*#__PURE__*/ createUseWriteContract({
+    abi: onlyPensAbi,
+    functionName: 'setPlatformFee',
   })
 
 /**
@@ -1086,6 +1154,15 @@ export const useSimulateOnlyPensRenounceOwnership =
   /*#__PURE__*/ createUseSimulateContract({
     abi: onlyPensAbi,
     functionName: 'renounceOwnership',
+  })
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"setPlatformFee"`
+ */
+export const useSimulateOnlyPensSetPlatformFee =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: onlyPensAbi,
+    functionName: 'setPlatformFee',
   })
 
 /**
@@ -1246,4 +1323,13 @@ export const useWatchOnlyPensPaymentReleasedEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
     abi: onlyPensAbi,
     eventName: 'PaymentReleased',
+  })
+
+/**
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link onlyPensAbi}__ and `eventName` set to `"PlatformFeeUpdated"`
+ */
+export const useWatchOnlyPensPlatformFeeUpdatedEvent =
+  /*#__PURE__*/ createUseWatchContractEvent({
+    abi: onlyPensAbi,
+    eventName: 'PlatformFeeUpdated',
   })

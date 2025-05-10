@@ -14,6 +14,8 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 // Access hre (hardhat runtime environment)
 declare const hre: HardhatRuntimeEnvironment;
 
+const TREASURY_ADDRESS = "0xA996b471e6D161c776ac88b82cB55F3BC490a356";
+
 async function main() {
   console.log(`Deploying OnlyPens contracts to ${network.name}...`);
 
@@ -75,6 +77,8 @@ async function main() {
   // Initialize data for the proxy
   const initializeData = OnlyPens.interface.encodeFunctionData("initialize", [
     networkConfig.usdcAddress,
+    TREASURY_ADDRESS,
+    1000, // 10% platform fee
   ]);
 
   // Deploy the TransparentUpgradeableProxy

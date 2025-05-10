@@ -54,6 +54,8 @@ contract OnlyPens is Initializable, Ownable {
     uint256 public nextPackageId;
     uint256 public nextDeliverableId;
     uint256 public constant RELEASE_TIMEOUT = 14 days;
+    address public treasury;
+    uint16 public platformFeeBps; // Basis points, e.g., 1000 for 10%
 
     // Storage mappings
     mapping(uint256 => GigPackage) public packages;
@@ -117,11 +119,13 @@ contract OnlyPens is Initializable, Ownable {
         uint256 indexed packageId,
         uint256 indexed deliverableId,
         address indexed to,
-        uint256 amount
+        uint256 amount,
+        uint256 platformFee
     );
     event GigPackageCompleted(uint256 indexed packageId);
     event GigPackageCancelled(uint256 indexed packageId);
     event GigPackageExpired(uint256 indexed packageId);
+    event PlatformFeeUpdated(uint16 newFeeBps);
 
     // Modifiers - shortened error messages
     modifier packageMustExist(uint256 _packageId) {
@@ -213,13 +217,29 @@ contract OnlyPens is Initializable, Ownable {
         _disableInitializers();
     }
 
-    function initialize(IERC20 _usdc) external initializer {
+    function initialize(
+        IERC20 _usdc,
+        address _treasury,
+        uint16 _platformFeeBps
+    ) external initializer {
         require(address(_usdc) != address(0), "Invalid USDC");
+        require(_treasury != address(0), "Invalid treasury");
+        require(_platformFeeBps <= 10000, "Fee too high"); // Max 100%
         _transferOwnership(msg.sender);
 
         usdc = _usdc;
+        treasury = _treasury;
+        platformFeeBps = _platformFeeBps;
         nextPackageId = 1;
         nextDeliverableId = 1;
+    }
+
+    /// @notice Owner can set a new platform fee
+    /// @param _newFeeBps The new platform fee in basis points (e.g., 500 for 5%)
+    function setPlatformFee(uint16 _newFeeBps) external onlyOwner {
+        require(_newFeeBps <= 10000, "Fee too high"); // Max 100%
+        platformFeeBps = _newFeeBps;
+        emit PlatformFeeUpdated(_newFeeBps);
     }
 
     /// @notice Creates a new gig package with multiple deliverables
@@ -705,17 +725,34 @@ contract OnlyPens is Initializable, Ownable {
         bool _approveAll
     ) private {
         if (totalReleased > 0) {
-            p.amountReleased += totalReleased;
+            uint256 feeAmount = (totalReleased * platformFeeBps) / 10000;
+            uint256 amountToWriter = totalReleased - feeAmount;
 
-            // Transfer tokens after all state changes
-            require(usdc.transfer(p.writer, totalReleased), "Transfer failed");
+            p.amountReleased += totalReleased; // Still track the gross amount released from package total
+
+            // Transfer fee to treasury
+            if (feeAmount > 0) {
+                require(
+                    usdc.transfer(treasury, feeAmount),
+                    "Fee transfer failed"
+                );
+            }
+
+            // Transfer amount to writer
+            if (amountToWriter > 0) {
+                require(
+                    usdc.transfer(p.writer, amountToWriter),
+                    "Writer payment failed"
+                );
+            }
 
             // Emit payment released event
             emit PaymentReleased(
                 _packageId,
                 _approveAll ? 0 : _deliverableId,
                 p.writer,
-                totalReleased
+                amountToWriter, // Net amount to writer
+                feeAmount
             );
         }
 
