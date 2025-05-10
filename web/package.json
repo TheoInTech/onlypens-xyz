@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && yarn wagmi generate",
+    "build": "next build && yarn wagmi generate && graphclient build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "graph:codegen": "graphclient build",
+    "graph:dev": "graphclient serve-dev"
   },
   "dependencies": {
     "@coinbase/wallet-sdk": "^4.3.2",
@@ -34,6 +36,7 @@
     "ethers": "^6.14.0",
     "firebase": "^11.7.1",
     "firebase-admin": "^13.3.0",
+    "graphql": "^16.11.0",
     "lucide-react": "^0.503.0",
     "mantine-form-zod-resolver": "^1.1.0",
     "next": "15.3.1",
@@ -49,6 +52,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@graphprotocol/client-cli": "^3.0.7",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

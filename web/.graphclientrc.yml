@@ -1,0 +1,5 @@
+sources:
+  - name: onlypens
+    handler:
+      graphql:
+        endpoint: https://api.studio.thegraph.com/query/110790/onlypens/version/latest
