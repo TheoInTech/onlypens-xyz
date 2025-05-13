@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { UserSchema } from "@/schema/user.schema";
-// import { db } from "@/lib/firebase-client"; // No longer needed for POST
-// import { doc, setDoc, getDoc } from "firebase/firestore"; // No longer needed for POST
 import { db as clientDb } from "@/lib/firebase-client"; // For GET requests
 import { doc as clientDoc, getDoc as clientGetDoc } from "firebase/firestore"; // For GET requests
 import { adminDb } from "@/lib/firebase-admin"; // Import Admin SDK

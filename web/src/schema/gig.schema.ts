@@ -3,9 +3,8 @@ import {
   EActivityType,
   EContentTypes,
   ENicheKeywords,
-  ESubmissionStatus,
-  EToneKeywords,
 } from "@/schema/enum.schema";
+import { MatchmakerResponseSchema } from "./matchmaker.schema";
 
 // Define the GigStatus enum to match the smart contract's PackageStatus
 export enum GigStatus {
@@ -45,38 +44,23 @@ export const OnchainGigSchema = z.object({
 
 export type IOnchainGig = z.infer<typeof OnchainGigSchema>;
 
+// Schema for deliverable item with clearer field naming
+export const DeliverableSchema = z.object({
+  contentType: z.nativeEnum(EContentTypes),
+  price: z.string(), // Total price for all items of this content type
+  quantity: z.string(), // Number of items
+  requirements: z.string().optional(), // Optional specific requirements for this content type
+});
+
 // Schema for offchain gig metadata stored in Firebase
 export const GigMetadataSchema = z.object({
   title: z.string(),
   description: z.string().nullish(),
-  contentType: z.nativeEnum(EContentTypes),
-  toneKeywords: z.array(z.nativeEnum(EToneKeywords)),
+  deliverables: z.array(DeliverableSchema).default([]),
   nicheKeywords: z.array(z.nativeEnum(ENicheKeywords)),
-  wordCount: z.number().nullish(),
   deadline: z.number().nullish(), // unix timestamp
-  invitedGhostwriters: z.array(z.string()).nullish(),
-  submissions: z
-    .array(
-      z.object({
-        submissionId: z.string(),
-        submittedBy: z.string(),
-        previewLink: z.string(),
-        status: z.nativeEnum(ESubmissionStatus),
-        submittedAt: z.string(),
-        feedback: z.string().nullish(),
-      })
-    )
-    .nullish(),
-  history: z
-    .array(
-      z.object({
-        event: z.nativeEnum(EActivityType), // Changed from string to EActivityType
-        timestamp: z.number(),
-        by: z.string().nullish(),
-        details: z.record(z.string()).nullish(),
-      })
-    )
-    .nullish(),
+  referenceWritings: z.array(z.string()).nullish(),
+  matchmaker: MatchmakerResponseSchema.nullish(),
 });
 
 export type IGigMetadata = z.infer<typeof GigMetadataSchema>;
@@ -88,3 +72,31 @@ export const GigSchema = z.object({
 });
 
 export type IGig = z.infer<typeof GigSchema>;
+
+export const MAX_TONE_KEYWORDS = 5;
+export const MAX_NICHE_KEYWORDS = 3;
+
+// Schema for gig creation form submission via API
+export const GigFormSchema = z.object({
+  packageId: z.number(),
+  creatorAddress: z.string(),
+  transactionHash: z.string(),
+  totalAmount: z.string(), // USDC amount in smallest units
+  expiresAt: z.number().nullable(),
+  title: z.string().min(3, "Title must be at least 3 characters"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  nicheKeywords: z
+    .array(z.nativeEnum(ENicheKeywords))
+    .min(1, "Select at least one niche keyword")
+    .max(3, "Select at most 3 niche keywords"),
+  deadline: z.date().or(z.string()), // unix timestamp for off-chain deadline
+  numberOfDeliverables: z.number().int().positive(),
+  deliverables: z
+    .array(DeliverableSchema)
+    .min(1, "At least one deliverable is required"),
+  referenceWritings: z.array(z.string()), // Optional reference writings
+  matchmaker: MatchmakerResponseSchema.nullish(),
+});
+
+export type IGigForm = z.infer<typeof GigFormSchema>;
+export type IDeliverable = z.infer<typeof DeliverableSchema>;

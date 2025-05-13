@@ -1,7 +1,7 @@
 {
   "base-sepolia": {
     "OnlyPens": {
-      "address": "0xC8F769515cf20B8Ba3b195Efc17DAc1Cd3a85b41",
+      "address": "0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062",
       "startBlock": 25559167
     }
   }

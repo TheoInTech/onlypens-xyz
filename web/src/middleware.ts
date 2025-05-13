@@ -4,7 +4,7 @@ import { getToken } from "next-auth/jwt";
 // import { getUserProfile } from "@/services/user.service";
 
 // Public routes that are accessible to everyone
-const publicRoutes = ["/about", "/terms", "/privacy"];
+const publicRoutes = ["/about", "/terms", "/privacy", "/"];
 
 // Routes that need profile check
 const profileRequiredRoutes = [
@@ -36,39 +36,36 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // Fetch user profile directly
+  // Only fetch user profile if authenticated
   let profileExists = false;
-  if (isAuthenticated) {
-    try {
-      const profileResponse = await fetch(
-        new URL("/api/users/me", request.url).toString(),
-        {
-          headers: {
-            // Forward necessary cookies for authentication
-            cookie: request.headers.get("cookie") || "",
-          },
-        }
-      );
-
-      if (profileResponse.ok) {
-        const profileData = await profileResponse.json();
-        // Assuming the API returns a non-empty object or a specific field that indicates a profile exists
-        // Adjust this check based on the actual structure of your /api/users/me response
-        profileExists = !!profileData && Object.keys(profileData).length > 0;
-      } else {
-        // Log error or handle cases where the profile API fails
-        console.error("Failed to fetch user profile:", profileResponse.status);
+  try {
+    const profileResponse = await fetch(
+      new URL("/api/users/me", request.url).toString(),
+      {
+        headers: {
+          // Forward necessary cookies for authentication
+          cookie: request.headers.get("cookie") || "",
+        },
       }
-    } catch (error) {
-      console.error("Error fetching user profile in middleware:", error);
-      // Decide how to handle this error, e.g., redirect to an error page or allow access
+    );
+
+    if (profileResponse.ok) {
+      const profileData = await profileResponse.json();
+      profileExists = !!profileData && Object.keys(profileData).length > 0;
+    } else {
+      console.error("Failed to fetch user profile:", profileResponse.status);
     }
+  } catch (error) {
+    console.error("Error fetching user profile in middleware:", error);
   }
 
-  if (path === "/" && profileExists) {
-    return NextResponse.redirect(new URL(`/dashboard`, request.url));
-  } else if (path === "/" && !profileExists) {
-    return NextResponse.redirect(new URL(`/onboarding`, request.url));
+  // Handle authenticated user navigation based on profile existence
+  if (path === "/") {
+    if (profileExists) {
+      return NextResponse.redirect(new URL(`/dashboard`, request.url));
+    } else {
+      return NextResponse.redirect(new URL(`/onboarding`, request.url));
+    }
   }
 
   // If the route is in the profileRequiredRoutes array and no profile exists, redirect to onboarding
@@ -79,7 +76,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`/onboarding`, request.url));
   }
 
-  // If no profile exists and not on onboarding, redirect to onboarding
+  // If profile exists and on onboarding, redirect to dashboard
   if (profileExists && path.startsWith("/onboarding")) {
     return NextResponse.redirect(new URL(`/dashboard`, request.url));
   }

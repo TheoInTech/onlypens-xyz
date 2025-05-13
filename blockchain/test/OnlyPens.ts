@@ -9,6 +9,17 @@ import { MockERC20 } from "../typechain-types/contracts/MockERC20";
 import { OnlyPens } from "../typechain-types/contracts/OnlyPens.sol/OnlyPens";
 import "./helpers"; // Import the helper functions
 
+// Define interface for DeliverableInput to match contract struct
+interface DeliverableInput {
+  contentType: string;
+  amount: bigint;
+  quantity: bigint;
+}
+
+// Force TypeScript to use 'any' type for the contract to avoid type errors during test updates
+// This is a temporary workaround while updating tests for the modified contract
+const asAny = (contract: any) => contract as any;
+
 describe("OnlyPens", function () {
   // Set up fixture
   async function deployOnlyPensFixture() {
@@ -38,38 +49,16 @@ describe("OnlyPens", function () {
       },
     });
 
-    // Deploy implementation first
-    const onlyPensImpl = await OnlyPens.deploy();
-    await onlyPensImpl.waitForDeployment();
-    const implAddress = await onlyPensImpl.getAddress();
-
-    // Create a proxy admin
-    const ProxyAdmin = await ethers.getContractFactory("CustomProxyAdmin");
-    const proxyAdmin = await ProxyAdmin.deploy();
-    await proxyAdmin.waitForDeployment();
-    const adminAddress = await proxyAdmin.getAddress();
-
-    // Encode the initialize function call
-    const initializeData = OnlyPens.interface.encodeFunctionData("initialize", [
+    // Deploy OnlyPens as a non-upgradeable contract with constructor arguments
+    const onlyPens = await OnlyPens.deploy(
       usdcAddress,
       treasury.address,
-      1000,
-    ]);
-
-    // Deploy the TransparentUpgradeableProxy
-    const TransparentUpgradeableProxy = await ethers.getContractFactory(
-      "CustomTransparentUpgradeableProxy"
+      1000 // 10% platform fee
     );
-    const proxy = await TransparentUpgradeableProxy.deploy(
-      implAddress,
-      adminAddress,
-      initializeData
-    );
-    await proxy.waitForDeployment();
-    const proxyAddress = await proxy.getAddress();
-
-    // Create a contract instance at the proxy address
-    const onlyPens = OnlyPens.attach(proxyAddress) as OnlyPens;
+    await onlyPens.waitForDeployment();
+    // Use as unknown first to avoid TypeScript errors
+    const typedOnlyPens = onlyPens as unknown as OnlyPens;
+    const onlyPensAddress = await onlyPens.getAddress();
 
     // Mint some USDC to the creator
     const usdcAmount = ethers.parseUnits("1000", 6); // 1000 USDC with 6 decimals
@@ -77,11 +66,11 @@ describe("OnlyPens", function () {
     await mockUSDC.mint(writer1.address, usdcAmount);
 
     // Approve OnlyPens to spend creator's USDC
-    await mockUSDC.connect(creator).approve(proxyAddress, usdcAmount);
-    await mockUSDC.connect(writer1).approve(proxyAddress, usdcAmount);
+    await mockUSDC.connect(creator).approve(onlyPensAddress, usdcAmount);
+    await mockUSDC.connect(writer1).approve(onlyPensAddress, usdcAmount);
 
     return {
-      onlyPens,
+      onlyPens: typedOnlyPens,
       mockUSDC,
       owner,
       creator,
@@ -100,10 +89,10 @@ describe("OnlyPens", function () {
     const { onlyPens, creator, writer1, mockUSDC, treasury } = fixture;
 
     // Create package
-    const totalAmount = ethers.parseUnits("100", 6);
-    const deliverables = [
-      { contentType: "Article", amount: ethers.parseUnits("60", 6) },
-      { contentType: "Review", amount: ethers.parseUnits("40", 6) },
+    const totalAmount = BigInt(100000000); // 100 USDC with 6 decimals
+    const deliverables: DeliverableInput[] = [
+      { contentType: "Article", amount: BigInt(60000000), quantity: BigInt(2) }, // 60 USDC
+      { contentType: "Review", amount: BigInt(40000000), quantity: BigInt(1) }, // 40 USDC
     ];
 
     const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
@@ -131,19 +120,19 @@ describe("OnlyPens", function () {
     const { onlyPens, writer1, packageId, deliverableIds, mockUSDC, treasury } =
       fixture;
 
-    // Submit deliverables
-    await onlyPens
+    // Submit deliverables - using asAny to avoid TypeScript errors
+    await asAny(onlyPens)
       .connect(writer1)
-      .submitDeliverable(packageId, deliverableIds[0]);
-    await onlyPens
+      .submitDeliverable(packageId, deliverableIds[0], BigInt(2));
+    await asAny(onlyPens)
       .connect(writer1)
-      .submitDeliverable(packageId, deliverableIds[1]);
+      .submitDeliverable(packageId, deliverableIds[1], BigInt(1));
 
     return fixture; // fixture already contains mockUSDC and treasury from setupAssignedPackage
   }
 
   describe("Deployment", function () {
-    it("Should initialize with the correct USDC token", async function () {
+    it("Should be initialized with the correct USDC token", async function () {
       const { onlyPens, mockUSDC } = await loadFixture(deployOnlyPensFixture);
       expect(await onlyPens.usdc()).to.equal(await mockUSDC.getAddress());
     });
@@ -163,120 +152,59 @@ describe("OnlyPens", function () {
       expect(await onlyPens.nextDeliverableId()).to.equal(1);
     });
 
-    it("Should revert if initialized with zero address for USDC", async function () {
+    it("Should revert if deployed with zero address for USDC", async function () {
       const { onlyPensHelpers, treasury } = await loadFixture(
         deployOnlyPensFixture
       );
-      const helpersAddress = await onlyPensHelpers.getAddress();
 
+      const helpersAddress = await onlyPensHelpers.getAddress();
       const OnlyPens = await ethers.getContractFactory("OnlyPens", {
         libraries: {
           OnlyPensHelpers: helpersAddress,
         },
       });
 
-      // Deploy implementation first
-      const onlyPensImpl = await OnlyPens.deploy();
-      await onlyPensImpl.waitForDeployment();
-
-      // Create a proxy admin
-      const ProxyAdmin = await ethers.getContractFactory("CustomProxyAdmin");
-      const proxyAdmin = await ProxyAdmin.deploy();
-      await proxyAdmin.waitForDeployment();
-
-      // Get the initialize function data with zero address
-      const initData = OnlyPens.interface.encodeFunctionData("initialize", [
-        ethers.ZeroAddress,
-        treasury.address,
-        1000,
-      ]);
-
-      // Deploy transparent proxy - should revert during initialization
-      const TransparentUpgradeableProxy = await ethers.getContractFactory(
-        "CustomTransparentUpgradeableProxy"
-      );
+      // Try to deploy with zero address for USDC
       await expect(
-        TransparentUpgradeableProxy.deploy(
-          await onlyPensImpl.getAddress(),
-          await proxyAdmin.getAddress(),
-          initData
-        )
+        OnlyPens.deploy(ethers.ZeroAddress, treasury.address, 1000)
       ).to.be.revertedWith("Invalid USDC");
     });
 
-    it("Should revert if initialized with zero address for treasury", async function () {
+    it("Should revert if deployed with zero address for treasury", async function () {
       const { onlyPensHelpers, mockUSDC } = await loadFixture(
         deployOnlyPensFixture
       );
+
       const helpersAddress = await onlyPensHelpers.getAddress();
       const usdcAddress = await mockUSDC.getAddress();
-
       const OnlyPens = await ethers.getContractFactory("OnlyPens", {
         libraries: {
           OnlyPensHelpers: helpersAddress,
         },
       });
 
-      const onlyPensImpl = await OnlyPens.deploy();
-      await onlyPensImpl.waitForDeployment();
-
-      const ProxyAdmin = await ethers.getContractFactory("CustomProxyAdmin");
-      const proxyAdmin = await ProxyAdmin.deploy();
-      await proxyAdmin.waitForDeployment();
-
-      const initData = OnlyPens.interface.encodeFunctionData("initialize", [
-        usdcAddress,
-        ethers.ZeroAddress,
-        1000,
-      ]);
-
-      const TransparentUpgradeableProxy = await ethers.getContractFactory(
-        "CustomTransparentUpgradeableProxy"
-      );
+      // Try to deploy with zero address for treasury
       await expect(
-        TransparentUpgradeableProxy.deploy(
-          await onlyPensImpl.getAddress(),
-          await proxyAdmin.getAddress(),
-          initData
-        )
+        OnlyPens.deploy(usdcAddress, ethers.ZeroAddress, 1000)
       ).to.be.revertedWith("Invalid treasury");
     });
 
-    it("Should revert if initialized with platform fee > 100%", async function () {
+    it("Should revert if deployed with platform fee > 100%", async function () {
       const { onlyPensHelpers, mockUSDC, treasury } = await loadFixture(
         deployOnlyPensFixture
       );
+
       const helpersAddress = await onlyPensHelpers.getAddress();
       const usdcAddress = await mockUSDC.getAddress();
-
       const OnlyPens = await ethers.getContractFactory("OnlyPens", {
         libraries: {
           OnlyPensHelpers: helpersAddress,
         },
       });
 
-      const onlyPensImpl = await OnlyPens.deploy();
-      await onlyPensImpl.waitForDeployment();
-
-      const ProxyAdmin = await ethers.getContractFactory("CustomProxyAdmin");
-      const proxyAdmin = await ProxyAdmin.deploy();
-      await proxyAdmin.waitForDeployment();
-
-      const initData = OnlyPens.interface.encodeFunctionData("initialize", [
-        usdcAddress,
-        treasury.address,
-        10001,
-      ]);
-
-      const TransparentUpgradeableProxy = await ethers.getContractFactory(
-        "CustomTransparentUpgradeableProxy"
-      );
+      // Try to deploy with platform fee > 100%
       await expect(
-        TransparentUpgradeableProxy.deploy(
-          await onlyPensImpl.getAddress(),
-          await proxyAdmin.getAddress(),
-          initData
-        )
+        OnlyPens.deploy(usdcAddress, treasury.address, 10001)
       ).to.be.revertedWith("Fee too high");
     });
   });
@@ -287,10 +215,18 @@ describe("OnlyPens", function () {
         deployOnlyPensFixture
       );
 
-      const totalAmount = ethers.parseUnits("100", 6); // 100 USDC
-      const deliverables = [
-        { contentType: "Article", amount: ethers.parseUnits("60", 6) },
-        { contentType: "Review", amount: ethers.parseUnits("40", 6) },
+      const totalAmount = BigInt(100000000); // 100 USDC with 6 decimals
+      const deliverables: DeliverableInput[] = [
+        {
+          contentType: "Article",
+          amount: BigInt(60000000),
+          quantity: BigInt(2),
+        }, // 60 USDC
+        {
+          contentType: "Review",
+          amount: BigInt(40000000),
+          quantity: BigInt(1),
+        }, // 40 USDC
       ];
 
       const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
@@ -303,9 +239,9 @@ describe("OnlyPens", function () {
         .to.emit(onlyPens, "GigPackageCreated")
         .withArgs(1, creator.address, totalAmount, futureTime)
         .to.emit(onlyPens, "DeliverableCreated")
-        .withArgs(1, 1, "Article", ethers.parseUnits("60", 6))
+        .withArgs(1, 1, "Article", 60000000, 2) // Include quantity
         .to.emit(onlyPens, "DeliverableCreated")
-        .withArgs(1, 2, "Review", ethers.parseUnits("40", 6));
+        .withArgs(1, 2, "Review", 40000000, 1); // Include quantity
 
       // Check the creator's USDC balance decreased
       const creatorBalance = await mockUSDC.balanceOf(creator.address);
@@ -338,12 +274,14 @@ describe("OnlyPens", function () {
 
       const deliverable1 = await onlyPens.packageDeliverables(1, 1);
       expect(deliverable1.contentType).to.equal("Article");
-      expect(deliverable1.amount).to.equal(ethers.parseUnits("60", 6));
+      expect(deliverable1.amount).to.equal(60000000); // Adjust to match contract values
+      expect(asAny(deliverable1).quantity).to.equal(2);
       expect(deliverable1.status).to.equal(0); // PENDING
 
       const deliverable2 = await onlyPens.packageDeliverables(1, 2);
       expect(deliverable2.contentType).to.equal("Review");
-      expect(deliverable2.amount).to.equal(ethers.parseUnits("40", 6));
+      expect(deliverable2.amount).to.equal(40000000); // Adjust to match contract values
+      expect(asAny(deliverable2).quantity).to.equal(1);
       expect(deliverable2.status).to.equal(0); // PENDING
     });
 
@@ -351,7 +289,7 @@ describe("OnlyPens", function () {
       const { onlyPens, creator } = await loadFixture(deployOnlyPensFixture);
 
       const deliverables = [
-        { contentType: "Article", amount: ethers.parseUnits("0", 6) },
+        { contentType: "Article", amount: BigInt(0), quantity: BigInt(1) },
       ];
 
       const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
@@ -359,15 +297,17 @@ describe("OnlyPens", function () {
       await expect(
         onlyPens
           .connect(creator)
-          .createGigPackage(ethers.parseUnits("0", 6), deliverables, futureTime)
+          .createGigPackage(BigInt(0), deliverables, futureTime)
       ).to.be.revertedWith("Zero amount");
     });
 
     it("Should revert when creating a package with past expiry date", async function () {
       const { onlyPens, creator } = await loadFixture(deployOnlyPensFixture);
 
-      const totalAmount = ethers.parseUnits("100", 6);
-      const deliverables = [{ contentType: "Article", amount: totalAmount }];
+      const totalAmount = BigInt(100);
+      const deliverables = [
+        { contentType: "Article", amount: BigInt(100), quantity: BigInt(1) },
+      ];
 
       const pastTime = (await time.latest()) - 3600; // 1 hour ago
 
@@ -381,7 +321,7 @@ describe("OnlyPens", function () {
     it("Should revert when creating a package with no deliverables", async function () {
       const { onlyPens, creator } = await loadFixture(deployOnlyPensFixture);
 
-      const totalAmount = ethers.parseUnits("100", 6);
+      const totalAmount = BigInt(100);
       const emptyDeliverables: any[] = [];
 
       const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
@@ -396,10 +336,10 @@ describe("OnlyPens", function () {
     it("Should revert when deliverable amounts don't sum to total amount", async function () {
       const { onlyPens, creator } = await loadFixture(deployOnlyPensFixture);
 
-      const totalAmount = ethers.parseUnits("100", 6);
+      const totalAmount = BigInt(100);
       const deliverables = [
-        { contentType: "Article", amount: ethers.parseUnits("60", 6) },
-        { contentType: "Review", amount: ethers.parseUnits("30", 6) },
+        { contentType: "Article", amount: BigInt(60), quantity: BigInt(1) },
+        { contentType: "Review", amount: BigInt(30), quantity: BigInt(1) },
       ];
       // Total is 90, not 100
 
@@ -415,8 +355,10 @@ describe("OnlyPens", function () {
     it("Should revert when a deliverable has an empty content type", async function () {
       const { onlyPens, creator } = await loadFixture(deployOnlyPensFixture);
 
-      const totalAmount = ethers.parseUnits("100", 6);
-      const deliverables = [{ contentType: "", amount: totalAmount }];
+      const totalAmount = BigInt(100);
+      const deliverables = [
+        { contentType: "", amount: BigInt(100), quantity: BigInt(1) },
+      ];
 
       const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
 
@@ -430,10 +372,27 @@ describe("OnlyPens", function () {
     it("Should revert when a deliverable has zero amount", async function () {
       const { onlyPens, creator } = await loadFixture(deployOnlyPensFixture);
 
-      const totalAmount = ethers.parseUnits("100", 6);
+      const totalAmount = BigInt(100);
       const deliverables = [
-        { contentType: "Article", amount: ethers.parseUnits("100", 6) },
-        { contentType: "Review", amount: ethers.parseUnits("0", 6) },
+        { contentType: "Article", amount: BigInt(100), quantity: BigInt(1) },
+        { contentType: "Review", amount: BigInt(0), quantity: BigInt(1) },
+      ];
+
+      const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
+
+      await expect(
+        onlyPens
+          .connect(creator)
+          .createGigPackage(totalAmount, deliverables, futureTime)
+      ).to.be.revertedWith("Invalid deliverables");
+    });
+
+    it("Should revert when a deliverable has zero quantity", async function () {
+      const { onlyPens, creator } = await loadFixture(deployOnlyPensFixture);
+
+      const totalAmount = BigInt(100);
+      const deliverables = [
+        { contentType: "Article", amount: BigInt(100), quantity: BigInt(0) },
       ];
 
       const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
@@ -455,8 +414,14 @@ describe("OnlyPens", function () {
         .connect(creator)
         .approve(await onlyPens.getAddress(), ethers.parseUnits("50", 6));
 
-      const totalAmount = ethers.parseUnits("100", 6);
-      const deliverables = [{ contentType: "Article", amount: totalAmount }];
+      const totalAmount = BigInt(100000000); // 100 USDC with 6 decimals
+      const deliverables = [
+        {
+          contentType: "Article",
+          amount: BigInt(100000000), // 100 USDC with 6 decimals
+          quantity: BigInt(1),
+        },
+      ];
 
       const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
 
@@ -470,8 +435,10 @@ describe("OnlyPens", function () {
     it("Should create a package with no expiry date", async function () {
       const { onlyPens, creator } = await loadFixture(deployOnlyPensFixture);
 
-      const totalAmount = ethers.parseUnits("100", 6);
-      const deliverables = [{ contentType: "Article", amount: totalAmount }];
+      const totalAmount = BigInt(100);
+      const deliverables = [
+        { contentType: "Article", amount: BigInt(100), quantity: BigInt(1) },
+      ];
 
       const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
 
@@ -493,10 +460,18 @@ describe("OnlyPens", function () {
       const fixture = await loadFixture(deployOnlyPensFixture);
       const { onlyPens, creator } = fixture;
 
-      const totalAmount = ethers.parseUnits("100", 6);
-      const deliverables = [
-        { contentType: "Article", amount: ethers.parseUnits("60", 6) },
-        { contentType: "Review", amount: ethers.parseUnits("40", 6) },
+      const totalAmount = BigInt(100000000); // 100 USDC with 6 decimals
+      const deliverables: DeliverableInput[] = [
+        {
+          contentType: "Article",
+          amount: BigInt(60000000),
+          quantity: BigInt(2),
+        },
+        {
+          contentType: "Review",
+          amount: BigInt(40000000),
+          quantity: BigInt(1),
+        },
       ];
 
       const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
@@ -615,8 +590,14 @@ describe("OnlyPens", function () {
       const fixture = await loadFixture(deployOnlyPensFixture);
       const { onlyPens, creator, writer1, writer2 } = fixture;
 
-      const totalAmount = ethers.parseUnits("100", 6);
-      const deliverables = [{ contentType: "Article", amount: totalAmount }];
+      const totalAmount = BigInt(100000000); // 100 USDC with 6 decimals
+      const deliverables: DeliverableInput[] = [
+        {
+          contentType: "Article",
+          amount: BigInt(100000000),
+          quantity: BigInt(1),
+        },
+      ];
 
       const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
 
@@ -671,8 +652,10 @@ describe("OnlyPens", function () {
       );
 
       // Create package but don't invite anyone
-      const totalAmount = ethers.parseUnits("100", 6);
-      const deliverables = [{ contentType: "Article", amount: totalAmount }];
+      const totalAmount = BigInt(100);
+      const deliverables: DeliverableInput[] = [
+        { contentType: "Article", amount: BigInt(100), quantity: BigInt(1) },
+      ];
       const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
       await onlyPens
         .connect(creator)
@@ -745,13 +728,20 @@ describe("OnlyPens", function () {
       const { onlyPens, writer1, packageId, deliverableIds } =
         await setupAssignedPackage();
 
+      const submittedQuantity = BigInt(2);
+
       await expect(
-        onlyPens
+        asAny(onlyPens)
           .connect(writer1)
-          .submitDeliverable(packageId, deliverableIds[0])
+          .submitDeliverable(packageId, deliverableIds[0], submittedQuantity)
       )
         .to.emit(onlyPens, "DeliverableSubmitted")
-        .withArgs(packageId, deliverableIds[0], writer1.address);
+        .withArgs(
+          packageId,
+          deliverableIds[0],
+          writer1.address,
+          submittedQuantity
+        );
 
       // Check deliverable status
       const deliverable = await onlyPens.packageDeliverables(
@@ -759,6 +749,8 @@ describe("OnlyPens", function () {
         deliverableIds[0]
       );
       expect(deliverable.status).to.equal(1); // SUBMITTED
+      // Note: Using asAny to access submittedQuantity which isn't in the type definition
+      expect(asAny(deliverable).submittedQuantity).to.equal(submittedQuantity);
       expect(deliverable.submittedAt).to.be.gt(0);
 
       // Check package status
@@ -771,9 +763,9 @@ describe("OnlyPens", function () {
         await setupAssignedPackage();
 
       await expect(
-        onlyPens
+        asAny(onlyPens)
           .connect(otherAccount)
-          .submitDeliverable(packageId, deliverableIds[0])
+          .submitDeliverable(packageId, deliverableIds[0], BigInt(2))
       ).to.be.revertedWith("Not writer");
     });
 
@@ -781,7 +773,7 @@ describe("OnlyPens", function () {
       const { onlyPens, writer1 } = await loadFixture(deployOnlyPensFixture);
 
       await expect(
-        onlyPens.connect(writer1).submitDeliverable(999, 1)
+        asAny(onlyPens).connect(writer1).submitDeliverable(999, 1, BigInt(2))
       ).to.be.revertedWith("No package");
     });
 
@@ -789,7 +781,9 @@ describe("OnlyPens", function () {
       const { onlyPens, writer1, packageId } = await setupAssignedPackage();
 
       await expect(
-        onlyPens.connect(writer1).submitDeliverable(packageId, 999)
+        asAny(onlyPens)
+          .connect(writer1)
+          .submitDeliverable(packageId, 999, BigInt(2))
       ).to.be.revertedWith("No deliverable");
     });
 
@@ -798,16 +792,35 @@ describe("OnlyPens", function () {
         await setupAssignedPackage();
 
       // Submit once
-      await onlyPens
+      await asAny(onlyPens)
         .connect(writer1)
-        .submitDeliverable(packageId, deliverableIds[0]);
+        .submitDeliverable(packageId, deliverableIds[0], BigInt(2));
 
       // Try to submit again
       await expect(
-        onlyPens
+        asAny(onlyPens)
           .connect(writer1)
-          .submitDeliverable(packageId, deliverableIds[0])
+          .submitDeliverable(packageId, deliverableIds[0], BigInt(2))
       ).to.be.revertedWith("Already handled");
+    });
+
+    it("Should revert when submitting invalid quantity", async function () {
+      const { onlyPens, writer1, packageId, deliverableIds } =
+        await setupAssignedPackage();
+
+      // Trying to submit 0 quantity
+      await expect(
+        asAny(onlyPens)
+          .connect(writer1)
+          .submitDeliverable(packageId, deliverableIds[0], BigInt(0))
+      ).to.be.revertedWith("Invalid quantity");
+
+      // Trying to submit more than requested quantity
+      await expect(
+        asAny(onlyPens)
+          .connect(writer1)
+          .submitDeliverable(packageId, deliverableIds[0], BigInt(3)) // Exceeds quantity of 2
+      ).to.be.revertedWith("Invalid quantity");
     });
 
     it("Should submit all deliverables successfully", async function () {
@@ -815,14 +828,14 @@ describe("OnlyPens", function () {
         await setupAssignedPackage();
 
       // Submit first deliverable
-      await onlyPens
+      await asAny(onlyPens)
         .connect(writer1)
-        .submitDeliverable(packageId, deliverableIds[0]);
+        .submitDeliverable(packageId, deliverableIds[0], BigInt(2));
 
       // Submit second deliverable
-      await onlyPens
+      await asAny(onlyPens)
         .connect(writer1)
-        .submitDeliverable(packageId, deliverableIds[1]);
+        .submitDeliverable(packageId, deliverableIds[1], BigInt(1));
 
       // Check both are submitted
       const deliverable1 = await onlyPens.packageDeliverables(
@@ -842,10 +855,12 @@ describe("OnlyPens", function () {
       const { onlyPens, creator, writer1, packageId, deliverableIds } =
         await setupAssignedPackage();
 
+      const submittedQuantity = BigInt(2);
+
       // Submit
-      await onlyPens
+      await asAny(onlyPens)
         .connect(writer1)
-        .submitDeliverable(packageId, deliverableIds[0]);
+        .submitDeliverable(packageId, deliverableIds[0], submittedQuantity);
 
       // Creator rejects
       await onlyPens
@@ -854,12 +869,17 @@ describe("OnlyPens", function () {
 
       // Resubmit
       await expect(
-        onlyPens
+        asAny(onlyPens)
           .connect(writer1)
-          .submitDeliverable(packageId, deliverableIds[0])
+          .submitDeliverable(packageId, deliverableIds[0], submittedQuantity)
       )
         .to.emit(onlyPens, "DeliverableRevised")
-        .withArgs(packageId, deliverableIds[0], writer1.address);
+        .withArgs(
+          packageId,
+          deliverableIds[0],
+          writer1.address,
+          submittedQuantity
+        );
     });
   });
 
@@ -878,8 +898,9 @@ describe("OnlyPens", function () {
       // Writer's balance before approval
       const writerBalanceBefore = await mockUSDC.balanceOf(writer1.address);
       const treasuryBalanceBefore = await mockUSDC.balanceOf(treasury.address);
-      const deliverableAmount = ethers.parseUnits("60", 6);
-      const currentPlatformFeeBps = await onlyPens.platformFeeBps();
+      const deliverableAmount = BigInt(60000000); // 60 USDC with 6 decimals
+      const submittedQuantity = BigInt(2); // Matches the quantity we set in the test
+      const currentPlatformFeeBps = await asAny(onlyPens).platformFeeBps();
       const expectedFee =
         (deliverableAmount * BigInt(currentPlatformFeeBps)) / BigInt(10000);
       const expectedWriterAmount = deliverableAmount - expectedFee;
@@ -890,7 +911,12 @@ describe("OnlyPens", function () {
           .approveDeliverable(packageId, deliverableIds[0])
       )
         .to.emit(onlyPens, "DeliverableApproved")
-        .withArgs(packageId, deliverableIds[0], writer1.address)
+        .withArgs(
+          packageId,
+          deliverableIds[0],
+          writer1.address,
+          submittedQuantity
+        )
         .to.emit(onlyPens, "PaymentReleased")
         .withArgs(
           packageId,
@@ -939,10 +965,10 @@ describe("OnlyPens", function () {
 
       const writerInitialBalance = await mockUSDC.balanceOf(writer1.address); // Get writer's balance before any approvals
       const treasuryInitialBalance = await mockUSDC.balanceOf(treasury.address);
-      const currentPlatformFeeBpsAll = await onlyPens.platformFeeBps();
+      const currentPlatformFeeBpsAll = await asAny(onlyPens).platformFeeBps();
 
       // Approve first deliverable
-      const deliverable1Amount = ethers.parseUnits("60", 6);
+      const deliverable1Amount = BigInt(60000000); // 60 USDC with 6 decimals
       const fee1 =
         (deliverable1Amount * BigInt(currentPlatformFeeBpsAll)) / BigInt(10000);
       await onlyPens
@@ -950,16 +976,24 @@ describe("OnlyPens", function () {
         .approveDeliverable(packageId, deliverableIds[0]);
 
       // Approve second deliverable - should complete the package
-      const deliverable2Amount = ethers.parseUnits("40", 6);
+      const deliverable2Amount = BigInt(40000000); // 40 USDC with 6 decimals
       const fee2 =
         (deliverable2Amount * BigInt(currentPlatformFeeBpsAll)) / BigInt(10000);
       const writerAmount2 = deliverable2Amount - fee2;
+      const submittedQuantity2 = BigInt(1); // Matches the quantity we set in the test
 
       await expect(
         onlyPens
           .connect(creator)
           .approveDeliverable(packageId, deliverableIds[1])
       )
+        .to.emit(onlyPens, "DeliverableApproved")
+        .withArgs(
+          packageId,
+          deliverableIds[1],
+          writer1.address,
+          submittedQuantity2
+        )
         .to.emit(onlyPens, "GigPackageCompleted")
         .withArgs(packageId);
 
@@ -971,7 +1005,7 @@ describe("OnlyPens", function () {
 
       // Check total fee transferred to treasury
       const treasuryBalance = await mockUSDC.balanceOf(treasury.address);
-      expect(treasuryBalance).to.equal(fee1 + fee2);
+      expect(treasuryBalance - treasuryInitialBalance).to.equal(fee1 + fee2);
 
       // Check total amount transferred to writer
       const writerBalance = await mockUSDC.balanceOf(writer1.address);
@@ -987,13 +1021,20 @@ describe("OnlyPens", function () {
       const { onlyPens, creator, writer1, packageId, deliverableIds } =
         await setupSubmittedDeliverables();
 
+      const submittedQuantity = BigInt(2); // Matches the quantity we set in the test
+
       await expect(
         onlyPens
           .connect(creator)
           .rejectDeliverable(packageId, deliverableIds[0])
       )
         .to.emit(onlyPens, "DeliverableRejected")
-        .withArgs(packageId, deliverableIds[0], writer1.address);
+        .withArgs(
+          packageId,
+          deliverableIds[0],
+          writer1.address,
+          submittedQuantity
+        );
 
       // Check deliverable status
       const deliverable = await onlyPens.packageDeliverables(
@@ -1054,8 +1095,8 @@ describe("OnlyPens", function () {
       // Writer's balance before approval
       const writerBalanceBefore = await mockUSDC.balanceOf(writer1.address);
       const treasuryBalanceBefore = await mockUSDC.balanceOf(treasury.address);
-      const totalPackageAmount = ethers.parseUnits("100", 6);
-      const currentPlatformFeeBpsAll = await onlyPens.platformFeeBps();
+      const totalPackageAmount = BigInt(100000000); // 100 USDC with 6 decimals
+      const currentPlatformFeeBpsAll = await asAny(onlyPens).platformFeeBps();
       const expectedTotalFee =
         (totalPackageAmount * BigInt(currentPlatformFeeBpsAll)) / BigInt(10000);
       const expectedTotalWriterAmount = totalPackageAmount - expectedTotalFee;
@@ -1089,8 +1130,14 @@ describe("OnlyPens", function () {
       const fixture = await loadFixture(deployOnlyPensFixture);
       const { onlyPens, creator } = fixture;
 
-      const totalAmount = ethers.parseUnits("100", 6);
-      const deliverables = [{ contentType: "Article", amount: totalAmount }];
+      const totalAmount = BigInt(100000000); // 100 USDC with 6 decimals
+      const deliverables: DeliverableInput[] = [
+        {
+          contentType: "Article",
+          amount: BigInt(100000000),
+          quantity: BigInt(1),
+        },
+      ];
 
       const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
 
@@ -1196,9 +1243,9 @@ describe("OnlyPens", function () {
       const deliverableIds = await onlyPens.getPackageDeliverables(packageId);
 
       // Writer submits deliverable, changing status to IN_PROGRESS
-      await onlyPens
+      await asAny(onlyPens)
         .connect(writer1)
-        .submitDeliverable(packageId, deliverableIds[0]);
+        .submitDeliverable(packageId, deliverableIds[0], BigInt(1));
 
       // Try to cancel after submission
       await expect(
@@ -1212,8 +1259,14 @@ describe("OnlyPens", function () {
       const fixture = await loadFixture(deployOnlyPensFixture);
       const { onlyPens, creator, writer1 } = fixture;
 
-      const totalAmount = ethers.parseUnits("100", 6);
-      const deliverables = [{ contentType: "Article", amount: totalAmount }];
+      const totalAmount = BigInt(100000000); // 100 USDC with 6 decimals
+      const deliverables: DeliverableInput[] = [
+        {
+          contentType: "Article",
+          amount: BigInt(100000000),
+          quantity: BigInt(1),
+        },
+      ];
 
       const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
 
@@ -1282,8 +1335,10 @@ describe("OnlyPens", function () {
       const { onlyPens, creator } = fixture;
 
       // Create package with no expiry
-      const totalAmount = ethers.parseUnits("100", 6);
-      const deliverables = [{ contentType: "Article", amount: totalAmount }];
+      const totalAmount = BigInt(100);
+      const deliverables: DeliverableInput[] = [
+        { contentType: "Article", amount: BigInt(100), quantity: BigInt(1) },
+      ];
 
       // Using 0 for no expiry as per contract logic
       // const futureTime = (await time.latest()) + 86400 * 7; // 7 days from now
@@ -1349,10 +1404,10 @@ describe("OnlyPens", function () {
       const { onlyPens, creator, writer1, writer2 } = fixture;
 
       // Create first package
-      const totalAmount1 = ethers.parseUnits("100", 6);
-      const deliverables1 = [
-        { contentType: "Article", amount: ethers.parseUnits("60", 6) },
-        { contentType: "Review", amount: ethers.parseUnits("40", 6) },
+      const totalAmount1 = BigInt(100);
+      const deliverables1: DeliverableInput[] = [
+        { contentType: "Article", amount: BigInt(60), quantity: BigInt(2) },
+        { contentType: "Review", amount: BigInt(40), quantity: BigInt(1) },
       ];
       const futureTime1 = (await time.latest()) + 86400 * 7; // 7 days from now
       await onlyPens
@@ -1360,10 +1415,10 @@ describe("OnlyPens", function () {
         .createGigPackage(totalAmount1, deliverables1, futureTime1);
 
       // Create second package
-      const totalAmount2 = ethers.parseUnits("200", 6);
-      const deliverables2 = [
-        { contentType: "Research", amount: ethers.parseUnits("120", 6) },
-        { contentType: "Editing", amount: ethers.parseUnits("80", 6) },
+      const totalAmount2 = BigInt(200);
+      const deliverables2: DeliverableInput[] = [
+        { contentType: "Research", amount: BigInt(120), quantity: BigInt(3) },
+        { contentType: "Editing", amount: BigInt(80), quantity: BigInt(2) },
       ];
       const futureTime2 = (await time.latest()) + 86400 * 14; // 14 days from now
       await onlyPens
@@ -1487,7 +1542,7 @@ describe("OnlyPens", function () {
       const packageDetails = await onlyPens.getPackageDetails(1);
       expect(packageDetails[0]).to.equal(creator.address); // creator
       expect(packageDetails[1]).to.equal(writer1.address); // writer
-      expect(packageDetails[2]).to.equal(ethers.parseUnits("100", 6)); // totalAmount
+      expect(packageDetails[2]).to.equal(BigInt(100)); // totalAmount
       expect(packageDetails[6]).to.equal(2); // status: ASSIGNED
       expect(packageDetails[7]).to.equal(2); // numDeliverables
       expect(packageDetails[8]).to.equal(0); // numApproved
@@ -1499,10 +1554,10 @@ describe("OnlyPens", function () {
     it("Should allow owner to set platform fee", async function () {
       const { onlyPens, owner } = await loadFixture(deployOnlyPensFixture);
       const newFee = 500; // 5%
-      await expect(onlyPens.connect(owner).setPlatformFee(newFee))
+      await expect(asAny(onlyPens).connect(owner).setPlatformFee(newFee))
         .to.emit(onlyPens, "PlatformFeeUpdated")
         .withArgs(newFee);
-      expect(await onlyPens.platformFeeBps()).to.equal(newFee);
+      expect(await asAny(onlyPens).platformFeeBps()).to.equal(newFee);
     });
 
     it("Should prevent non-owner from setting platform fee", async function () {
@@ -1511,7 +1566,7 @@ describe("OnlyPens", function () {
       );
       const newFee = 500;
       await expect(
-        onlyPens.connect(otherAccount).setPlatformFee(newFee)
+        asAny(onlyPens).connect(otherAccount).setPlatformFee(newFee)
       ).to.be.revertedWithCustomError(onlyPens, "OwnableUnauthorizedAccount");
     });
 
@@ -1519,7 +1574,7 @@ describe("OnlyPens", function () {
       const { onlyPens, owner } = await loadFixture(deployOnlyPensFixture);
       const newFee = 10001; // > 100%
       await expect(
-        onlyPens.connect(owner).setPlatformFee(newFee)
+        asAny(onlyPens).connect(owner).setPlatformFee(newFee)
       ).to.be.revertedWith("Fee too high");
     });
 
@@ -1531,7 +1586,7 @@ describe("OnlyPens", function () {
 
       // Set a new fee
       const newFeeBps = 2000; // 20%
-      await onlyPens.connect(owner).setPlatformFee(newFeeBps);
+      await asAny(onlyPens).connect(owner).setPlatformFee(newFeeBps);
 
       const writerBalanceBefore = await mockUSDC.balanceOf(writer1.address);
       const treasuryBalanceBefore = await mockUSDC.balanceOf(treasury.address);
@@ -1541,6 +1596,7 @@ describe("OnlyPens", function () {
         deliverableId
       );
       const deliverableAmount = deliverableDetails.amount;
+      const submittedQuantity = BigInt(2); // Matches the quantity we set in the test
 
       const expectedFee =
         (deliverableAmount * BigInt(newFeeBps)) / BigInt(10000);
@@ -1549,6 +1605,8 @@ describe("OnlyPens", function () {
       await expect(
         onlyPens.connect(creator).approveDeliverable(packageId, deliverableId)
       )
+        .to.emit(onlyPens, "DeliverableApproved")
+        .withArgs(packageId, deliverableId, writer1.address, submittedQuantity)
         .to.emit(onlyPens, "PaymentReleased")
         .withArgs(
           packageId,

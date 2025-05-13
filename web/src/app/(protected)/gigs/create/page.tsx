@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Stack,
@@ -13,6 +13,8 @@ import {
   Flex,
   Switch,
   Divider,
+  Modal,
+  Loader,
 } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { Input, Textarea, Checkbox, Button, NumberInput } from "@/components";
@@ -27,179 +29,328 @@ import {
   IconPencil,
   IconCalendar,
   IconFileText,
-  IconMoodHappy,
   IconCategory,
   IconCoin,
 } from "@tabler/icons-react";
-import {
-  EActivityType,
-  EContentTypes,
-  ENicheKeywords,
-  EToneKeywords,
-} from "@/schema/enum.schema";
+import { EContentTypes, ENicheKeywords } from "@/schema/enum.schema";
 import { useGlobalStore } from "@/stores";
+import { useForm, zodResolver } from "@mantine/form";
+import { useAccount, usePublicClient, useWalletClient } from "wagmi";
+import { useWriteOnlyPensCreateGigPackage } from "@/hooks/abi-generated";
+import { createGig, getRecentGig } from "@/services/gigs.service";
 import classes from "./create.module.css";
+import {
+  GigFormSchema,
+  IGigForm,
+  MAX_NICHE_KEYWORDS,
+} from "@/schema/gig.schema";
+import getConfig from "@/lib/blockchain-config";
+import { encodeFunctionData } from "viem";
+import { USDCTestnetABI } from "@/lib/abi";
+import { ITransactionError } from "@/schema/transaction.schema";
+import { generateMatchmakingData } from "@/services/matchmaker.service";
+import { IMatchmaker } from "@/schema/matchmaker.schema";
 
-// Constants for max selections
-const MAX_TONE_KEYWORDS = 5;
-const MAX_NICHE_KEYWORDS = 3;
-
-// Base prices for content types
-const CONTENT_TYPE_PRICES: Record<string, number> = {
-  [EContentTypes.SOCIAL_POST]: 50,
-  [EContentTypes.SOCIAL_THREAD]: 120,
-  [EContentTypes.SHORT_CAPTION]: 30,
-  [EContentTypes.BLOG_NEWSLETTER]: 250,
-  [EContentTypes.PRODUCT_MARKETING]: 150,
-  [EContentTypes.WEBSITE_LANDING]: 175,
-  [EContentTypes.SCRIPT_DIALOGUE]: 200,
-  [EContentTypes.PERSONAL_BIO]: 100,
-};
-
-// Interface for content type with quantity (deliverable)
-interface DeliverableInput {
-  contentType: string;
-  amount: number; // Price in USDC (smallest units)
-}
+// Get blockchain config
+const blockchainConfig = getConfig();
 
 const CreatePackagePage = () => {
   const router = useRouter();
+  const { address } = useAccount();
+  const publicClient = usePublicClient();
+  const { data: walletClient } = useWalletClient();
+  const { selectedNicheKeywords, user } = useGlobalStore();
+  const { writeContractAsync, isPending: isContractWritePending } =
+    useWriteOnlyPensCreateGigPackage();
 
-  // Get saved preferences from global store
-  const { selectedToneKeywords, selectedNicheKeywords } = useGlobalStore();
-
-  // State for using saved preferences
-  const [useSavedReferences, setUseSavedReferences] = useState(false);
-  const [useSavedToneKeywords, setUseSavedToneKeywords] = useState(false);
-  const [useSavedNicheKeywords, setUseSavedNicheKeywords] = useState(false);
-
-  // State for the form
-  const [gigTitle, setGigTitle] = useState("");
-  const [gigDescription, setGigDescription] = useState("");
-  const [deadline, setDeadline] = useState<Date | null>(null);
-  const [referenceWritings, setReferenceWritings] = useState(["", "", ""]);
-
-  // Gig package state
-  const [deliverables, setDeliverables] = useState<DeliverableInput[]>([]);
-  const [toneKeywords, setToneKeywords] = useState<string[]>([]);
-  const [nicheKeywords, setNicheKeywords] = useState<string[]>([]);
-  const [suggestedPrice, setSuggestedPrice] = useState<number | null>(null);
-  const [gigPrice, setGigPrice] = useState<number | null>(null);
-
-  // New state for package expiration (optional)
+  // Local state for UI controls that aren't part of the IGigForm schema
   const [hasExpiration, setHasExpiration] = useState(false);
   const [expirationDate, setExpirationDate] = useState<Date | null>(null);
+  const [useSavedReferences, setUseSavedReferences] = useState(false);
+  const [useSavedNicheKeywords, setUseSavedNicheKeywords] = useState(false);
+  const [suggestedPrice, setSuggestedPrice] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [progressModalContent, setProgressModalContent] = useState<
+    string | undefined
+  >();
 
-  // Warning states
-  const [toneWarningVisible, setToneWarningVisible] = useState(false);
-  const [nicheWarningVisible, setNicheWarningVisible] = useState(false);
+  // Add state to track selected content types separately
+  const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>(
+    []
+  );
 
   // Warning timeout refs
   const toneWarningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const nicheWarningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Apply saved preferences when toggles change
-  useEffect(() => {
-    if (useSavedToneKeywords && selectedToneKeywords.length > 0) {
-      setToneKeywords(selectedToneKeywords);
-    } else if (!useSavedToneKeywords) {
-      setToneKeywords([]);
-    }
-  }, [useSavedToneKeywords, selectedToneKeywords]);
+  // State for warnings
+  const [nicheWarningVisible, setNicheWarningVisible] = React.useState(false);
+
+  // Initialize form with IGigForm schema
+  const form = useForm<IGigForm>({
+    mode: "controlled",
+    initialValues: {
+      packageId: 0, // Will be set after contract transaction
+      creatorAddress: address || "",
+      transactionHash: "", // Will be set after contract transaction
+      title: "",
+      description: "",
+      totalAmount: "0",
+      expiresAt: null,
+      nicheKeywords: [],
+      deliverables: [],
+      numberOfDeliverables: 0,
+      referenceWritings: ["", "", ""],
+      deadline: new Date(),
+    },
+    validate: zodResolver(GigFormSchema),
+  });
 
   useEffect(() => {
-    if (useSavedNicheKeywords && selectedNicheKeywords.length > 0) {
-      setNicheKeywords(selectedNicheKeywords);
-    } else if (!useSavedNicheKeywords) {
-      setNicheKeywords([]);
+    if (!useSavedNicheKeywords && selectedNicheKeywords.length > 0) {
+      form.setFieldValue("nicheKeywords", selectedNicheKeywords);
+    } else if (useSavedNicheKeywords) {
+      form.setFieldValue("nicheKeywords", user?.nicheKeywords || []);
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useSavedNicheKeywords, selectedNicheKeywords]);
 
+  useEffect(() => {
+    if (
+      !useSavedReferences &&
+      !!form.values.referenceWritings &&
+      form.values.referenceWritings.length > 0
+    ) {
+      form.setFieldValue("referenceWritings", form.values.referenceWritings);
+    } else if (useSavedReferences) {
+      form.setFieldValue("referenceWritings", user?.samples || []);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useSavedReferences, form.values.referenceWritings]);
+
+  // Keep selectedContentTypes in sync with form.values.deliverables
+  useEffect(() => {
+    // Map deliverables to content type strings for UI state
+    const contentTypes = form.values.deliverables.map((d) => d.contentType);
+    setSelectedContentTypes(contentTypes);
+
+    // Automatically calculate total amount when deliverables change
+    if (contentTypes.length > 0) {
+      calculateTotalAmount();
+    }
+  }, [form.values.deliverables]);
+
   // Calculate AI suggested price
-  // TODO: Make this AI-powered
   const calculateAIPrice = () => {
-    let basePrice = 0;
-    deliverables.forEach((deliverable) => {
-      basePrice += CONTENT_TYPE_PRICES[deliverable.contentType] || 75;
-    });
+    // TODO: Ask LLM about price insights based on content requirements, writing samples, tones, niche and deadline.
+    // Important to research the market price for the content type and niche and add it as context of the prompt.
 
-    const toneMultiplier = 1 + toneKeywords.length * 0.1;
-    const nicheMultiplier = 1 + nicheKeywords.length * 0.05;
+    if (form.values.deliverables.length === 0) {
+      setSuggestedPrice(null);
+      return;
+    }
 
-    const price = Math.round(basePrice * toneMultiplier * nicheMultiplier);
-    setSuggestedPrice(price);
+    // setSuggestedPrice(calculatedPrice);
+  };
+
+  const handleReferenceWritingChange = (index: number, value: string) => {
+    const newReferenceWritings = [...(form.values.referenceWritings || [])];
+    newReferenceWritings[index] = value;
+    form.setFieldValue("referenceWritings", newReferenceWritings);
   };
 
   // Handle content type toggle
-  const handleContentTypeToggle = (contentType: string, isChecked: boolean) => {
-    if (isChecked) {
-      setDeliverables((prev) => [
-        ...prev,
-        {
-          contentType,
-          amount: CONTENT_TYPE_PRICES[contentType] || 75,
-        },
-      ]);
+  const handleContentTypeToggle = (contentType: string, checked: boolean) => {
+    let newDeliverables = [...form.values.deliverables];
+
+    // Convert string contentType to enum value to ensure type safety
+    // This assumes contentType is one of the values in EContentTypes
+    const contentTypeEnum = Object.values(EContentTypes).find(
+      (type) => type === contentType
+    ) as EContentTypes;
+
+    if (!contentTypeEnum) {
+      console.error("Invalid content type:", contentType);
+      return;
+    }
+
+    // Update separate state for UI
+    if (checked) {
+      setSelectedContentTypes((prev) => [...prev, contentType]);
     } else {
-      setDeliverables((prev) =>
-        prev.filter((item) => item.contentType !== contentType)
+      setSelectedContentTypes((prev) =>
+        prev.filter((type) => type !== contentType)
       );
+    }
+
+    // Find what's being added or removed
+    const existingItem = newDeliverables.find(
+      (item) => item.contentType === contentTypeEnum
+    );
+    let priceChange = 0;
+
+    if (checked) {
+      // Check if already exists to avoid duplicates
+      if (!existingItem) {
+        newDeliverables.push({
+          contentType: contentTypeEnum,
+          price: String(0),
+          quantity: String(1),
+        });
+      }
+    } else {
+      // Calculate price being removed
+      if (existingItem) {
+        priceChange = -parseFloat(existingItem.price);
+      }
+
+      // Remove from deliverables
+      newDeliverables = newDeliverables.filter(
+        (d) => d.contentType !== contentTypeEnum
+      );
+    }
+
+    // Update the form
+    form.setFieldValue("deliverables", newDeliverables);
+    form.setFieldValue("numberOfDeliverables", newDeliverables.length);
+
+    // Update the total amount directly by adding or subtracting the price change
+    const currentTotal = parseFloat(form.values.totalAmount) || 0;
+    const newTotal = Math.max(0, currentTotal + priceChange); // Ensure never negative
+
+    // Update all form values at once
+    form.setValues({
+      ...form.values,
+      deliverables: newDeliverables,
+      numberOfDeliverables: newDeliverables.length,
+      totalAmount: newTotal.toFixed(2),
+    });
+  };
+
+  // Handle deliverable quantity change
+  const handleQuantityChange = (contentType: string, quantity: number) => {
+    // Convert string contentType to enum value
+    const contentTypeEnum = Object.values(EContentTypes).find(
+      (type) => type === contentType
+    ) as EContentTypes;
+
+    if (!contentTypeEnum) {
+      console.error("Invalid content type:", contentType);
+      return;
+    }
+
+    // Get the current item
+    const currentItem = form.values.deliverables.find(
+      (item) => item.contentType === contentTypeEnum
+    );
+
+    if (currentItem) {
+      const deliverables = form.values.deliverables.map((item) =>
+        item.contentType === contentTypeEnum
+          ? {
+              ...item,
+              quantity: String(quantity),
+            }
+          : item
+      );
+
+      form.setFieldValue("deliverables", deliverables);
     }
   };
 
-  // Handle deliverable amount change
-  const handleAmountChange = (contentType: string, amount: number) => {
-    setDeliverables((prev) =>
-      prev.map((item) =>
-        item.contentType === contentType ? { ...item, amount } : item
-      )
+  // Handle deliverable price change
+  const handlePriceChange = (contentType: string, price: number) => {
+    // Convert string contentType to enum value
+    const contentTypeEnum = Object.values(EContentTypes).find(
+      (type) => type === contentType
+    ) as EContentTypes;
+
+    if (!contentTypeEnum) {
+      console.error("Invalid content type:", contentType);
+      return;
+    }
+
+    const deliverables = form.values.deliverables.map((item) =>
+      item.contentType === contentTypeEnum
+        ? { ...item, price: price.toFixed(2) }
+        : item
     );
+
+    form.setFieldValue("deliverables", deliverables);
+    calculateTotalAmount();
+  };
+
+  // Calculate total amount from all deliverables' custom prices
+  const calculateTotalAmount = () => {
+    let total = 0;
+
+    // Make sure we're using the latest deliverables from the form
+    const currentDeliverables = form.values.deliverables;
+    console.log("Calculating total from deliverables:", currentDeliverables);
+
+    currentDeliverables.forEach((deliverable) => {
+      const price = parseFloat(deliverable.price);
+      if (!isNaN(price)) {
+        total += price;
+      }
+    });
+
+    console.log("New total amount:", total);
+    form.setFieldValue("totalAmount", total.toFixed(2));
   };
 
   // Check if a content type is selected
   const isContentTypeSelected = (contentType: string) => {
-    return deliverables.some((item) => item.contentType === contentType);
+    // Use local state for UI rendering
+    return selectedContentTypes.includes(contentType);
   };
 
-  // Get amount for a deliverable
-  const getDeliverableAmount = (contentType: string) => {
-    const item = deliverables.find((item) => item.contentType === contentType);
-    return item ? item.amount : CONTENT_TYPE_PRICES[contentType] || 75;
-  };
+  // Get quantity for a deliverable
+  const getDeliverableQuantity = (contentType: string) => {
+    // Convert string contentType to enum value
+    const contentTypeEnum = Object.values(EContentTypes).find(
+      (type) => type === contentType
+    ) as EContentTypes;
 
-  // Calculate total package amount
-  const calculateTotalAmount = () => {
-    return deliverables.reduce((sum, item) => sum + item.amount, 0);
-  };
-
-  // Handle tone keyword toggle with max limit
-  const handleToneKeywordToggle = (keyword: string, isChecked: boolean) => {
-    if (isChecked && toneKeywords.length >= MAX_TONE_KEYWORDS) {
-      // Show warning
-      setToneWarningVisible(true);
-
-      // Auto-hide after 3 seconds
-      if (toneWarningTimeoutRef.current) {
-        clearTimeout(toneWarningTimeoutRef.current);
-      }
-
-      toneWarningTimeoutRef.current = setTimeout(() => {
-        setToneWarningVisible(false);
-      }, 3000);
-
-      return;
+    if (!contentTypeEnum) {
+      console.error("Invalid content type:", contentType);
+      return 1; // Default quantity
     }
 
-    if (isChecked) {
-      setToneKeywords((prev) => [...prev, keyword]);
-    } else {
-      setToneKeywords((prev) => prev.filter((k) => k !== keyword));
+    const item = form.values.deliverables.find(
+      (item) => item.contentType === contentTypeEnum
+    );
+
+    return item ? parseInt(item.quantity, 10) : 1; // Default quantity
+  };
+
+  // Get price for a deliverable
+  const getDeliverablePrice = (contentType: string) => {
+    // Convert string contentType to enum value
+    const contentTypeEnum = Object.values(EContentTypes).find(
+      (type) => type === contentType
+    ) as EContentTypes;
+
+    if (!contentTypeEnum) {
+      console.error("Invalid content type:", contentType);
+      return 0; // Default price
     }
+
+    const item = form.values.deliverables.find(
+      (item) => item.contentType === contentTypeEnum
+    );
+
+    // If price exists in the item, use it, otherwise use the base price
+    return item ? parseFloat(item.price) : 0;
   };
 
   // Handle niche keyword toggle with max limit
-  const handleNicheKeywordToggle = (keyword: string, isChecked: boolean) => {
-    if (isChecked && nicheKeywords.length >= MAX_NICHE_KEYWORDS) {
+  const handleNicheKeywordToggle = (keyword: string, checked: boolean) => {
+    const currentKeywords = [...form.values.nicheKeywords];
+
+    if (checked && currentKeywords.length >= MAX_NICHE_KEYWORDS) {
       // Show warning
       setNicheWarningVisible(true);
 
@@ -215,93 +366,163 @@ const CreatePackagePage = () => {
       return;
     }
 
-    if (isChecked) {
-      setNicheKeywords((prev) => [...prev, keyword]);
+    if (checked) {
+      form.setFieldValue("nicheKeywords", [
+        ...currentKeywords,
+        keyword as ENicheKeywords,
+      ]);
     } else {
-      setNicheKeywords((prev) => prev.filter((k) => k !== keyword));
+      form.setFieldValue(
+        "nicheKeywords",
+        currentKeywords.filter((k) => k !== keyword)
+      );
     }
   };
 
-  // Handle reference writing change
-  const handleReferenceWritingChange = (index: number, value: string) => {
-    const newWritings = [...referenceWritings];
-    newWritings[index] = value;
-    setReferenceWritings(newWritings);
-  };
-
-  // Handle price input change
-  const handlePriceInputChange = (value: string) => {
-    setGigPrice(value ? parseInt(value) : null);
-  };
-
-  // Form validation
-  const isFormComplete =
-    gigTitle.trim() !== "" &&
-    gigDescription.trim() !== "" &&
-    deadline &&
-    deliverables.length > 0 &&
-    (gigPrice || calculateTotalAmount() > 0);
-
-  // Convert $ to USDC smallest units (6 decimals)
-  const usdToUsdcUnits = (usdAmount: number) => {
-    return usdAmount * 1_000_000;
-  };
-
   // Handle post gig submission
-  const handlePostGig = () => {
-    // Prepare deliverables for smart contract format
-    const deliverableInputs = deliverables.map((item) => ({
-      contentType: item.contentType,
-      amount: usdToUsdcUnits(item.amount), // Convert to USDC units
-    }));
+  const handleSubmit = async (values: IGigForm) => {
+    try {
+      if (!address || !walletClient) {
+        throw new Error("Wallet not connected");
+      }
 
-    // Calculate total amount
-    const totalAmount = usdToUsdcUnits(gigPrice || calculateTotalAmount());
+      setIsSubmitting(true);
 
-    // Prepare expiry timestamp if enabled
-    const expiresAt =
-      hasExpiration && expirationDate
-        ? Math.floor(expirationDate.getTime() / 1000)
-        : 0;
+      setProgressModalContent("Creating your gig...");
 
-    const gigPackageData = {
-      // Smart contract data for createGigPackage function
-      contractData: {
-        totalAmount,
-        deliverables: deliverableInputs,
-        expiresAt,
-      },
+      // TODO: Move this to useGig hook
+      const totalAmount = BigInt(
+        Math.round(parseFloat(values.totalAmount) * 10 ** 6)
+      );
 
-      // Metadata to save in Firestore
-      metadata: {
-        title: gigTitle,
-        description: gigDescription,
-        contentType: deliverables[0].contentType, // Primary content type
-        toneKeywords: useSavedToneKeywords
-          ? selectedToneKeywords
-          : toneKeywords,
-        nicheKeywords: useSavedNicheKeywords
-          ? selectedNicheKeywords
-          : nicheKeywords,
-        wordCount: null, // Can be set later
-        deadline: deadline ? Math.floor(deadline.getTime() / 1000) : null,
-        invitedGhostwriters: [],
-        referenceWritings: useSavedReferences
-          ? ["Using saved references"]
-          : referenceWritings,
-      },
+      // Approve the contract to spend the USDC
+      // Generate the approve function data
+      const approveData = encodeFunctionData({
+        abi: USDCTestnetABI,
+        functionName: "approve",
+        args: [blockchainConfig.onlyPensAddress, totalAmount],
+      });
 
-      // Activity log entry
-      event: EActivityType.GIG_CREATED,
-    };
+      setProgressModalContent("Approving USDC allowance...");
 
-    // TODO: Integrate with smart contract
-    // 1. Save metadata to Firestore
-    // 2. Call smart contract's createGigPackage function
+      // Send the transaction
+      const hash = await walletClient.sendTransaction({
+        to: blockchainConfig.usdcAddress,
+        data: approveData,
+        account: address,
+      });
+      console.log("Approval transaction submitted with hash:", hash);
 
-    // For now, just go back to dashboard
-    router.push(`/dashboard`);
+      // Wait for transaction confirmation
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      console.log("Token approval verified - continuing submission", receipt);
+
+      // Format deliverables for contract - sending our custom price as the amount
+      const formattedDeliverables = values.deliverables.map((d) => ({
+        contentType: d.contentType,
+        amount: BigInt(Math.round(parseFloat(d.price) * 10 ** 6)), // Using our custom price as amount for contract
+        quantity: BigInt(d.quantity),
+      }));
+
+      // Convert expiration date to timestamp if set
+      const expirationTimestamp =
+        hasExpiration && expirationDate
+          ? Math.floor(expirationDate.getTime() / 1000)
+          : 0;
+
+      values.expiresAt = expirationTimestamp || null;
+
+      setProgressModalContent("Creating gig package on chain...");
+      // Send transaction to blockchain
+      try {
+        const tx = await writeContractAsync({
+          args: [
+            BigInt(Math.round(parseFloat(values.totalAmount) * 10 ** 6)),
+            formattedDeliverables,
+            BigInt(expirationTimestamp),
+          ],
+        });
+
+        // Wait for transaction to be mined
+        console.log("Transaction submitted successfully:", tx);
+        values.transactionHash = tx;
+
+        // Wait for blockchain indexing (can be adjusted based on network speed)
+        console.log("Waiting for transaction confirmation...");
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
+        // Fetch the latest gig created to get the packageId
+        setProgressModalContent("Fetching recent indexed gig data onchain...");
+        console.log("Fetching recent gig data from blockchain...");
+        const recentGig = await getRecentGig();
+
+        if (!recentGig) {
+          throw new Error(
+            "Failed to retrieve the newly created gig from the blockchain"
+          );
+        }
+
+        console.log("Recent gig data retrieved:", recentGig);
+
+        values.packageId = Number(recentGig.packageId);
+        values.creatorAddress = address;
+
+        const matchmakerPayload: IMatchmaker = {
+          bio: values.description,
+          samples: values.referenceWritings,
+          nicheKeywords: values.nicheKeywords,
+          contentTypeKeywords: values.deliverables.map((d) => d.contentType),
+          budget: Number(values.totalAmount),
+          source: "gig-creation",
+        };
+
+        setProgressModalContent("Generating matchmaking data...");
+        console.log("Generating matchmaking data:", matchmakerPayload);
+        const matchmakerResponse =
+          await generateMatchmakingData(matchmakerPayload);
+
+        const createGigPayload: IGigForm = {
+          ...values,
+          matchmaker: matchmakerResponse,
+        };
+        // Save metadata to Firestore using our createGig service
+        console.log("Saving metadata to database...", createGigPayload);
+        setProgressModalContent("Saving metadata...");
+        const result = await createGig(createGigPayload);
+
+        console.log("Gig created successfully:", result);
+
+        setProgressModalContent(
+          "Gig created successfully! Redirecting to gig detail page..."
+        );
+        // Redirect to dashboard or gig detail page
+        router.push(`/gigs/${result.onchainGig.gigId}`);
+      } catch (error: unknown) {
+        console.error("Transaction execution error:", error);
+        // Type safety when handling the error
+        const txError = error as ITransactionError;
+        if (
+          txError?.message &&
+          typeof txError.message === "string" &&
+          txError.message.includes("User denied")
+        ) {
+          console.log("User rejected the transaction in wallet");
+        }
+      }
+    } catch (error) {
+      console.error("Error in gig package creation process:", error);
+    } finally {
+      setIsSubmitting(false);
+      setProgressModalContent(undefined);
+    }
   };
+
+  // Check if the form is complete (for submit button)
+  const isFormComplete =
+    form.values.deliverables.length > 0 &&
+    form.values.title.length >= 3 &&
+    form.values.description.length >= 10 &&
+    form.isValid();
 
   // Clear timeouts on unmount
   useEffect(() => {
@@ -317,11 +538,31 @@ const CreatePackagePage = () => {
 
   return (
     <Stack gap="xl" align="center" justify="center" py="xl">
+      <Modal.Root
+        opened={!!progressModalContent}
+        onClose={() => {}}
+        centered
+        size="xl"
+      >
+        <Modal.Overlay className={classes.progressModalOverlay} />
+        <Modal.Content className={classes.progressModalContent}>
+          <Stack gap="md" align="center">
+            <Loader size="lg" color="purple" />
+            <Text size="sm" c="var(--mantine-color-midnight-9)">
+              {progressModalContent}
+            </Text>
+            <Text size="xs" c="dimmed" ta="center">
+              Please do not close or refresh the page.
+            </Text>
+          </Stack>
+        </Modal.Content>
+      </Modal.Root>
+
       <Stack gap="0" align="center" mb="md">
         <Title order={1} fw={500}>
-          Create new{" "}
+          Create a new{" "}
           <Text component="span" fs="italic" fw={900} style={{ fontSize: 32 }}>
-            package
+            gig package
           </Text>
         </Title>
         <Text size="xs" c="dimmed" w={560} ta="center">
@@ -330,7 +571,10 @@ const CreatePackagePage = () => {
         </Text>
       </Stack>
 
-      <form style={{ width: "700px", maxWidth: "100%" }}>
+      <form
+        style={{ width: "700px", maxWidth: "100%" }}
+        onSubmit={form.onSubmit(handleSubmit)}
+      >
         <Stack gap="xl" w="100%">
           {/* Basic Gig Information */}
           <Box className={classes.formSection}>
@@ -348,8 +592,14 @@ const CreatePackagePage = () => {
                 </InputLabel>
                 <Input
                   placeholder="Write a series of crypto market analysis threads"
-                  onChange={(value) => setGigTitle(value)}
+                  key={form.key("title")}
+                  {...form.getInputProps("title")}
                 />
+                {form.errors.title && (
+                  <Text size="xs" c="red" mt="xs">
+                    {form.errors.title}
+                  </Text>
+                )}
               </div>
 
               <div>
@@ -358,8 +608,14 @@ const CreatePackagePage = () => {
                 </InputLabel>
                 <Textarea
                   placeholder="I need a skilled writer to create in-depth market analysis threads covering the latest trends in DeFi, NFTs, and layer-2 solutions..."
-                  onChange={(value) => setGigDescription(value)}
+                  key={form.key("description")}
+                  {...form.getInputProps("description")}
                 />
+                {form.errors.description && (
+                  <Text size="xs" c="red" mt="xs">
+                    {form.errors.description}
+                  </Text>
+                )}
               </div>
 
               <div>
@@ -368,8 +624,8 @@ const CreatePackagePage = () => {
                 </InputLabel>
                 <DatePickerInput
                   placeholder="Select deadline"
-                  value={deadline}
-                  onChange={setDeadline}
+                  key={form.key("deadline")}
+                  {...form.getInputProps("deadline")}
                   minDate={new Date()}
                   leftSection={<IconCalendar size={16} />}
                   styles={{
@@ -417,9 +673,7 @@ const CreatePackagePage = () => {
                   <Checkbox
                     label="Set package expiration (optional)"
                     checked={hasExpiration}
-                    onChange={(isChecked: boolean) =>
-                      setHasExpiration(isChecked)
-                    }
+                    onChange={(checked) => setHasExpiration(checked)}
                   />
                   <Text size="xs" c="dimmed">
                     Package will auto-cancel if no ghostwriter accepts by this
@@ -431,7 +685,7 @@ const CreatePackagePage = () => {
                   <DatePickerInput
                     placeholder="Select expiration date"
                     value={expirationDate}
-                    onChange={setExpirationDate}
+                    onChange={(value) => setExpirationDate(value)}
                     minDate={new Date()}
                     leftSection={<IconCalendar size={16} />}
                     mt="sm"
@@ -463,7 +717,7 @@ const CreatePackagePage = () => {
                 <Text size="xs">Use saved references</Text>
                 <Switch
                   checked={useSavedReferences}
-                  onChange={(event) =>
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                     setUseSavedReferences(event.currentTarget.checked)
                   }
                 />
@@ -504,6 +758,7 @@ const CreatePackagePage = () => {
                   <Textarea
                     placeholder="Example 1: Paste a sample of the writing style you like"
                     minRows={9}
+                    value={form.values.referenceWritings?.[0]}
                     onChange={(value) => handleReferenceWritingChange(0, value)}
                   />
                 </Tabs.Panel>
@@ -512,6 +767,7 @@ const CreatePackagePage = () => {
                   <Textarea
                     placeholder="Example 2: Paste a sample of the writing style you like"
                     minRows={9}
+                    value={form.values.referenceWritings?.[1]}
                     onChange={(value) => handleReferenceWritingChange(1, value)}
                   />
                 </Tabs.Panel>
@@ -520,6 +776,7 @@ const CreatePackagePage = () => {
                   <Textarea
                     placeholder="Example 3: Paste a sample of the writing style you like"
                     minRows={9}
+                    value={form.values.referenceWritings?.[2]}
                     onChange={(value) => handleReferenceWritingChange(2, value)}
                   />
                 </Tabs.Panel>
@@ -569,41 +826,86 @@ const CreatePackagePage = () => {
                       <Checkbox
                         label={contentType}
                         checked={isContentTypeSelected(contentType)}
-                        onChange={(isChecked: boolean) =>
-                          handleContentTypeToggle(contentType, isChecked)
+                        onChange={(checked) =>
+                          handleContentTypeToggle(contentType, checked)
                         }
                       />
                       {isContentTypeSelected(contentType) && (
                         <Group ml="auto">
-                          <Text size="xs" c="dimmed" mr="xs">
-                            Price (USD):
-                          </Text>
-                          <Group gap={"xs"}>
-                            <IconMinus
-                              size={16}
-                              style={{ cursor: "pointer" }}
-                              onClick={() => {
-                                const currentAmount =
-                                  getDeliverableAmount(contentType);
-                                if (currentAmount > 10) {
-                                  handleAmountChange(
+                          <Group>
+                            <Text size="xs" c="dimmed" mr="xs">
+                              Quantity:
+                            </Text>
+                            <Group gap={"xs"}>
+                              <IconMinus
+                                size={16}
+                                style={{ cursor: "pointer" }}
+                                onClick={() => {
+                                  const currentQuantity =
+                                    getDeliverableQuantity(contentType);
+                                  if (currentQuantity > 1) {
+                                    handleQuantityChange(
+                                      contentType,
+                                      currentQuantity - 1
+                                    );
+                                  }
+                                }}
+                              />
+                              <NumberInput
+                                min={1}
+                                max={100}
+                                value={getDeliverableQuantity(contentType)}
+                                onChange={(value) =>
+                                  handleQuantityChange(
                                     contentType,
-                                    currentAmount - 5
-                                  );
+                                    Number(value)
+                                  )
                                 }
-                              }}
-                            />
+                                w={80}
+                                radius="md"
+                                decimalScale={0}
+                                prefix=""
+                                rightSection={<></>}
+                                styles={{
+                                  input: {
+                                    textAlign: "center",
+                                    backgroundColor:
+                                      "var(--mantine-color-midnight-9)",
+                                  },
+                                }}
+                              />
+                              <IconPlus
+                                size={16}
+                                style={{ cursor: "pointer" }}
+                                onClick={() => {
+                                  const currentQuantity =
+                                    getDeliverableQuantity(contentType);
+                                  if (currentQuantity < 100) {
+                                    handleQuantityChange(
+                                      contentType,
+                                      currentQuantity + 1
+                                    );
+                                  }
+                                }}
+                              />
+                            </Group>
+                          </Group>
+                          <Group align="center" gap="xs">
+                            <Text size="xs" c="dimmed" mr="xs">
+                              Price ($):
+                            </Text>
                             <NumberInput
-                              min={10}
-                              max={1000}
-                              value={getDeliverableAmount(contentType)}
+                              min={1}
+                              max={10000}
+                              value={getDeliverablePrice(contentType)}
                               onChange={(value) =>
-                                handleAmountChange(contentType, Number(value))
+                                handlePriceChange(contentType, Number(value))
                               }
-                              w={80}
+                              w={100}
                               radius="md"
-                              decimalScale={0}
-                              prefix="$"
+                              decimalScale={2}
+                              step={0.01}
+                              prefix=""
                               rightSection={<></>}
                               styles={{
                                 input: {
@@ -613,20 +915,6 @@ const CreatePackagePage = () => {
                                 },
                               }}
                             />
-                            <IconPlus
-                              size={16}
-                              style={{ cursor: "pointer" }}
-                              onClick={() => {
-                                const currentAmount =
-                                  getDeliverableAmount(contentType);
-                                if (currentAmount < 1000) {
-                                  handleAmountChange(
-                                    contentType,
-                                    currentAmount + 5
-                                  );
-                                }
-                              }}
-                            />
                           </Group>
                         </Group>
                       )}
@@ -634,70 +922,9 @@ const CreatePackagePage = () => {
                   ))}
                 </Stack>
 
-                {deliverables.length > 0 && (
-                  <Group justify="flex-end" mt="md">
-                    <Text size="sm" fw={500}>
-                      Total Package Amount: ${calculateTotalAmount()}
-                    </Text>
-                  </Group>
-                )}
-              </Stack>
-
-              <Divider my="sm" />
-
-              {/* Tone Keywords */}
-              <Stack gap="md">
-                <Group
-                  className={classes.formSectionTitle}
-                  justify="space-between"
-                >
-                  <Group gap="md">
-                    <IconMoodHappy size={18} />
-                    <InputLabel size="sm" fw={500}>
-                      Tone Keywords
-                    </InputLabel>
-                  </Group>
-                  <Group className={classes.switchGroup}>
-                    <Text size="xs">Use saved tone</Text>
-                    <Switch
-                      checked={useSavedToneKeywords}
-                      onChange={(event) =>
-                        setUseSavedToneKeywords(event.currentTarget.checked)
-                      }
-                    />
-                  </Group>
-                </Group>
-
-                {!useSavedToneKeywords ? (
-                  <>
-                    <Text size="xs" c="dimmed">
-                      Choose up to {MAX_TONE_KEYWORDS} tone keywords
-                    </Text>
-                    <Group
-                      style={{ flexWrap: "wrap", gap: "8px", marginTop: "8px" }}
-                    >
-                      {Object.values(EToneKeywords).map((keyword) => (
-                        <Checkbox
-                          key={keyword}
-                          label={keyword}
-                          checked={toneKeywords.includes(keyword)}
-                          onChange={(isChecked: boolean) =>
-                            handleToneKeywordToggle(keyword, isChecked)
-                          }
-                        />
-                      ))}
-                    </Group>
-                    {toneWarningVisible && (
-                      <Text size="xs" c="red.5">
-                        You&apos;ve selected the maximum of {MAX_TONE_KEYWORDS}{" "}
-                        tone keywords
-                      </Text>
-                    )}
-                  </>
-                ) : (
-                  <Text className={classes.savedPrefsText}>
-                    Using your saved tone keywords from your profile (
-                    {selectedToneKeywords.length} selected)
+                {form.errors.deliverables && (
+                  <Text size="xs" c="red" mt="xs">
+                    {form.errors.deliverables}
                   </Text>
                 )}
               </Stack>
@@ -720,7 +947,7 @@ const CreatePackagePage = () => {
                     <Text size="xs">Use saved niches</Text>
                     <Switch
                       checked={useSavedNicheKeywords}
-                      onChange={(event) =>
+                      onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                         setUseSavedNicheKeywords(event.currentTarget.checked)
                       }
                     />
@@ -739,9 +966,9 @@ const CreatePackagePage = () => {
                         <Checkbox
                           key={keyword}
                           label={keyword}
-                          checked={nicheKeywords.includes(keyword)}
-                          onChange={(isChecked: boolean) =>
-                            handleNicheKeywordToggle(keyword, isChecked)
+                          checked={form.values.nicheKeywords.includes(keyword)}
+                          onChange={(checked) =>
+                            handleNicheKeywordToggle(keyword, checked)
                           }
                         />
                       ))}
@@ -752,56 +979,106 @@ const CreatePackagePage = () => {
                         niche keywords
                       </Text>
                     )}
+                    {form.errors.nicheKeywords && (
+                      <Text size="xs" c="red" mt="xs">
+                        {form.errors.nicheKeywords}
+                      </Text>
+                    )}
                   </>
                 ) : (
                   <Text className={classes.savedPrefsText}>
                     Using your saved niche keywords from your profile (
-                    {selectedNicheKeywords.length} selected)
+                    {user?.nicheKeywords.join(", ")})
                   </Text>
                 )}
               </Stack>
 
               <Divider my="sm" />
 
-              {/* Custom Price (Optional) */}
+              {/* Price Summary */}
               <Stack gap="md">
                 <Group gap="md">
                   <IconCoin size={18} />
                   <InputLabel size="sm" fw={500}>
-                    Custom Package Price (Optional)
+                    Package Price
                   </InputLabel>
                 </Group>
 
-                <Group justify="space-between">
-                  <Group gap="xs">
-                    <Text size="xs" c="dimmed">
-                      Override the total price (optional)
+                <Group>
+                  <Text size="sm">
+                    Total price:{" "}
+                    <Text component="span" fw={600}>
+                      ${form.values.totalAmount}
                     </Text>
-                    {suggestedPrice && (
-                      <Text size="xs" c="green.6">
-                        AI suggested: ${suggestedPrice}
-                      </Text>
-                    )}
-                  </Group>
-                  <Group gap="xs">
-                    <Button
-                      variant="outline"
-                      onClick={calculateAIPrice}
-                      disabled={deliverables.length === 0}
-                      size="small"
-                      leftSection={<IconInfoCircle size={16} />}
-                    >
-                      Get AI price
-                    </Button>
-
-                    <div style={{ width: "100px" }}>
-                      <Input
-                        placeholder="$"
-                        onChange={handlePriceInputChange}
-                      />
-                    </div>
-                  </Group>
+                  </Text>
                 </Group>
+
+                {form.values.deliverables.length > 0 && (
+                  <Stack gap="xs" mt="xs">
+                    <Text size="xs" fw={500}>
+                      Price breakdown:
+                    </Text>
+                    {form.values.deliverables.map((deliverable, index) => {
+                      const price = parseFloat(deliverable.price);
+                      const quantity = parseInt(deliverable.quantity, 10) || 1;
+
+                      return (
+                        <Group key={index} justify="space-between" gap="xs">
+                          <Text size="xs" c="dimmed">
+                            {quantity} x {deliverable.contentType}
+                          </Text>
+                          <Text size="xs">${price.toFixed(2)}</Text>
+                        </Group>
+                      );
+                    })}
+                  </Stack>
+                )}
+
+                <Button
+                  variant="outline"
+                  onClick={calculateAIPrice}
+                  disabled={form.values.deliverables.length === 0}
+                  size="small"
+                  leftSection={<IconInfoCircle size={16} />}
+                  type="button"
+                  mt="sm"
+                >
+                  Get AI Price Insight
+                </Button>
+
+                {!!suggestedPrice && (
+                  <Box className={classes.aiInsightBox} mt="sm">
+                    <Group gap="md" mb="xs">
+                      <IconInfoCircle
+                        size={18}
+                        color="var(--mantine-color-blue-6)"
+                      />
+                      <Text size="sm" fw={500} c="blue.6">
+                        AI Price Insight
+                      </Text>
+                    </Group>
+
+                    {!!suggestedPrice && (
+                      <>
+                        <Text size="sm" mb="xs">
+                          AI suggested price:{" "}
+                          <Text component="span" fw={600}>
+                            ${suggestedPrice}
+                          </Text>
+                        </Text>
+
+                        {parseFloat(form.values.totalAmount) <
+                          suggestedPrice * 0.8 && (
+                          <Text size="xs" c="yellow.6" mb="xs">
+                            Your price might be too low compared to the market
+                            price based on your content requirements, writing
+                            samples, tones, niche and deadline.
+                          </Text>
+                        )}
+                      </>
+                    )}
+                  </Box>
+                )}
               </Stack>
             </Stack>
           </Box>
@@ -815,9 +1092,12 @@ const CreatePackagePage = () => {
             }}
           >
             <Button
-              onClick={handlePostGig}
-              disabled={!isFormComplete}
+              type="submit"
+              disabled={
+                !isFormComplete || isContractWritePending || isSubmitting
+              }
               size="default"
+              loading={isContractWritePending || isSubmitting}
             >
               Create Package & Lock Funds
             </Button>

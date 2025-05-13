@@ -1,0 +1,39 @@
+import {
+  IMatchmaker,
+  IMatchmakerResponse,
+  MatchmakerSchema,
+} from "@/schema/matchmaker.schema";
+
+/**
+ * Creates a new gig in Firebase after on-chain creation
+ */
+export const generateMatchmakingData = async (
+  data: IMatchmaker
+): Promise<IMatchmakerResponse> => {
+  try {
+    // Validate data against our schema
+    const validatedData = MatchmakerSchema.safeParse(data);
+
+    if (!validatedData.success) {
+      throw new Error("Invalid matchmaker data");
+    }
+
+    const response = await fetch("/api/match-maker", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to generate brand strategy");
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("Error creating gig:", error);
+    throw error;
+  }
+};

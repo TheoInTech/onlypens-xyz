@@ -1,4 +1,4 @@
-import { BigInt, Bytes, Address } from "@graphprotocol/graph-ts";
+import { BigInt, Bytes, Address, ethereum } from "@graphprotocol/graph-ts";
 import {
   DeliverableApproved as DeliverableApprovedEvent,
   DeliverableCreated as DeliverableCreatedEvent,
@@ -10,7 +10,6 @@ import {
   GigPackageCompleted as GigPackageCompletedEvent,
   GigPackageCreated as GigPackageCreatedEvent,
   GigPackageExpired as GigPackageExpiredEvent,
-  Initialized as InitializedEvent,
   InvitationAccepted as InvitationAcceptedEvent,
   InvitationDeclined as InvitationDeclinedEvent,
   OwnershipTransferred as OwnershipTransferredEvent,
@@ -27,11 +26,11 @@ import {
   GigPackageCompletedEvent as GigPackageCompletedEntity,
   GigPackageCreatedEvent as GigPackageCreatedEntity,
   GigPackageExpiredEvent as GigPackageExpiredEntity,
-  InitializedEvent as InitializedEntity,
   InvitationAcceptedEvent as InvitationAcceptedEntity,
   InvitationDeclinedEvent as InvitationDeclinedEntity,
   OwnershipTransferredEvent as OwnershipTransferredEntity,
   PaymentReleasedEvent as PaymentReleasedEntity,
+  PlatformFeeUpdatedEvent as PlatformFeeUpdatedEntity,
   User,
   Package,
   Deliverable,
@@ -116,6 +115,7 @@ export function handleDeliverableCreated(event: DeliverableCreatedEvent): void {
   entity.deliverableId = event.params.deliverableId;
   entity.contentType = event.params.contentType;
   entity.amount = event.params.amount;
+  entity.quantity = BigInt.fromI32(1); // Default to 1 until contract is updated
   entity.blockNumber = event.block.number;
   entity.blockTimestamp = event.block.timestamp;
   entity.transactionHash = event.transaction.hash;
@@ -144,6 +144,7 @@ export function handleDeliverableCreated(event: DeliverableCreatedEvent): void {
     deliverable.contentType = event.params.contentType;
     deliverable.status = "PENDING";
     deliverable.amount = event.params.amount;
+    deliverable.quantity = BigInt.fromI32(1); // Default to 1 until contract is updated
     deliverable.createdAt = event.block.timestamp;
     deliverable.transactionHash = event.transaction.hash;
     deliverable.save();
@@ -301,6 +302,7 @@ export function handleDeliverableSubmitted(
   entity.packageId = event.params.packageId;
   entity.deliverableId = event.params.deliverableId;
   entity.writer = event.params.writer;
+  entity.submittedQuantity = BigInt.fromI32(1); // Default to 1 until contract is updated
   entity.blockNumber = event.block.number;
   entity.blockTimestamp = event.block.timestamp;
   entity.transactionHash = event.transaction.hash;
@@ -328,6 +330,7 @@ export function handleDeliverableSubmitted(
     if (deliverable) {
       deliverable.status = "SUBMITTED";
       deliverable.submittedAt = event.block.timestamp;
+      deliverable.submittedQuantity = BigInt.fromI32(1); // Default to 1 until contract is updated
       deliverable.save();
     }
   }
@@ -342,6 +345,7 @@ export function handleDeliverableRevised(event: DeliverableRevisedEvent): void {
   entity.packageId = event.params.packageId;
   entity.deliverableId = event.params.deliverableId;
   entity.writer = event.params.writer;
+  entity.submittedQuantity = BigInt.fromI32(1); // Default to 1 until contract is updated
   entity.blockNumber = event.block.number;
   entity.blockTimestamp = event.block.timestamp;
   entity.transactionHash = event.transaction.hash;
@@ -367,6 +371,7 @@ export function handleDeliverableRevised(event: DeliverableRevisedEvent): void {
       deliverable.status = "SUBMITTED";
       deliverable.submittedAt = event.block.timestamp;
       deliverable.revisedAt = event.block.timestamp;
+      deliverable.submittedQuantity = BigInt.fromI32(1); // Default to 1 until contract is updated
       deliverable.save();
     }
   }
@@ -383,6 +388,7 @@ export function handleDeliverableApproved(
   entity.packageId = event.params.packageId;
   entity.deliverableId = event.params.deliverableId;
   entity.writer = event.params.writer;
+  entity.approvedQuantity = BigInt.fromI32(1); // Default to 1 until contract is updated
   entity.blockNumber = event.block.number;
   entity.blockTimestamp = event.block.timestamp;
   entity.transactionHash = event.transaction.hash;
@@ -408,6 +414,7 @@ export function handleDeliverableApproved(
     if (deliverable) {
       deliverable.status = "APPROVED";
       deliverable.approvedAt = event.block.timestamp;
+      deliverable.approvedQuantity = BigInt.fromI32(1); // Default to 1 until contract is updated
       deliverable.save();
     }
   }
@@ -424,6 +431,7 @@ export function handleDeliverableRejected(
   entity.packageId = event.params.packageId;
   entity.deliverableId = event.params.deliverableId;
   entity.writer = event.params.writer;
+  entity.submittedQuantity = BigInt.fromI32(1); // Default to 1 until contract is updated
   entity.blockNumber = event.block.number;
   entity.blockTimestamp = event.block.timestamp;
   entity.transactionHash = event.transaction.hash;
@@ -461,6 +469,7 @@ export function handlePaymentReleased(event: PaymentReleasedEvent): void {
   entity.deliverableId = event.params.deliverableId;
   entity.to = event.params.to;
   entity.amount = event.params.amount;
+  entity.platformFee = event.params.platformFee;
   entity.blockNumber = event.block.number;
   entity.blockTimestamp = event.block.timestamp;
   entity.transactionHash = event.transaction.hash;
@@ -471,10 +480,9 @@ export function handlePaymentReleased(event: PaymentReleasedEvent): void {
   let gigPackage = Package.load(packageId);
 
   if (gigPackage) {
-    // Update package amountReleased
-    gigPackage.amountReleased = gigPackage.amountReleased.plus(
-      event.params.amount
-    );
+    // Update package amountReleased (using gross amount: fee + writer payment)
+    let grossAmount = event.params.amount.plus(event.params.platformFee);
+    gigPackage.amountReleased = gigPackage.amountReleased.plus(grossAmount);
     gigPackage.lastUpdated = event.block.timestamp;
     gigPackage.save();
 
@@ -485,6 +493,7 @@ export function handlePaymentReleased(event: PaymentReleasedEvent): void {
     payment.from = gigPackage.creator;
     payment.to = event.params.to;
     payment.amount = event.params.amount;
+    payment.platformFee = event.params.platformFee;
     payment.timestamp = event.block.timestamp;
     payment.transactionHash = event.transaction.hash;
 
@@ -504,9 +513,7 @@ export function handlePaymentReleased(event: PaymentReleasedEvent): void {
     let writer = User.load(event.params.to);
 
     if (creator) {
-      creator.totalPaymentsSent = creator.totalPaymentsSent.plus(
-        event.params.amount
-      );
+      creator.totalPaymentsSent = creator.totalPaymentsSent.plus(grossAmount);
       creator.lastUpdated = event.block.timestamp;
       creator.save();
     }
@@ -595,19 +602,6 @@ export function handleGigPackageExpired(event: GigPackageExpiredEvent): void {
   }
 }
 
-// Handler for Initialized event
-export function handleInitialized(event: InitializedEvent): void {
-  // Create event entity
-  let entity = new InitializedEntity(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  );
-  entity.version = event.params.version;
-  entity.blockNumber = event.block.number;
-  entity.blockTimestamp = event.block.timestamp;
-  entity.transactionHash = event.transaction.hash;
-  entity.save();
-}
-
 // Handler for OwnershipTransferred event
 export function handleOwnershipTransferred(
   event: OwnershipTransferredEvent
@@ -626,4 +620,18 @@ export function handleOwnershipTransferred(
   // Create User entities if they don't exist yet
   getOrCreateUser(event.params.previousOwner, event.block.timestamp);
   getOrCreateUser(event.params.newOwner, event.block.timestamp);
+}
+
+// Handler for PlatformFeeUpdated event
+export function handlePlatformFeeUpdated(event: ethereum.Event): void {
+  // Create event entity with explicitly named arguments to avoid type confusion
+  let entity = new PlatformFeeUpdatedEntity(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  );
+  // Get the parameter from the event parameters array
+  entity.newFeeBps = BigInt.fromI32(event.parameters[0].value.toI32());
+  entity.blockNumber = event.block.number;
+  entity.blockTimestamp = event.block.timestamp;
+  entity.transactionHash = event.transaction.hash;
+  entity.save();
 }

@@ -5,10 +5,12 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { type ReactNode } from "react";
-import { WagmiProvider } from "wagmi";
+import { type ReactNode, useEffect, useState } from "react";
+import { WagmiProvider, useAccount, useChainId, useConfig } from "wagmi";
 import { SessionProvider } from "next-auth/react";
 import { config } from "@/lib/wagmi";
+import { baseSepolia } from "wagmi/chains";
+import { switchChain } from "wagmi/actions";
 
 function makeQueryClient() {
   return new QueryClient({
@@ -38,13 +40,84 @@ function getQueryClient() {
   }
 }
 
+// Network validator component
+function NetworkValidator({ children }: { children: ReactNode }) {
+  const { isConnected } = useAccount();
+  const chainId = useChainId();
+  const wagmiConfig = useConfig();
+  const [isCorrectNetwork, setIsCorrectNetwork] = useState(true);
+  const [networkSwitchAttempted, setNetworkSwitchAttempted] = useState(false);
+
+  useEffect(() => {
+    // Only check network if wallet is connected
+    if (isConnected) {
+      console.log(
+        `Connected to chain ID: ${chainId}, Base Sepolia ID: ${baseSepolia.id}`
+      );
+
+      if (chainId !== baseSepolia.id) {
+        setIsCorrectNetwork(false);
+
+        // Auto-switch to the correct network
+        const switchToCorrectNetwork = async () => {
+          try {
+            console.log("Attempting to switch to Base Sepolia...");
+            setNetworkSwitchAttempted(true);
+            await switchChain(wagmiConfig, { chainId: baseSepolia.id });
+            console.log("Successfully switched to Base Sepolia");
+            setIsCorrectNetwork(true);
+          } catch (error) {
+            console.error("Failed to switch network:", error);
+            // Network switch failed - user will need to switch manually
+          }
+        };
+
+        if (!networkSwitchAttempted) {
+          switchToCorrectNetwork();
+        }
+      } else if (chainId === baseSepolia.id) {
+        console.log("Already connected to Base Sepolia");
+        setIsCorrectNetwork(true);
+      }
+    }
+  }, [isConnected, chainId, wagmiConfig, networkSwitchAttempted]);
+
+  // Return children with a network warning banner if needed
+  return (
+    <>
+      {isConnected && !isCorrectNetwork && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: "#FF4D4F",
+            color: "white",
+            padding: "8px 16px",
+            textAlign: "center",
+            zIndex: 1000,
+            fontSize: "14px",
+          }}
+        >
+          Please switch to Base Sepolia network (Chain ID: {baseSepolia.id}).
+          Currently connected to Chain ID: {chainId}.
+        </div>
+      )}
+      {children}
+    </>
+  );
+}
+
 export function WalletProvider(props: { children: ReactNode }) {
   const queryClient = getQueryClient();
 
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <SessionProvider>{props.children}</SessionProvider>
+        <SessionProvider>
+          <NetworkValidator>{props.children}</NetworkValidator>
+        </SessionProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );

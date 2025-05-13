@@ -4,6 +4,7 @@ type DeliverableApprovedEvent @entity(immutable: true) {
   packageId: BigInt! # uint256
   deliverableId: BigInt! # uint256
   writer: Bytes! # address
+  approvedQuantity: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -15,6 +16,7 @@ type DeliverableCreatedEvent @entity(immutable: true) {
   deliverableId: BigInt! # uint256
   contentType: String! # string
   amount: BigInt! # uint256
+  quantity: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -25,6 +27,7 @@ type DeliverableRejectedEvent @entity(immutable: true) {
   packageId: BigInt! # uint256
   deliverableId: BigInt! # uint256
   writer: Bytes! # address
+  submittedQuantity: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -35,6 +38,7 @@ type DeliverableRevisedEvent @entity(immutable: true) {
   packageId: BigInt! # uint256
   deliverableId: BigInt! # uint256
   writer: Bytes! # address
+  submittedQuantity: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -45,6 +49,7 @@ type DeliverableSubmittedEvent @entity(immutable: true) {
   packageId: BigInt! # uint256
   deliverableId: BigInt! # uint256
   writer: Bytes! # address
+  submittedQuantity: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -94,14 +99,6 @@ type GigPackageExpiredEvent @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
-type InitializedEvent @entity(immutable: true) {
-  id: Bytes!
-  version: BigInt! # uint64
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
 type InvitationAcceptedEvent @entity(immutable: true) {
   id: Bytes!
   packageId: BigInt! # uint256
@@ -135,6 +132,15 @@ type PaymentReleasedEvent @entity(immutable: true) {
   deliverableId: BigInt! # uint256
   to: Bytes! # address
   amount: BigInt! # uint256
+  platformFee: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type PlatformFeeUpdatedEvent @entity(immutable: true) {
+  id: Bytes!
+  newFeeBps: BigInt! # uint16
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -206,6 +212,9 @@ type Deliverable @entity(immutable: false) {
   contentType: String!
   status: DeliverableStatus!
   amount: BigInt!
+  quantity: BigInt!
+  submittedQuantity: BigInt
+  approvedQuantity: BigInt
   writer: User
   submittedAt: BigInt
   approvedAt: BigInt
@@ -234,6 +243,7 @@ type Payment @entity(immutable: true) {
   from: User!
   to: User!
   amount: BigInt!
+  platformFee: BigInt!
   timestamp: BigInt!
   transactionHash: Bytes!
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import classes from "./gig-card.module.css";
 import { GlassCard } from "@/components/glass-card";
-import { Stack, Text, Tooltip } from "@mantine/core";
+import { Group, Stack, Text, Tooltip } from "@mantine/core";
 import Image from "next/image";
 import { IGig } from "@/schema/gig.schema";
 import { getContentTypeIcon } from "@/lib/utils";
@@ -16,22 +16,45 @@ interface IGigCard {
 
 export const GigCard = ({ gig, className }: IGigCard) => {
   const { onchainGig, metadata } = gig;
-  const icon = getContentTypeIcon(metadata.contentType);
+
+  // Get unique content types from deliverables
+  const contentTypes = [
+    ...new Set(metadata.deliverables.map((d) => d.contentType)),
+  ];
 
   return (
     <GlassCard className={cx(classes.gigCard, className)}>
       <Stack gap="0">
         <Stack className={classes.gigIconContainer}>
-          <Text className={classes.contentTypeText}>
-            {metadata.contentType}
-          </Text>
-          <Image
-            src={`/assets/content-types/${icon}`}
-            alt="Gig Icon"
-            width={1024}
-            height={1024}
-            className={classes.gigIcon}
-          />
+          <Group
+            justify="space-between"
+            wrap="nowrap"
+            className={classes.contentTypeBanner}
+          >
+            <Text className={classes.contentTypeCount}>
+              {contentTypes.length}{" "}
+              {contentTypes.length === 1 ? "type" : "types"}
+            </Text>
+          </Group>
+
+          <div className={classes.contentTypeBubbles}>
+            {contentTypes.map((contentType, index) => (
+              <Tooltip key={index} label={contentType}>
+                <div
+                  className={classes.bubbleWrapper}
+                  style={{ zIndex: contentTypes.length - index }}
+                >
+                  <Image
+                    src={`/assets/content-types/${getContentTypeIcon(contentType)}`}
+                    alt={contentType}
+                    width={48}
+                    height={48}
+                    className={classes.contentTypeBubble}
+                  />
+                </div>
+              </Tooltip>
+            ))}
+          </div>
         </Stack>
         <Stack p="lg">
           <Tooltip

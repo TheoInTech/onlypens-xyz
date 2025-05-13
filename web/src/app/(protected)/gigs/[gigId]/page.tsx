@@ -1,40 +1,121 @@
+"use client";
+
 import { getContentTypeIcon, getTimeUntil } from "@/lib/utils";
-import { getGig } from "@/services/gigs.service";
-import { Divider, Grid, GridCol, Group, Stack, Text } from "@mantine/core";
+import {
+  Container,
+  Divider,
+  Grid,
+  GridCol,
+  Group,
+  Loader,
+  Stack,
+  Text,
+  Tooltip,
+} from "@mantine/core";
 import React from "react";
-import Image from "next/image";
-import classes from "./gig-id.module.css";
 import { AmountPill, GlassCard, StatusPill, ToneNichePill } from "@/components";
+import useGig from "@/hooks/useGig";
+import Image from "next/image";
+import classes from "./page.module.css";
 
 interface IGigIdPage {
   params: {
     gigId: string;
-    address: string;
   };
 }
 
-const GigIdPage = async ({ params }: IGigIdPage) => {
-  const { gigId, address } = await params;
-  const { onchainGig, metadata, event } = await getGig(gigId, address);
-  const icon = getContentTypeIcon(metadata.contentType);
+const GigIdPage = ({ params }: IGigIdPage) => {
+  const { gigId } = params;
+  const { gigData, isLoadingGig } = useGig(gigId);
+
+  if (isLoadingGig) {
+    return (
+      <Container
+        p="sm"
+        h="100%"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "8px",
+        }}
+      >
+        <Loader color="purple" />
+        <Text>Loading your gig...</Text>
+      </Container>
+    );
+  }
+
+  if (!gigData) {
+    return (
+      <Container
+        p="sm"
+        h="100%"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "8px",
+        }}
+      >
+        <Text>Gig not found. Please try again.</Text>
+      </Container>
+    );
+  }
+
+  const { metadata, onchainGig } = gigData;
+
+  // Get unique content types from deliverables
+  const contentTypes = [
+    ...new Set(metadata.deliverables.map((d) => d.contentType)),
+  ];
 
   return (
     <Stack gap="lg">
       <GlassCard>
         <Grid gutter="xl">
           <GridCol span={4}>
-            <Stack className={classes.gigIconContainer}>
-              <Text className={classes.contentTypeText}>
-                {metadata.contentType}
-              </Text>
-              <Image
-                src={`/assets/content-types/${icon}`}
-                alt="Gig Icon"
-                width={1024}
-                height={1024}
-                className={classes.gigIcon}
-              />
-            </Stack>
+            <div className={classes.contentTypeDisplay}>
+              <div className={classes.contentTypeHeader}>
+                <Text className={classes.contentTypeCount}>
+                  {contentTypes.length}{" "}
+                  {contentTypes.length === 1 ? "Content Type" : "Content Types"}
+                </Text>
+              </div>
+              <div className={classes.contentTypeBubbles}>
+                {contentTypes.map((contentType, index) => (
+                  <Tooltip key={index} label={contentType} position="bottom">
+                    <div
+                      className={classes.bubbleWrapper}
+                      style={{
+                        zIndex: contentTypes.length - index,
+                        transform: `translateX(${index * -8}px)`,
+                      }}
+                    >
+                      <Image
+                        src={`/assets/content-types/${getContentTypeIcon(contentType)}`}
+                        alt={contentType}
+                        width={64}
+                        height={64}
+                        className={classes.contentTypeBubble}
+                      />
+                    </div>
+                  </Tooltip>
+                ))}
+              </div>
+              <div className={classes.deliverableSummary}>
+                {metadata.deliverables.map((deliverable, index) => (
+                  <div key={index} className={classes.deliverableItem}>
+                    <Text size="xs" fw={700}>
+                      {deliverable.contentType}
+                    </Text>
+                    <Text size="xs">Qty: {deliverable.quantity}</Text>
+                  </div>
+                ))}
+              </div>
+            </div>
           </GridCol>
           <GridCol span={8}>
             <Stack>
@@ -59,16 +140,6 @@ const GigIdPage = async ({ params }: IGigIdPage) => {
               <Text size="sm" c="gray.2">
                 {metadata.description}
               </Text>
-              <Group gap="xs">
-                <Text size="xs" fw={700}>
-                  Tones:{" "}
-                </Text>
-                <Group gap="xs">
-                  {metadata.toneKeywords.map((tone) => (
-                    <ToneNichePill value={tone} size="md" key={tone} />
-                  ))}
-                </Group>
-              </Group>
               <Group gap="xs">
                 <Text size="xs" fw={700}>
                   Niches:{" "}

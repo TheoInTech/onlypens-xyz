@@ -115,3 +115,99 @@ export const PaymentEventSchema = z.object({
 });
 
 export type IPaymentEvent = z.infer<typeof PaymentEventSchema>;
+
+// ======== GraphQL Response Types ========
+
+// User response types
+export interface IUser {
+  id: string;
+  totalPaymentsReceived?: string;
+  totalPaymentsSent?: string;
+}
+
+export interface IUserResponse {
+  user: IUser | null;
+}
+
+// Gig response types
+export interface IGig {
+  id: string;
+  packageId: string;
+  totalAmount: string;
+  amountReleased: string;
+  status: string;
+  createdAt: number;
+  lastUpdated: number;
+  expiresAt: number;
+  isExpired: boolean;
+  writer: { id: string } | null;
+  numDeliverables: number;
+  numApproved: number;
+  transactionHash: string;
+}
+
+export interface IGigsResponse {
+  packages: IGig[];
+}
+
+// Deliverable response types
+export interface IDeliverableResponse {
+  id: string;
+  deliverableId: string;
+  contentType: string;
+  status: string;
+  amount: string;
+  submittedAt: number;
+  approvedAt?: number;
+  rejectedAt?: number;
+  revisedAt?: number;
+  writer?: { id: string };
+  package?: {
+    id: string;
+    packageId: string;
+    status: string;
+    creator: { id: string };
+  };
+  transactionHash: string;
+}
+
+export interface IDeliverablesResponse {
+  deliverables: IDeliverableResponse[];
+}
+
+// Invitation response types
+export interface IInvitation {
+  id: string;
+  status: string;
+  invitedAt: number;
+  respondedAt?: number;
+  ghostwriter?: { id: string };
+  package?: {
+    id: string;
+    packageId: string;
+    status: string;
+    creator: { id: string };
+    totalAmount: string;
+    expiresAt: number;
+    isExpired: boolean;
+    createdAt: number;
+    transactionHash: string;
+  };
+  transactionHash: string;
+}
+
+export interface IInvitationsResponse {
+  invitations: IInvitation[];
+}
+
+// Package with deliverables response type
+export interface IPackageWithDeliverables {
+  id: string;
+  packageId: string;
+  status: string;
+  deliverables: IDeliverableResponse[];
+}
+
+export interface IPackagesWithDeliverablesResponse {
+  packages: IPackageWithDeliverables[];
+}

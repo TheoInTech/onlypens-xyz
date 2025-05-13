@@ -31,6 +31,8 @@
     "@openzeppelin/contracts-upgradeable": "^5.3.0"
   },
   "scripts": {
-    "extract-abi": "npx hardhat compile && npx ts-node scripts/extractAbi.ts"
+    "extract-abi": "npx hardhat compile && npx ts-node scripts/extractAbi.ts",
+    "test": "npx hardhat test test/OnlyPens.ts --no-compile",
+    "compile": "npx hardhat compile"
   }
 }

@@ -84,14 +84,10 @@ _Reference_: [Deploying Smart Contracts with Hardhat](https://docs.base.org/cook
 
 The OnlyPens platform utilizes the following smart contracts:
 
-| Contract Name               | Contract Address                           | Description                                                                                             |
-| --------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| OnlyPensHelpers             | 0x74f6F9aaB65920dE55CD499227Cb99aD86C02964 | Library contract containing helper functions for deliverable validation and other utility operations    |
-| OnlyPens (Implementation)   | 0xC8F769515cf20B8Ba3b195Efc17DAc1Cd3a85b41 | Core contract containing the business logic for gig management, deliverables, and payment release       |
-| CustomProxyAdmin            | 0xf92C590E5d2DF7E795293834d83CCb35a345b826 | Admin contract controlling the upgrade mechanism and permissions                                        |
-| TransparentUpgradeableProxy | 0xAea48688cD175CC4dC269b0ceFB65597B5419900 | Proxy contract that users interact with, forwarding calls to the implementation while maintaining state |
-
-The system uses the Transparent Proxy Pattern, allowing for future upgrades while preserving user data and contract state.
+| Contract Name             | Contract Address                           | Description                                                                                          |
+| ------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| OnlyPensHelpers           | 0xbde1F236a030a0257ef83c43F289FE5107Ae9c74 | Library contract containing helper functions for deliverable validation and other utility operations |
+| OnlyPens (Implementation) | 0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062 | Core contract containing the business logic for gig management, deliverables, and payment release    |
 
 ---
 

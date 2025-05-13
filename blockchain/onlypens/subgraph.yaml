@@ -8,9 +8,9 @@ dataSources:
     name: OnlyPens
     network: base-sepolia
     source:
-      address: "0xC8F769515cf20B8Ba3b195Efc17DAc1Cd3a85b41"
+      address: "0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062"
       abi: OnlyPens
-      startBlock: 25559167
+      startBlock: 25612679
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -31,24 +31,24 @@ dataSources:
         - GigPackageCompletedEvent
         - GigPackageCreatedEvent
         - GigPackageExpiredEvent
-        - InitializedEvent
         - InvitationAcceptedEvent
         - InvitationDeclinedEvent
         - OwnershipTransferredEvent
         - PaymentReleasedEvent
+        - PlatformFeeUpdatedEvent
       abis:
         - name: OnlyPens
           file: ./abis/OnlyPens.json
       eventHandlers:
-        - event: DeliverableApproved(indexed uint256,indexed uint256,indexed address)
+        - event: DeliverableApproved(indexed uint256,indexed uint256,indexed address,uint256)
           handler: handleDeliverableApproved
-        - event: DeliverableCreated(indexed uint256,indexed uint256,string,uint256)
+        - event: DeliverableCreated(indexed uint256,indexed uint256,string,uint256,uint256)
           handler: handleDeliverableCreated
-        - event: DeliverableRejected(indexed uint256,indexed uint256,indexed address)
+        - event: DeliverableRejected(indexed uint256,indexed uint256,indexed address,uint256)
           handler: handleDeliverableRejected
-        - event: DeliverableRevised(indexed uint256,indexed uint256,indexed address)
+        - event: DeliverableRevised(indexed uint256,indexed uint256,indexed address,uint256)
           handler: handleDeliverableRevised
-        - event: DeliverableSubmitted(indexed uint256,indexed uint256,indexed address)
+        - event: DeliverableSubmitted(indexed uint256,indexed uint256,indexed address,uint256)
           handler: handleDeliverableSubmitted
         - event: GhostwriterInvited(indexed uint256,indexed address)
           handler: handleGhostwriterInvited
@@ -60,14 +60,14 @@ dataSources:
           handler: handleGigPackageCreated
         - event: GigPackageExpired(indexed uint256)
           handler: handleGigPackageExpired
-        - event: Initialized(uint64)
-          handler: handleInitialized
         - event: InvitationAccepted(indexed uint256,indexed address)
           handler: handleInvitationAccepted
         - event: InvitationDeclined(indexed uint256,indexed address)
           handler: handleInvitationDeclined
         - event: OwnershipTransferred(indexed address,indexed address)
           handler: handleOwnershipTransferred
-        - event: PaymentReleased(indexed uint256,indexed uint256,indexed address,uint256)
+        - event: PaymentReleased(indexed uint256,indexed uint256,indexed address,uint256,uint256)
           handler: handlePaymentReleased
+        - event: PlatformFeeUpdated(uint16)
+          handler: handlePlatformFeeUpdated
       file: ./src/only-pens.ts

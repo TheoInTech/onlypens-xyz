@@ -75,6 +75,10 @@ const config: HardhatUserConfig = {
       },
     ],
   },
+  sourcify: {
+    // Enable Sourcify verification
+    enabled: true,
+  },
   paths: {
     sources: "./contracts",
     tests: "./test",

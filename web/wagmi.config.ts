@@ -2,6 +2,7 @@ import { defineConfig } from "@wagmi/cli";
 import { react } from "@wagmi/cli/plugins";
 import { OnlyPensABI } from "@/lib/abi";
 import { Abi } from "viem";
+import { baseSepolia } from "viem/chains";
 
 export default defineConfig({
   out: "src/hooks/abi-generated.ts",
@@ -9,6 +10,10 @@ export default defineConfig({
     {
       name: "OnlyPens",
       abi: OnlyPensABI as Abi,
+      address: {
+        // [base.id]: "",
+        [baseSepolia.id]: "0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062",
+      },
     },
   ],
   plugins: [

@@ -2,7 +2,6 @@
 pragma solidity ^0.8.22;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./OnlyPensHelpers.sol";
 
@@ -10,7 +9,7 @@ import "./OnlyPensHelpers.sol";
  * @title OnlyPens
  * @dev Escrow contract for OnlyPens platform managing gig packages and deliverables
  */
-contract OnlyPens is Initializable, Ownable {
+contract OnlyPens is Ownable {
     enum PackageStatus {
         PENDING,
         INVITED,
@@ -32,6 +31,8 @@ contract OnlyPens is Initializable, Ownable {
         string contentType;
         DeliverableStatus status;
         uint256 amount;
+        uint256 quantity;
+        uint256 submittedQuantity;
         uint256 submittedAt;
         uint256 approvedAt;
     }
@@ -81,7 +82,8 @@ contract OnlyPens is Initializable, Ownable {
         uint256 indexed packageId,
         uint256 indexed deliverableId,
         string contentType,
-        uint256 amount
+        uint256 amount,
+        uint256 quantity
     );
     event GhostwriterInvited(
         uint256 indexed packageId,
@@ -98,22 +100,26 @@ contract OnlyPens is Initializable, Ownable {
     event DeliverableSubmitted(
         uint256 indexed packageId,
         uint256 indexed deliverableId,
-        address indexed writer
+        address indexed writer,
+        uint256 submittedQuantity
     );
     event DeliverableRevised(
         uint256 indexed packageId,
         uint256 indexed deliverableId,
-        address indexed writer
+        address indexed writer,
+        uint256 submittedQuantity
     );
     event DeliverableApproved(
         uint256 indexed packageId,
         uint256 indexed deliverableId,
-        address indexed writer
+        address indexed writer,
+        uint256 approvedQuantity
     );
     event DeliverableRejected(
         uint256 indexed packageId,
         uint256 indexed deliverableId,
-        address indexed writer
+        address indexed writer,
+        uint256 submittedQuantity
     );
     event PaymentReleased(
         uint256 indexed packageId,
@@ -212,20 +218,14 @@ contract OnlyPens is Initializable, Ownable {
         _;
     }
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() Ownable(msg.sender) {
-        _disableInitializers();
-    }
-
-    function initialize(
+    constructor(
         IERC20 _usdc,
         address _treasury,
         uint16 _platformFeeBps
-    ) external initializer {
+    ) Ownable(msg.sender) {
         require(address(_usdc) != address(0), "Invalid USDC");
         require(_treasury != address(0), "Invalid treasury");
         require(_platformFeeBps <= 10000, "Fee too high"); // Max 100%
-        _transferOwnership(msg.sender);
 
         usdc = _usdc;
         treasury = _treasury;
@@ -318,6 +318,7 @@ contract OnlyPens is Initializable, Ownable {
             d.contentType = _deliverables[i].contentType;
             d.status = DeliverableStatus.PENDING;
             d.amount = _deliverables[i].amount;
+            d.quantity = _deliverables[i].quantity;
 
             // Store with index+1 for unambiguous detection
             packageDeliverableIds[_packageId].push(deliverableId);
@@ -327,7 +328,8 @@ contract OnlyPens is Initializable, Ownable {
                 _packageId,
                 deliverableId,
                 _deliverables[i].contentType,
-                _deliverables[i].amount
+                _deliverables[i].amount,
+                _deliverables[i].quantity
             );
         }
     }
@@ -478,7 +480,8 @@ contract OnlyPens is Initializable, Ownable {
     /// @notice Ghostwriter submits a deliverable
     function submitDeliverable(
         uint256 _packageId,
-        uint256 _deliverableId
+        uint256 _deliverableId,
+        uint256 _submittedQuantity
     ) external {
         if (!packageExists[_packageId]) {
             revert("No package");
@@ -510,9 +513,14 @@ contract OnlyPens is Initializable, Ownable {
             revert("Already handled");
         }
 
+        if (_submittedQuantity == 0 || _submittedQuantity > d.quantity) {
+            revert("Invalid quantity");
+        }
+
         DeliverableStatus prevStatus = d.status;
         d.status = DeliverableStatus.SUBMITTED;
         d.submittedAt = block.timestamp;
+        d.submittedQuantity = _submittedQuantity;
 
         // Update package status if needed
         if (p.status == PackageStatus.ASSIGNED) {
@@ -523,9 +531,19 @@ contract OnlyPens is Initializable, Ownable {
 
         // Differentiate first submission vs revision
         if (prevStatus == DeliverableStatus.REJECTED) {
-            emit DeliverableRevised(_packageId, _deliverableId, msg.sender);
+            emit DeliverableRevised(
+                _packageId,
+                _deliverableId,
+                msg.sender,
+                _submittedQuantity
+            );
         } else {
-            emit DeliverableSubmitted(_packageId, _deliverableId, msg.sender);
+            emit DeliverableSubmitted(
+                _packageId,
+                _deliverableId,
+                msg.sender,
+                _submittedQuantity
+            );
         }
     }
 
@@ -661,7 +679,12 @@ contract OnlyPens is Initializable, Ownable {
             p.numApproved++;
             amountToRelease = d.amount;
 
-            emit DeliverableApproved(_packageId, _deliverableId, p.writer);
+            emit DeliverableApproved(
+                _packageId,
+                _deliverableId,
+                p.writer,
+                d.submittedQuantity
+            );
             return amountToRelease;
         }
         return 0; // Return 0 if not approved (e.g., not in SUBMITTED state)
@@ -792,8 +815,14 @@ contract OnlyPens is Initializable, Ownable {
 
         d.status = DeliverableStatus.REJECTED;
         p.lastUpdated = block.timestamp;
+        uint256 rejectedQuantity = d.submittedQuantity;
 
-        emit DeliverableRejected(_packageId, _deliverableId, p.writer);
+        emit DeliverableRejected(
+            _packageId,
+            _deliverableId,
+            p.writer,
+            rejectedQuantity
+        );
     }
 
     /// @notice Approve all remaining deliverables

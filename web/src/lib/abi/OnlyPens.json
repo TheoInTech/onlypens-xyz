@@ -1,18 +1,24 @@
 [
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "_usdc",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_treasury",
+        "type": "address"
+      },
+      {
+        "internalType": "uint16",
+        "name": "_platformFeeBps",
+        "type": "uint16"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "constructor"
-  },
-  {
-    "inputs": [],
-    "name": "InvalidInitialization",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "NotInitializing",
-    "type": "error"
   },
   {
     "inputs": [
@@ -56,6 +62,12 @@
         "internalType": "address",
         "name": "writer",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "approvedQuantity",
+        "type": "uint256"
       }
     ],
     "name": "DeliverableApproved",
@@ -87,6 +99,12 @@
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "quantity",
+        "type": "uint256"
       }
     ],
     "name": "DeliverableCreated",
@@ -112,6 +130,12 @@
         "internalType": "address",
         "name": "writer",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "submittedQuantity",
+        "type": "uint256"
       }
     ],
     "name": "DeliverableRejected",
@@ -137,6 +161,12 @@
         "internalType": "address",
         "name": "writer",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "submittedQuantity",
+        "type": "uint256"
       }
     ],
     "name": "DeliverableRevised",
@@ -162,6 +192,12 @@
         "internalType": "address",
         "name": "writer",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "submittedQuantity",
+        "type": "uint256"
       }
     ],
     "name": "DeliverableSubmitted",
@@ -254,19 +290,6 @@
       }
     ],
     "name": "GigPackageExpired",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint64",
-        "name": "version",
-        "type": "uint64"
-      }
-    ],
-    "name": "Initialized",
     "type": "event"
   },
   {
@@ -476,6 +499,11 @@
           {
             "internalType": "uint256",
             "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "quantity",
             "type": "uint256"
           }
         ],
@@ -689,29 +717,6 @@
   {
     "inputs": [
       {
-        "internalType": "contract IERC20",
-        "name": "_usdc",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_treasury",
-        "type": "address"
-      },
-      {
-        "internalType": "uint16",
-        "name": "_platformFeeBps",
-        "type": "uint16"
-      }
-    ],
-    "name": "initialize",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
         "name": "_packageId",
         "type": "uint256"
@@ -866,6 +871,16 @@
       {
         "internalType": "uint256",
         "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "quantity",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "submittedQuantity",
         "type": "uint256"
       },
       {
@@ -1073,6 +1088,11 @@
       {
         "internalType": "uint256",
         "name": "_deliverableId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_submittedQuantity",
         "type": "uint256"
       }
     ],

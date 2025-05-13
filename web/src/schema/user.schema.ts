@@ -1,10 +1,7 @@
 import { z } from "zod";
 import { ERoles } from "@/stores/constants";
-import {
-  EToneKeywords,
-  ENicheKeywords,
-  EContentTypes,
-} from "@/schema/enum.schema";
+import { ENicheKeywords, EContentTypes } from "@/schema/enum.schema";
+import { MatchmakerResponseSchema } from "./matchmaker.schema";
 
 // Flattened user schema
 export const UserSchema = z
@@ -34,11 +31,7 @@ export const UserSchema = z
       .min(3, "You must provide all 3 sample writings")
       .max(3, "You can provide up to 3 sample writings"),
 
-    // Preferences
-    toneKeywords: z
-      .array(z.nativeEnum(EToneKeywords))
-      .min(3, "You must select at least 3 tone keywords")
-      .max(5, "You can select up to 5 tone keywords"),
+    // Preferences,
     nicheKeywords: z
       .array(z.nativeEnum(ENicheKeywords))
       .min(1, "You must select at least 1 niche keyword")
@@ -47,6 +40,7 @@ export const UserSchema = z
     // Ghostwriter-specific fields (conditional based on role)
     contentTypeKeywords: z.array(z.nativeEnum(EContentTypes)),
     ratePerWord: z.coerce.number().positive().nullable(),
+    matchmaker: MatchmakerResponseSchema.nullish(),
   })
   .refine(
     (data) => {
@@ -96,10 +90,10 @@ export const DefaultCreatorForm: IUser = {
   about: "",
   avatarUrl: "",
   samples: [],
-  toneKeywords: [],
   nicheKeywords: [],
   contentTypeKeywords: [],
   ratePerWord: null,
+  matchmaker: null,
 };
 
 export const DefaultGhostwriterForm: IUser = {
@@ -109,8 +103,8 @@ export const DefaultGhostwriterForm: IUser = {
   about: "",
   avatarUrl: "",
   samples: [],
-  toneKeywords: [],
   nicheKeywords: [],
   contentTypeKeywords: [],
   ratePerWord: null,
+  matchmaker: null,
 };

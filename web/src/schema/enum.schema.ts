@@ -81,11 +81,11 @@ export enum ENicheKeywords {
 
 export enum EContentTypes {
   SOCIAL_POST = "Social Post", // Single tweet, LinkedIn, etc. /
-  SOCIAL_THREAD = "Thread / Longform Post", // Tweet thread or multi-part post /
+  SOCIAL_THREAD = "Thread / Longform", // Tweet thread or multi-part post /
   SHORT_CAPTION = "Short Caption", // IG, TikTok, or quick hooks /
   BLOG_NEWSLETTER = "Blog / Newsletter", // Long-form + email content /
   PRODUCT_MARKETING = "Product Copy", // Ad copy, CTAs, product desc /
-  WEBSITE_LANDING = "Website / Landing Copy", // Headlines, hero copy /
+  WEBSITE_LANDING = "Website Copy", // Headlines, hero copy /
   SCRIPT_DIALOGUE = "Script / Dialogue", // Podcast, video, reels /
   PERSONAL_BIO = "Bio / About Me", // Creator intros, brand bios
   WHITEPAPER = "Whitepaper", // Technical writing, blockchain, crypto, etc.
