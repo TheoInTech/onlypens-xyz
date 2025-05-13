@@ -481,6 +481,10 @@ const CreatePackagePage = () => {
         const matchmakerResponse =
           await generateMatchmakingData(matchmakerPayload);
 
+        if (!matchmakerResponse) {
+          throw new Error("Failed to generate matchmaking data");
+        }
+
         const createGigPayload: IGigForm = {
           ...values,
           matchmaker: matchmakerResponse,

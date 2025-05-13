@@ -10,7 +10,6 @@ export const MatchmakerSchema = z.object({
   samples: z.array(z.string()).max(3),
   nicheKeywords: z.array(z.nativeEnum(ENicheKeywords)),
   contentTypeKeywords: z.array(z.nativeEnum(EContentTypes)),
-  toneKeywords: z.array(z.nativeEnum(EToneKeywords)).optional(),
   budget: z.number().positive(),
   source: z.enum(["onboarding", "gig-creation"]),
 });

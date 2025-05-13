@@ -78,7 +78,6 @@ export async function POST(request: NextRequest) {
         - Bio: {{about}}
         - Niche Keywords: {{nicheKeywords[]}} — from list like ["crypto", "health", "startups"]
         - Content Types: {{contentTypeKeywords[]}} — from list like ["threads", "newsletters", "web copy"]
-        - Tone Preferences: {{toneKeywords[]}} — from list like ["witty", "professional", "emotional"]
         - Rate per word: {{ratePerWord}} — in USD
         - Sample Writings:
         1. {{samples[0]}}
@@ -96,16 +95,20 @@ export async function POST(request: NextRequest) {
           "{{contentTypeKeywords[]}}",
           body.contentTypeKeywords.join(", ")
         )
-        .replace("{{toneKeywords[]}}", body.toneKeywords?.join(", ") || "")
-        .replace("{{ratePerWord}}", `$${body.budget}`);
+        .replace("{{ratePerWord}}", `$${body.budget}`)
+        .replace("{{samples[0]}}", body.samples[0])
+        .replace("{{samples[1]}}", body.samples[1])
+        .replace("{{samples[2]}}", body.samples[2]);
     } else if (body.source === "gig-creation") {
       const rawUserPrompt = `Analyze based on:
         - Creator Description of Project: {{about}}
-        - Reference Samples or Briefs: {{samples[]}}
-        - Desired Tone: {{toneKeywords[]}}
         - Gig Niche: {{nicheKeywords[]}}
         - Content Types Expected: {{contentTypeKeywords[]}}
         - Overall Budget: {{totalAmount}}
+        - Sample Writings:
+        1. {{samples[0]}}
+        2. {{samples[1]}}
+        3. {{samples[2]}}
 
         Do NOT include estimatedWordRate — just set it to 'null'.
         The goal is to profile what type of ghostwriter would best fit this gig.
@@ -113,14 +116,15 @@ export async function POST(request: NextRequest) {
 
       userPrompt = rawUserPrompt
         .replace("{{about}}", body.bio)
-        .replace("{{samples[]}}", body.samples.join(", "))
-        .replace("{{toneKeywords[]}}", body.toneKeywords?.join(", ") || "")
         .replace("{{nicheKeywords[]}}", body.nicheKeywords.join(", "))
         .replace(
           "{{contentTypeKeywords[]}}",
           body.contentTypeKeywords.join(", ")
         )
-        .replace("{{totalAmount}}", `$${body.budget}`);
+        .replace("{{totalAmount}}", `$${body.budget}`)
+        .replace("{{samples[0]}}", body.samples[0])
+        .replace("{{samples[1]}}", body.samples[1])
+        .replace("{{samples[2]}}", body.samples[2]);
     }
 
     // Call OpenAI API without streaming to get the complete response first
@@ -141,9 +145,13 @@ export async function POST(request: NextRequest) {
       // Parse the complete JSON response
       const matchmakerJson = JSON.parse(completeJsonResponse);
 
+      console.log("MATCHMAKER JSON:", matchmakerJson);
+
       // Validate the response against the schema
       const validatedResponse =
         MatchmakerResponseSchema.safeParse(matchmakerJson);
+
+      console.log("MATCHMAKER Validated response:", validatedResponse);
 
       if (!validatedResponse.success) {
         return NextResponse.json(

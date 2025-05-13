@@ -94,7 +94,7 @@ export const GigFormSchema = z.object({
   deliverables: z
     .array(DeliverableSchema)
     .min(1, "At least one deliverable is required"),
-  referenceWritings: z.array(z.string()), // Optional reference writings
+  referenceWritings: z.array(z.string()), // reference writings
   matchmaker: MatchmakerResponseSchema.nullish(),
 });
 

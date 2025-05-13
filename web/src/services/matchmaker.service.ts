@@ -31,7 +31,13 @@ export const generateMatchmakingData = async (
       throw new Error(errorData.error || "Failed to generate brand strategy");
     }
 
-    return response.json();
+    const matchmakerResponse = await response.json();
+
+    if (!matchmakerResponse || !matchmakerResponse?.success) {
+      throw new Error("Failed to generate matchmaking data");
+    }
+
+    return matchmakerResponse.data;
   } catch (error) {
     console.error("Error creating gig:", error);
     throw error;

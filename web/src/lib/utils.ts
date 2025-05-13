@@ -95,6 +95,10 @@ export function getContentTypeIcon(contentType: string) {
       return "script-dialogue.png";
     case EContentTypes.PERSONAL_BIO:
       return "short-bio.png";
+    case EContentTypes.BOOK:
+      return "book.png";
+    case EContentTypes.WHITEPAPER:
+      return "whitepaper.png";
     default:
       return "/placeholder.png";
   }
