@@ -1,7 +1,16 @@
 "use client";
 
-import { Stack, Title, Text, Tabs, InputLabel, Group } from "@mantine/core";
-import React, { useEffect } from "react";
+import {
+  Stack,
+  Title,
+  Text,
+  Tabs,
+  InputLabel,
+  Group,
+  Loader,
+  Modal,
+} from "@mantine/core";
+import React, { useEffect, useState } from "react";
 import { Button, Input, Textarea } from "@/components";
 import {
   IconArrowLeftDashed,
@@ -20,9 +29,10 @@ import { useForm } from "@mantine/form";
 import useOnboarding from "@/hooks/useOnboarding";
 import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
+import { EMatchmakerSource, IMatchmaker } from "@/schema/matchmaker.schema";
+import { generateMatchmakingData } from "@/services/matchmaker.service";
 export const OnboardingStep2Ghostwriter = () => {
   const {
-    selectedToneKeywords,
     selectedNicheKeywords,
     selectedContentTypeKeywords,
     setStep,
@@ -32,13 +42,12 @@ export const OnboardingStep2Ghostwriter = () => {
   const { saveProfile, isSavingProfile } = useOnboarding();
   const router = useRouter();
 
-  const {
-    toneCheckboxes,
-    nicheCheckboxes,
-    contentTypeCheckboxes,
-    toneWarningVisible,
-    nicheWarningVisible,
-  } = useCheckboxGroup();
+  const [progressModalContent, setProgressModalContent] = useState<
+    string | undefined
+  >();
+
+  const { nicheCheckboxes, contentTypeCheckboxes, nicheWarningVisible } =
+    useCheckboxGroup();
 
   const form = useForm<IUser>({
     mode: "uncontrolled",
@@ -47,35 +56,77 @@ export const OnboardingStep2Ghostwriter = () => {
   });
 
   useEffect(() => {
-    form.setFieldValue("toneKeywords", selectedToneKeywords);
     form.setFieldValue("nicheKeywords", selectedNicheKeywords);
     form.setFieldValue("contentTypeKeywords", selectedContentTypeKeywords);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    selectedToneKeywords,
-    selectedNicheKeywords,
-    selectedContentTypeKeywords,
-  ]);
+  }, [selectedNicheKeywords, selectedContentTypeKeywords]);
 
   const handleBack = () => {
     setStep(1);
   };
 
   const handleSubmit = async (values: IUser) => {
-    const response = await saveProfile({
-      ...values,
-      address: address!.toString(),
-    });
+    try {
+      const matchmakerPayload: IMatchmaker = {
+        bio: values.about,
+        samples: values.samples,
+        nicheKeywords: values.nicheKeywords,
+        contentTypeKeywords: values.contentTypeKeywords,
+        budget: Number(values.ratePerWord),
+        source: EMatchmakerSource.ONBOARDING,
+      };
 
-    if (response?.success && response.user) {
-      setUser(response.user);
-      router.push("/dashboard");
+      setProgressModalContent("Generating matchmaking data...");
+      const matchmakerResponse =
+        await generateMatchmakingData(matchmakerPayload);
+
+      if (!matchmakerResponse) {
+        throw new Error("Failed to generate matchmaking data");
+      }
+
+      setProgressModalContent("Saving profile...");
+      const response = await saveProfile({
+        ...values,
+        address: address!.toString(),
+        matchmaker: matchmakerResponse,
+      });
+
+      if (response?.success && response.user) {
+        setProgressModalContent("Profile successfully saved. Redirecting...");
+
+        setUser(response.user);
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.error("Error in gig package creation process:", error);
+    } finally {
+      setProgressModalContent(undefined);
     }
   };
 
   return (
     <Stack gap="xl" align="center" justify="center" h="100%">
+      <Modal.Root
+        opened={!!progressModalContent}
+        onClose={() => {}}
+        centered
+        size="xl"
+      >
+        <Modal.Overlay className={classes.progressModalOverlay} />
+        <Modal.Content className={classes.progressModalContent}>
+          <Stack gap="md" align="center">
+            <Loader size="lg" color="purple" />
+            <Text size="sm" c="var(--mantine-color-midnight-9)">
+              {progressModalContent}
+            </Text>
+            <Text size="xs" c="dimmed" ta="center">
+              Please do not close or refresh the page.
+            </Text>
+          </Stack>
+        </Modal.Content>
+      </Modal.Root>
+
       <Stack gap="0" align="center">
         <Title order={1} fw={500}>
           Create your{" "}
@@ -177,25 +228,6 @@ export const OnboardingStep2Ghostwriter = () => {
             />
           </Stack>
 
-          {/* Tone Keywords */}
-          <Stack gap="sm">
-            <Stack gap="0">
-              <InputLabel>Tone Keywords</InputLabel>
-              <Text size="xs" c="dimmed">
-                Choose up to 5 keywords that best describe your writing style
-              </Text>
-              <Text className={classes.errorText}>
-                {form.errors.toneKeywords}
-              </Text>
-              {toneWarningVisible && (
-                <Text size="xs" c="red.5">
-                  You&apos;ve selected the maximum of 5 tone keywords
-                </Text>
-              )}
-            </Stack>
-            {toneCheckboxes}
-          </Stack>
-
           {/* Industries & Niches Keywords */}
           <Stack gap="sm">
             <Stack gap="0">
@@ -251,7 +283,7 @@ export const OnboardingStep2Ghostwriter = () => {
             rightSection={<IconArrowRightDashed />}
             type="submit"
             loading={isSavingProfile}
-            disabled={isSavingProfile}
+            disabled={isSavingProfile || !!progressModalContent}
           >
             {isSavingProfile ? "Saving" : "Submit"}
           </Button>

@@ -7,9 +7,11 @@ import {
 import { Group } from "@mantine/core";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Checkbox } from "@/components";
+import { ERoles } from "@/stores/constants";
 
 export const useCheckboxGroup = () => {
   const {
+    role,
     selectedToneKeywords,
     setSelectedToneKeywords,
     selectedNicheKeywords,
@@ -117,7 +119,7 @@ export const useCheckboxGroup = () => {
         localNicheKeywords,
         setLocalNicheKeywords,
         setSelectedNicheKeywords,
-        3, // Max allowed niche keywords
+        role === ERoles.GHOSTWRITER ? 10 : 3, // Max allowed niche keywords
         nicheWarningVisible,
         setNicheWarningVisible,
         nicheWarningTimeoutRef
@@ -128,6 +130,7 @@ export const useCheckboxGroup = () => {
       localNicheKeywords,
       nicheWarningVisible,
       setSelectedNicheKeywords,
+      role,
     ]
   );
 

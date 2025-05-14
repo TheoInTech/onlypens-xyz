@@ -1,5 +1,6 @@
 import { openai } from "@/lib/openai";
 import {
+  EMatchmakerSource,
   IMatchmaker,
   MatchmakerResponseSchema,
 } from "@/schema/matchmaker.schema";
@@ -73,12 +74,12 @@ export async function POST(request: NextRequest) {
     // Create the user prompt with the form data
     let userPrompt = "";
 
-    if (body.source === "onboarding") {
+    if (body.source === EMatchmakerSource.ONBOARDING) {
       const rawUserPrompt = `Analyze based on the following fields:
         - Bio: {{about}}
         - Niche Keywords: {{nicheKeywords[]}} — from list like ["crypto", "health", "startups"]
         - Content Types: {{contentTypeKeywords[]}} — from list like ["threads", "newsletters", "web copy"]
-        - Rate per word: {{ratePerWord}} — in USD
+        - Rate per word: {{ratePerWord}} per word — in USD
         - Sample Writings:
         1. {{samples[0]}}
         2. {{samples[1]}}
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
         .replace("{{samples[0]}}", body.samples[0])
         .replace("{{samples[1]}}", body.samples[1])
         .replace("{{samples[2]}}", body.samples[2]);
-    } else if (body.source === "gig-creation") {
+    } else if (body.source === EMatchmakerSource.GIG_CREATION) {
       const rawUserPrompt = `Analyze based on:
         - Creator Description of Project: {{about}}
         - Gig Niche: {{nicheKeywords[]}}
@@ -145,13 +146,9 @@ export async function POST(request: NextRequest) {
       // Parse the complete JSON response
       const matchmakerJson = JSON.parse(completeJsonResponse);
 
-      console.log("MATCHMAKER JSON:", matchmakerJson);
-
       // Validate the response against the schema
       const validatedResponse =
         MatchmakerResponseSchema.safeParse(matchmakerJson);
-
-      console.log("MATCHMAKER Validated response:", validatedResponse);
 
       if (!validatedResponse.success) {
         return NextResponse.json(

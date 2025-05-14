@@ -13,7 +13,8 @@
 
   &[data-active] {
     border: 1px solid transparent;
-    box-shadow: 0 0 0 2px var(--mantine-color-purple-8),
+    box-shadow:
+      0 0 0 2px var(--mantine-color-purple-8),
       inset 0 4px 6px -4px rgba(0, 0, 0, 0.5);
   }
 }
@@ -32,4 +33,19 @@
   color: var(--mantine-color-red-5);
   font-size: 18px;
   margin-top: 0;
+}
+
+.progressModalContent {
+  color: var(--mantine-color-midnight-9);
+  border-radius: var(--mantine-radius-xl);
+  padding: var(--mantine-spacing-xl);
+
+  .mantine-Modal-content {
+    background-color: var(--mantine-color-midnight-8);
+  }
+}
+
+.progressModalOverlay {
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(3px);
 }

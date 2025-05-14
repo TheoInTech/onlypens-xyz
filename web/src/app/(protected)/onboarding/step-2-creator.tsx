@@ -20,18 +20,12 @@ import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
 
 export const OnboardingStep2Creator = () => {
-  const { selectedToneKeywords, selectedNicheKeywords, setStep, setUser } =
-    useGlobalStore();
+  const { selectedNicheKeywords, setStep, setUser } = useGlobalStore();
   const { saveProfile, isSavingProfile } = useOnboarding();
   const router = useRouter();
   const { address } = useAccount();
 
-  const {
-    toneCheckboxes,
-    nicheCheckboxes,
-    toneWarningVisible,
-    nicheWarningVisible,
-  } = useCheckboxGroup();
+  const { nicheCheckboxes, nicheWarningVisible } = useCheckboxGroup();
 
   const form = useForm<IUser>({
     mode: "uncontrolled",
@@ -40,11 +34,10 @@ export const OnboardingStep2Creator = () => {
   });
 
   useEffect(() => {
-    form.setFieldValue("toneKeywords", selectedToneKeywords);
     form.setFieldValue("nicheKeywords", selectedNicheKeywords);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedToneKeywords, selectedNicheKeywords]);
+  }, [selectedNicheKeywords]);
 
   const handleBack = () => {
     setStep(1);
@@ -154,25 +147,6 @@ export const OnboardingStep2Creator = () => {
                 />
               </Tabs.Panel>
             </Tabs>
-          </Stack>
-
-          {/* Tone Keywords */}
-          <Stack gap="sm">
-            <Stack gap="0">
-              <InputLabel>Tone Keywords</InputLabel>
-              <Text size="xs" c="dimmed">
-                Choose up to 5 keywords that best describe your writing style
-              </Text>
-              <Text className={classes.errorText}>
-                {form.errors.toneKeywords}
-              </Text>
-              {toneWarningVisible && (
-                <Text size="xs" c="red.5">
-                  You&apos;ve selected the maximum of 5 tone keywords
-                </Text>
-              )}
-            </Stack>
-            {toneCheckboxes}
           </Stack>
 
           {/* Industries & Niches Keywords */}

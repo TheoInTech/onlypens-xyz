@@ -17,6 +17,7 @@ import { AmountPill, GlassCard, StatusPill, ToneNichePill } from "@/components";
 import useGig from "@/hooks/useGig";
 import Image from "next/image";
 import classes from "./page.module.css";
+import { InviteGhostwriters } from "./invite-ghostwriters";
 
 interface IGigIdPage {
   params: {
@@ -73,7 +74,7 @@ const GigIdPage = ({ params }: IGigIdPage) => {
   ];
 
   return (
-    <Stack gap="lg">
+    <Stack gap="xl">
       <GlassCard>
         <Grid gutter="xl">
           <GridCol span={4}>
@@ -154,6 +155,7 @@ const GigIdPage = ({ params }: IGigIdPage) => {
           </GridCol>
         </Grid>
       </GlassCard>
+      <InviteGhostwriters gig={gigData} />
     </Stack>
   );
 };

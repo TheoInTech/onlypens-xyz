@@ -49,7 +49,7 @@ import { encodeFunctionData } from "viem";
 import { USDCTestnetABI } from "@/lib/abi";
 import { ITransactionError } from "@/schema/transaction.schema";
 import { generateMatchmakingData } from "@/services/matchmaker.service";
-import { IMatchmaker } from "@/schema/matchmaker.schema";
+import { EMatchmakerSource, IMatchmaker } from "@/schema/matchmaker.schema";
 
 // Get blockchain config
 const blockchainConfig = getConfig();
@@ -473,7 +473,7 @@ const CreatePackagePage = () => {
           nicheKeywords: values.nicheKeywords,
           contentTypeKeywords: values.deliverables.map((d) => d.contentType),
           budget: Number(values.totalAmount),
-          source: "gig-creation",
+          source: EMatchmakerSource.GIG_CREATION,
         };
 
         setProgressModalContent("Generating matchmaking data...");

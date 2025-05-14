@@ -5,13 +5,18 @@ import {
   EToneKeywords,
 } from "@/schema/enum.schema";
 
+export enum EMatchmakerSource {
+  ONBOARDING = "onboarding",
+  GIG_CREATION = "gig-creation",
+}
+
 export const MatchmakerSchema = z.object({
   bio: z.string(),
   samples: z.array(z.string()).max(3),
   nicheKeywords: z.array(z.nativeEnum(ENicheKeywords)),
   contentTypeKeywords: z.array(z.nativeEnum(EContentTypes)),
   budget: z.number().positive(),
-  source: z.enum(["onboarding", "gig-creation"]),
+  source: z.nativeEnum(EMatchmakerSource),
 });
 
 export const MatchmakerResponseSchema = z.object({

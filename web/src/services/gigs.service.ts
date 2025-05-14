@@ -65,6 +65,7 @@ export const getGigs = async (): Promise<IGig[]> => {
       return {
         onchainGig,
         metadata,
+        ghostwriters: gig.ghostwriters || [],
         event: EActivityType.GIG_CREATED,
       };
     });
@@ -103,7 +104,7 @@ export const getGig = async (gigId: string): Promise<IGig> => {
       throw new Error(`Gig with ID ${gigId} not found`);
     }
 
-    console.log("data ==>", data);
+    const ghostwriters = data.ghostwriters || [];
 
     // Transform API data to match the IGig structure
     const onchainGig: IOnchainGig = {
@@ -138,6 +139,7 @@ export const getGig = async (gigId: string): Promise<IGig> => {
     return {
       onchainGig,
       metadata,
+      ghostwriters,
       event: EActivityType.GIG_CREATED,
     };
   } catch (error) {
@@ -217,6 +219,7 @@ export const createGig = async (gigData: IGigForm): Promise<IGig> => {
     return {
       onchainGig,
       metadata,
+      ghostwriters: [],
       event: EActivityType.GIG_CREATED,
     };
   } catch (error) {
@@ -298,6 +301,7 @@ export const updateGig = async (
     return {
       onchainGig,
       metadata,
+      ghostwriters: data.ghostwriters || [],
       // No specific GIG_UPDATED type exists in the enum, so we use GIG_CREATED as a default
       // In a production app, you might want to add a GIG_UPDATED type to EActivityType
       event: EActivityType.GIG_CREATED,

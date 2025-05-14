@@ -4,7 +4,7 @@ import {
   EContentTypes,
   ENicheKeywords,
 } from "@/schema/enum.schema";
-import { MatchmakerResponseSchema } from "./matchmaker.schema";
+import { MatchmakerResponseSchema } from "@/schema/matchmaker.schema";
 
 // Define the GigStatus enum to match the smart contract's PackageStatus
 export enum GigStatus {
@@ -68,6 +68,7 @@ export type IGigMetadata = z.infer<typeof GigMetadataSchema>;
 export const GigSchema = z.object({
   onchainGig: OnchainGigSchema,
   metadata: GigMetadataSchema,
+  ghostwriters: z.array(z.string()), // base eth addresses
   event: z.nativeEnum(EActivityType),
 });
 
