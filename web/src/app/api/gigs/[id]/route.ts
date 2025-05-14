@@ -48,7 +48,7 @@ export async function GET(
     }
 
     // Get the gig from Firebase
-    const gigId = params.id;
+    const { id: gigId } = params;
     const gigRef = adminDb.collection("gigs").doc(gigId);
     const gigDoc = await gigRef.get();
 

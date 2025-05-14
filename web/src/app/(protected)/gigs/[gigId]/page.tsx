@@ -12,7 +12,7 @@ import {
   Text,
   Tooltip,
 } from "@mantine/core";
-import React from "react";
+import React, { Usable, use } from "react";
 import { AmountPill, GlassCard, StatusPill, ToneNichePill } from "@/components";
 import useGig from "@/hooks/useGig";
 import Image from "next/image";
@@ -25,7 +25,7 @@ interface IGigIdPage {
 }
 
 const GigIdPage = ({ params }: IGigIdPage) => {
-  const { gigId } = params;
+  const { gigId } = use(params as unknown as Usable<{ gigId: string }>);
   const { gigData, isLoadingGig } = useGig(gigId);
 
   if (isLoadingGig) {
