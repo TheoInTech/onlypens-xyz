@@ -1,5 +1,6 @@
 import {
   IMatchmaker,
+  IMatchmakerMatchResponse,
   IMatchmakerResponse,
   MatchmakerSchema,
 } from "@/schema/matchmaker.schema";
@@ -48,10 +49,13 @@ export const generateMatchmakingData = async (
 /**
  * Match ghostwriters for a gig
  */
-export const matchGhostwriters = async (gigId: string): Promise<IUser[]> => {
+export const matchGhostwriters = async (
+  gigId: string,
+  creator: string
+): Promise<{ gigId: string; matchedGhostwriterAddresses: string[] }> => {
   try {
-    if (!gigId) {
-      throw new Error("Matchmaker data is required");
+    if (!gigId || !creator) {
+      throw new Error("Gig ID and creator address are required");
     }
 
     const response = await fetch("/api/match-maker/match", {
@@ -59,7 +63,7 @@ export const matchGhostwriters = async (gigId: string): Promise<IUser[]> => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ gigId }),
+      body: JSON.stringify({ gigId, creator }),
     });
 
     if (!response.ok) {
@@ -67,7 +71,7 @@ export const matchGhostwriters = async (gigId: string): Promise<IUser[]> => {
       throw new Error(errorData.error || "Failed to match ghostwriters");
     }
 
-    const matchmakerResponse = await response.json();
+    const matchmakerResponse: IMatchmakerMatchResponse = await response.json();
 
     if (!matchmakerResponse || !matchmakerResponse?.success) {
       throw new Error("Failed to match ghostwriters");
@@ -76,6 +80,37 @@ export const matchGhostwriters = async (gigId: string): Promise<IUser[]> => {
     return matchmakerResponse.data;
   } catch (error) {
     console.error("Error creating gig:", error);
+    throw error;
+  }
+};
+
+/**
+ * Get ghostwriter profiles for a gig
+ */
+export const getGhostwriterProfiles = async (
+  gigId: string,
+  creator: string
+): Promise<IUser[]> => {
+  try {
+    const response = await fetch(
+      `/api/match-maker/match?gigId=${gigId}&creator=${creator}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to get ghostwriter profiles");
+    }
+
+    const { data } = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error getting ghostwriter profiles:", error);
     throw error;
   }
 };

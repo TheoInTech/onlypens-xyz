@@ -25,12 +25,12 @@ export const StatusPill = ({
         return classes.invited;
       case GigStatus.ASSIGNED:
         return classes.assigned;
-      case GigStatus.SUBMITTED:
-        return classes.submitted;
-      case GigStatus.APPROVED:
-        return classes.approved;
-      case GigStatus.REJECTED:
-        return classes.rejected;
+      case GigStatus.IN_PROGRESS:
+        return classes["in-progress"];
+      case GigStatus.COMPLETED:
+        return classes.completed;
+      case GigStatus.CANCELLED:
+        return classes.cancelled;
       case GigStatus.AUTO_RELEASED:
         return classes["auto-released"];
       default:

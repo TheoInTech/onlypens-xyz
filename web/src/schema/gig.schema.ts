@@ -4,7 +4,8 @@ import {
   EContentTypes,
   ENicheKeywords,
 } from "@/schema/enum.schema";
-import { MatchmakerResponseSchema } from "@/schema/matchmaker.schema";
+import { MatchmakerResponseSchema } from "@/schema/shared.schema";
+import { InvitationSchema } from "@/schema/matchmaker.schema";
 
 // Define the GigStatus enum to match the smart contract's PackageStatus
 export enum GigStatus {
@@ -58,9 +59,10 @@ export const GigMetadataSchema = z.object({
   description: z.string().nullish(),
   deliverables: z.array(DeliverableSchema).default([]),
   nicheKeywords: z.array(z.nativeEnum(ENicheKeywords)),
-  deadline: z.number().nullish(), // unix timestamp
+  deadline: z.date().or(z.string()).nullish(),
   referenceWritings: z.array(z.string()).nullish(),
   matchmaker: MatchmakerResponseSchema.nullish(),
+  ghostwriters: z.array(z.string()).nullish(), // base eth addresses
 });
 
 export type IGigMetadata = z.infer<typeof GigMetadataSchema>;
@@ -68,8 +70,14 @@ export type IGigMetadata = z.infer<typeof GigMetadataSchema>;
 export const GigSchema = z.object({
   onchainGig: OnchainGigSchema,
   metadata: GigMetadataSchema,
-  ghostwriters: z.array(z.string()), // base eth addresses
   event: z.nativeEnum(EActivityType),
+  invitations: z
+    .object({
+      allInvited: z.array(InvitationSchema).optional().default([]),
+      accepted: z.array(InvitationSchema).optional().default([]),
+      declined: z.array(InvitationSchema).optional().default([]),
+    })
+    .nullish(),
 });
 
 export type IGig = z.infer<typeof GigSchema>;
@@ -95,9 +103,48 @@ export const GigFormSchema = z.object({
   deliverables: z
     .array(DeliverableSchema)
     .min(1, "At least one deliverable is required"),
-  referenceWritings: z.array(z.string()), // reference writings
+  referenceWritings: z.array(z.string()).nullish(), // reference writings
   matchmaker: MatchmakerResponseSchema.nullish(),
 });
 
 export type IGigForm = z.infer<typeof GigFormSchema>;
 export type IDeliverable = z.infer<typeof DeliverableSchema>;
+
+// Schema for API response when fetching a gig
+export const GigApiResponseSchema = z.object({
+  id: z.string(),
+  packageId: z.number(),
+  creatorAddress: z.string(),
+  transactionHash: z.string(),
+  totalAmount: z.string(),
+  expiresAt: z.string().nullable(),
+  title: z.string(),
+  description: z.string(),
+  nicheKeywords: z.array(z.string()),
+  deadline: z.string(),
+  numberOfDeliverables: z.number(),
+  deliverables: z.array(DeliverableSchema),
+  referenceWritings: z.array(z.string()).nullable(),
+  matchmaker: MatchmakerResponseSchema.nullable(),
+  createdAt: z.number(),
+  ghostwriters: z.array(z.string()).nullable(),
+  updatedAt: z.object({
+    _seconds: z.number(),
+    _nanoseconds: z.number(),
+  }),
+  invitations: z
+    .object({
+      allInvited: z.array(InvitationSchema).optional().default([]),
+      accepted: z.array(InvitationSchema).optional().default([]),
+      declined: z.array(InvitationSchema).optional().default([]),
+    })
+    .nullish(),
+  // Additional fields that might be in the API response
+  assignedWriter: z.string().nullable().optional(),
+  status: z.number().nullable().optional(),
+  toneKeywords: z.array(z.string()).nullable().optional(),
+  submissions: z.array(z.any()).nullable().optional(),
+  history: z.array(z.any()).nullable().optional(),
+});
+
+export type IGigApiResponse = z.infer<typeof GigApiResponseSchema>;

@@ -14,8 +14,11 @@ import { Button, GigCard } from "@/components";
 import Link from "next/link";
 import classes from "./gigs.module.css";
 import useGigs from "@/hooks/useGigs";
+import { ERoles } from "@/stores/constants";
+import { useGlobalStore } from "@/stores";
 
 const MyGigsPage = () => {
+  const { role } = useGlobalStore();
   const { gigsData, isLoadingGigs } = useGigs();
 
   if (isLoadingGigs) {
@@ -58,12 +61,14 @@ const MyGigsPage = () => {
   return (
     <Stack w="100%">
       {/* Filters, Sorting, Search*/}
-      <Group align="center" justify="space-between">
-        <Text>My Gigs ({gigsData.length})</Text>
-        <Button size="small" component={Link} href={`/gigs/create`}>
-          Post a Gig
-        </Button>
-      </Group>
+      {role === ERoles.CREATOR && (
+        <Group align="center" justify="space-between">
+          <Text>My Gigs ({gigsData.length})</Text>
+          <Button size="small" component={Link} href={`/gigs/create`}>
+            Post a Gig
+          </Button>
+        </Group>
+      )}
       {/* Gigs List */}
       <Stack w="100%">
         {gigsData.length > 0 ? (

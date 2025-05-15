@@ -8,6 +8,13 @@
   resize: none;
 }
 
+.textarea:disabled {
+  background-color: var(--mantine-color-midnight-9);
+  color: var(--mantine-color-gray-6);
+  opacity: 0.9;
+  border: 1px solid var(--mantine-color-gray-7);
+}
+
 .textarea:focus {
   border: 1px solid var(--mantine-color-white);
   outline: none;

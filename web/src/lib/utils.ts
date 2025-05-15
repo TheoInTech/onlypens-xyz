@@ -9,6 +9,13 @@ export function shortenAddress(address: string) {
   return address.slice(0, 6) + "..." + address.slice(-4);
 }
 
+export function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("");
+}
+
 export function timestampAgo(timestamp: string): string {
   const date = new Date(timestamp);
   const now = Date.now();

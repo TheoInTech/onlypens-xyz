@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ERoles } from "@/stores/constants";
 import { ENicheKeywords, EContentTypes } from "@/schema/enum.schema";
-import { MatchmakerResponseSchema } from "./matchmaker.schema";
+import { MatchmakerResponseSchema } from "@/schema/shared.schema";
 
 // Flattened user schema
 export const UserSchema = z

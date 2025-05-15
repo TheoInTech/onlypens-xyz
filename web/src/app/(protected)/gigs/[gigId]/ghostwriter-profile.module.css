@@ -1,0 +1,57 @@
+.progressModalContent section {
+  color: var(--mantine-color-white);
+  background-color: var(--mantine-color-midnight-9);
+  border-radius: var(--mantine-radius-xl);
+  padding: var(--mantine-spacing-xl);
+  display: flex;
+  flex-direction: column;
+  max-height: 540px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.progressModalOverlay {
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(3px);
+}
+
+.progressModalBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-xl);
+}
+
+.pill {
+  background-color: var(--mantine-color-purple-8);
+  color: var(--mantine-color-white);
+  border-radius: var(--mantine-radius-xl);
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.writingPersona {
+  display: inline-flex;
+  gap: var(--mantine-spacing-xs);
+}
+
+.tabsList {
+  margin-right: 1.5rem;
+  gap: 1rem;
+}
+
+.tab {
+  border: 1px solid var(--mantine-color-gray-8);
+  transition: all 0.2s ease-in-out;
+
+  &:hover:not([data-active]) {
+    background-color: var(--mantine-color-midnight-8);
+  }
+
+  &[data-active] {
+    border: 1px solid transparent;
+    box-shadow:
+      0 0 0 2px var(--mantine-color-purple-8),
+      inset 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+  }
+}

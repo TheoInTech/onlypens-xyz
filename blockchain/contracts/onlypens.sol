@@ -369,10 +369,21 @@ contract OnlyPens is Ownable {
             revert("Self invite");
         }
 
+        // Prevent re-inviting the same ghostwriter
+        if (
+            isInvited[_packageId][_ghostwriter] &&
+            !inviteeRemoved[_packageId][_ghostwriter]
+        ) {
+            revert("Already invited");
+        }
+
         GigPackage storage p = packages[_packageId];
 
-        // More gas-efficient check if already invited
-        if (!isInvited[_packageId][_ghostwriter]) {
+        // Only add to invitees if not already invited or was previously removed
+        if (
+            !isInvited[_packageId][_ghostwriter] ||
+            inviteeRemoved[_packageId][_ghostwriter]
+        ) {
             isInvited[_packageId][_ghostwriter] = true;
             inviteeRemoved[_packageId][_ghostwriter] = false;
             packageInvitees[_packageId].push(_ghostwriter);

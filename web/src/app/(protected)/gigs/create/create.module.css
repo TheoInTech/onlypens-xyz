@@ -95,10 +95,6 @@
   color: var(--mantine-color-midnight-9);
   border-radius: var(--mantine-radius-xl);
   padding: var(--mantine-spacing-xl);
-
-  .mantine-Modal-content {
-    background-color: var(--mantine-color-midnight-8);
-  }
 }
 
 .progressModalOverlay {

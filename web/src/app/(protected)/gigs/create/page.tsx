@@ -469,7 +469,7 @@ const CreatePackagePage = () => {
 
         const matchmakerPayload: IMatchmaker = {
           bio: values.description,
-          samples: values.referenceWritings,
+          samples: values.referenceWritings || [],
           nicheKeywords: values.nicheKeywords,
           contentTypeKeywords: values.deliverables.map((d) => d.contentType),
           budget: Number(values.totalAmount),

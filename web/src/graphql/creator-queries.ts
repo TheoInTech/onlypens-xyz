@@ -462,3 +462,131 @@ export const GET_CREATOR_RECENT_GIG = gql`
     }
   }
 `;
+
+export const GET_ALL_INVITED_GHOSTWRITERS_FOR_GIG = gql`
+  query GetAllInvitedGhostwritersForGig(
+    $packageId: ID!
+    $first: Int
+    $skip: Int
+  ) {
+    invitations(
+      where: { package: $packageId }
+      first: $first
+      skip: $skip
+      orderBy: "invitedAt"
+      orderDirection: "desc"
+    ) {
+      id
+      status
+      invitedAt
+      respondedAt
+      ghostwriter {
+        id # Wallet address of the ghostwriter
+      }
+      transactionHash
+    }
+  }
+`;
+
+export const GET_ACCEPTED_GHOSTWRITERS_FOR_GIG = gql`
+  query GetAcceptedGhostwritersForGig(
+    $packageId: ID!
+    $first: Int
+    $skip: Int
+  ) {
+    invitations(
+      where: { package: $packageId, status: ACCEPTED }
+      first: $first
+      skip: $skip
+      orderBy: "respondedAt"
+      orderDirection: "desc"
+    ) {
+      id
+      status
+      invitedAt
+      respondedAt
+      ghostwriter {
+        id
+      }
+      transactionHash
+    }
+  }
+`;
+
+export const GET_DECLINED_GHOSTWRITERS_FOR_GIG = gql`
+  query GetDeclinedGhostwritersForGig(
+    $packageId: ID!
+    $first: Int
+    $skip: Int
+  ) {
+    invitations(
+      where: { package: $packageId, status: DECLINED }
+      first: $first
+      skip: $skip
+      orderBy: "respondedAt"
+      orderDirection: "desc"
+    ) {
+      id
+      status
+      invitedAt
+      respondedAt
+      ghostwriter {
+        id
+      }
+      transactionHash
+    }
+  }
+`;
+
+// Direct query to fetch invitations by package ID (both numeric and string ID)
+export const GET_PACKAGE_INVITATIONS = gql`
+  query GetPackageInvitations($packageId: String!, $numericPackageId: Int!) {
+    # Try by string ID (full ID)
+    packageById: package(id: $packageId) {
+      id
+      packageId
+      invitations {
+        id
+        ghostwriter {
+          id
+        }
+        status
+        invitedAt
+        respondedAt
+        transactionHash
+      }
+    }
+
+    # Also try by numeric packageId
+    packagesByNumber: packages(where: { packageId: $numericPackageId }) {
+      id
+      packageId
+      invitations {
+        id
+        ghostwriter {
+          id
+        }
+        status
+        invitedAt
+        respondedAt
+        transactionHash
+      }
+    }
+
+    # Direct query for invitations by packageId
+    invitationsByPackage: invitations(where: { package: $packageId }) {
+      id
+      ghostwriter {
+        id
+      }
+      status
+      invitedAt
+      respondedAt
+      transactionHash
+      package {
+        id
+        packageId
+      }
+    }
+  }
+`;

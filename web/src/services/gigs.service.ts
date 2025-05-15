@@ -1,10 +1,12 @@
-import { EActivityType } from "@/schema/enum.schema";
+import { EActivityType, ENicheKeywords } from "@/schema/enum.schema";
 import {
+  GigApiResponseSchema,
   GigFormSchema,
   GigStatus,
   IGig,
   IGigForm,
   IOnchainGig,
+  type IGigApiResponse,
 } from "@/schema/gig.schema";
 
 /**
@@ -59,14 +61,15 @@ export const getGigs = async (): Promise<IGig[]> => {
         referenceWritings: gig.referenceWritings || [],
         submissions: gig.submissions || [],
         history: gig.history || [],
+        ghostwriters: gig.ghostwriters || [],
       };
 
       // Return combined gig data
       return {
         onchainGig,
         metadata,
-        ghostwriters: gig.ghostwriters || [],
         event: EActivityType.GIG_CREATED,
+        invitations: gig.invitations || null,
       };
     });
 
@@ -81,11 +84,11 @@ export const getGigs = async (): Promise<IGig[]> => {
  * Fetches a single gig by ID
  */
 export const getGig = async (gigId: string): Promise<IGig> => {
-  if (!gigId) {
-    throw new Error("Missing required parameters");
-  }
-
   try {
+    if (!gigId) {
+      throw new Error("Missing gig ID");
+    }
+
     const response = await fetch(`/api/gigs/${gigId}`, {
       method: "GET",
       headers: {
@@ -98,49 +101,226 @@ export const getGig = async (gigId: string): Promise<IGig> => {
       throw new Error(error.error || `Failed to fetch gig with ID ${gigId}`);
     }
 
-    const { data } = await response.json();
+    const responseJson = await response.json();
 
-    if (!data) {
+    // Handle the case where invitations might contain simplified ghostwriter objects
+    if (responseJson.data && responseJson.data.invitations) {
+      try {
+        // Deduplicate invitations by ID to prevent duplicates
+        if (responseJson.data.invitations.allInvited) {
+          // Use a Map to deduplicate by ID
+          const uniqueInvitations = new Map();
+
+          responseJson.data.invitations.allInvited.forEach(
+            (invitation: { id: string }) => {
+              uniqueInvitations.set(invitation.id, invitation);
+            }
+          );
+
+          // Replace with deduplicated array
+          responseJson.data.invitations.allInvited = Array.from(
+            uniqueInvitations.values()
+          );
+        }
+
+        // Do the same for accepted and declined invitations
+        if (responseJson.data.invitations.accepted) {
+          const uniqueAccepted = new Map();
+          responseJson.data.invitations.accepted.forEach(
+            (invitation: { id: string }) => {
+              uniqueAccepted.set(invitation.id, invitation);
+            }
+          );
+          responseJson.data.invitations.accepted = Array.from(
+            uniqueAccepted.values()
+          );
+        }
+
+        if (responseJson.data.invitations.declined) {
+          const uniqueDeclined = new Map();
+          responseJson.data.invitations.declined.forEach(
+            (invitation: { id: string }) => {
+              uniqueDeclined.set(invitation.id, invitation);
+            }
+          );
+          responseJson.data.invitations.declined = Array.from(
+            uniqueDeclined.values()
+          );
+        }
+
+        // Pre-process the invitations to ensure ghostwriter objects have the required fields
+        // This is a workaround for the schema validation
+        if (responseJson.data.invitations.allInvited) {
+          responseJson.data.invitations.allInvited =
+            responseJson.data.invitations.allInvited.map(
+              (invitation: {
+                ghostwriter: { address?: string; displayName?: string };
+              }) => {
+                if (
+                  invitation.ghostwriter &&
+                  !invitation.ghostwriter.displayName
+                ) {
+                  const address = invitation.ghostwriter.address;
+                  // Create a minimum viable ghostwriter object that will pass validation
+                  return {
+                    ...invitation,
+                    ghostwriter: {
+                      address,
+                      displayName: `Ghostwriter ${address?.substring(0, 6)}`,
+                      about:
+                        "Invited ghostwriter - profile will be loaded when available",
+                      role: "ghostwriter",
+                      samples: ["", "", ""],
+                      nicheKeywords: ["OTHER"],
+                      contentTypeKeywords: [],
+                      toneKeywords: [],
+                      isOnboarded: true,
+                      createdAt: Date.now(),
+                      ratePerWord: 0.1,
+                    },
+                  };
+                }
+                return invitation;
+              }
+            );
+        }
+
+        // Do the same for accepted invitations
+        if (responseJson.data.invitations.accepted) {
+          responseJson.data.invitations.accepted =
+            responseJson.data.invitations.accepted.map(
+              (invitation: {
+                ghostwriter: { address?: string; displayName?: string };
+              }) => {
+                if (
+                  invitation.ghostwriter &&
+                  !invitation.ghostwriter.displayName
+                ) {
+                  const address = invitation.ghostwriter.address;
+                  return {
+                    ...invitation,
+                    ghostwriter: {
+                      address,
+                      displayName: `Ghostwriter ${address?.substring(0, 6)}`,
+                      about:
+                        "Invited ghostwriter - profile will be loaded when available",
+                      role: "ghostwriter",
+                      samples: ["", "", ""],
+                      nicheKeywords: ["OTHER"],
+                      contentTypeKeywords: [],
+                      toneKeywords: [],
+                      isOnboarded: true,
+                      createdAt: Date.now(),
+                      ratePerWord: 0.1,
+                    },
+                  };
+                }
+                return invitation;
+              }
+            );
+        }
+
+        // Do the same for declined invitations
+        if (responseJson.data.invitations.declined) {
+          responseJson.data.invitations.declined =
+            responseJson.data.invitations.declined.map(
+              (invitation: {
+                ghostwriter: { address?: string; displayName?: string };
+              }) => {
+                if (
+                  invitation.ghostwriter &&
+                  !invitation.ghostwriter.displayName
+                ) {
+                  const address = invitation.ghostwriter.address;
+                  return {
+                    ...invitation,
+                    ghostwriter: {
+                      address,
+                      displayName: `Ghostwriter ${address?.substring(0, 6)}`,
+                      about:
+                        "Invited ghostwriter - profile will be loaded when available",
+                      role: "ghostwriter",
+                      samples: ["", "", ""],
+                      nicheKeywords: ["OTHER"],
+                      contentTypeKeywords: [],
+                      toneKeywords: [],
+                      isOnboarded: true,
+                      createdAt: Date.now(),
+                      ratePerWord: 0.1,
+                    },
+                  };
+                }
+                return invitation;
+              }
+            );
+        }
+      } catch (preprocessError) {
+        console.error("Error pre-processing invitations:", preprocessError);
+        // Continue with parsing attempt even if preprocessing fails
+      }
+    }
+
+    // Try parsing with safeParse first to handle validation errors
+    const result = GigApiResponseSchema.safeParse(responseJson.data);
+
+    if (!result.success) {
+      console.error("Zod validation error:", result.error.format());
+      console.error(
+        "Response data causing validation error:",
+        responseJson.data
+      );
+      throw new Error(`Failed to parse gig data: ${result.error.message}`);
+    }
+
+    const apiGig = result.data as IGigApiResponse;
+
+    console.log("getGig data ===>", apiGig);
+
+    if (!apiGig) {
       throw new Error(`Gig with ID ${gigId} not found`);
     }
 
-    const ghostwriters = data.ghostwriters || [];
+    const ghostwriters = apiGig.ghostwriters || [];
 
     // Transform API data to match the IGig structure
     const onchainGig: IOnchainGig = {
-      gigId: data.packageId.toString(),
-      creator: data.creatorAddress,
-      writer: data.assignedWriter || null,
-      amount: (Number(data.totalAmount) * 10 ** 6).toString(),
+      gigId: apiGig.packageId.toString(),
+      creator: apiGig.creatorAddress,
+      writer: apiGig.assignedWriter || null,
+      amount: (Number(apiGig.totalAmount) * 10 ** 6).toString(),
       status:
-        data.status != null
-          ? (Number(data.status) as GigStatus)
+        apiGig.status != null
+          ? (Number(apiGig.status) as GigStatus)
           : GigStatus.PENDING,
-      createdAt: data.createdAt,
-      lastUpdated: data.updatedAt,
-      expiresAt: data.expiresAt,
-      numDeliverables: data.numberOfDeliverables,
+      createdAt: apiGig.createdAt,
+      lastUpdated: apiGig.updatedAt._seconds,
+      expiresAt: apiGig.expiresAt ? Number(apiGig.expiresAt) : null,
+      numDeliverables: apiGig.numberOfDeliverables,
     };
 
     // Extract metadata
     const metadata = {
-      title: data.title,
-      description: data.description,
-      deliverables: data.deliverables || [],
-      toneKeywords: data.toneKeywords,
-      nicheKeywords: data.nicheKeywords,
-      deadline: data.deadline,
-      referenceWritings: data.referenceWritings || [],
-      submissions: data.submissions || [],
-      history: data.history || [],
+      title: apiGig.title,
+      description: apiGig.description,
+      deliverables: apiGig.deliverables || [],
+      nicheKeywords: apiGig.nicheKeywords.map(
+        (keyword) => keyword as unknown as ENicheKeywords
+      ),
+      deadline: apiGig.deadline,
+      referenceWritings: apiGig.referenceWritings || [],
+      matchmaker: apiGig.matchmaker || null,
+      submissions: apiGig.submissions || [],
+      history: apiGig.history || [],
+      ghostwriters: ghostwriters,
     };
 
     // Return combined gig data
     return {
       onchainGig,
       metadata,
-      ghostwriters,
       event: EActivityType.GIG_CREATED,
+      // Include invitations data if available
+      invitations: apiGig.invitations || null,
     };
   } catch (error) {
     console.error(`Error fetching gig ${gigId}:`, error);
@@ -213,14 +393,15 @@ export const createGig = async (gigData: IGigForm): Promise<IGig> => {
       referenceWritings: data.referenceWritings || [],
       submissions: [],
       history: [],
+      ghostwriters: [],
     };
 
     // Return combined gig data
     return {
       onchainGig,
       metadata,
-      ghostwriters: [],
       event: EActivityType.GIG_CREATED,
+      invitations: null, // No invitations for newly created gigs
     };
   } catch (error) {
     console.error("Error creating gig:", error);
@@ -295,16 +476,18 @@ export const updateGig = async (
       referenceWritings: data.referenceWritings || [],
       submissions: data.submissions || [],
       history: data.history || [],
+      ghostwriters: data.ghostwriters || [],
     };
 
     // Return combined gig data
     return {
       onchainGig,
       metadata,
-      ghostwriters: data.ghostwriters || [],
       // No specific GIG_UPDATED type exists in the enum, so we use GIG_CREATED as a default
       // In a production app, you might want to add a GIG_UPDATED type to EActivityType
       event: EActivityType.GIG_CREATED,
+      // Include invitations data if available
+      invitations: data.invitations || null,
     };
   } catch (error) {
     console.error(`Error updating gig ${gigId}:`, error);

@@ -1,9 +1,24 @@
-import React from "react";
+import { getGhostwriterProfiles } from "@/services/matchmaker.service";
+import { useQuery } from "@tanstack/react-query";
+import { useAccount } from "wagmi";
 
-// TODO: Query the list of ghostwriters for a gig
+const useInviteGhostwriters = (gigId: string) => {
+  const { address } = useAccount();
+  const {
+    data: ghostwriterProfiles,
+    isLoading: isLoadingGhostwriterProfiles,
+    refetch: refetchGhostwriterProfiles,
+  } = useQuery({
+    queryKey: ["gig", gigId, "ghostwriter-profiles"],
+    queryFn: () => getGhostwriterProfiles(gigId, address?.toString() || ""),
+    enabled: gigId !== undefined && gigId !== "" && gigId !== null && !!address,
+  });
 
-const useInviteGhostwriters = () => {
-  return <div>useInviteGhostwriters</div>;
+  return {
+    ghostwriterProfiles,
+    isLoadingGhostwriterProfiles,
+    refetchGhostwriterProfiles,
+  };
 };
 
 export default useInviteGhostwriters;

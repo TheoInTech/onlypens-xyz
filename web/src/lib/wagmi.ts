@@ -5,7 +5,7 @@ import { coinbaseWallet } from "wagmi/connectors";
 // Configure Coinbase Wallet connector to use Base Sepolia
 export const cbWalletConnector = coinbaseWallet({
   appName: "OnlyPens",
-  preference: "all",
+  preference: "eoaOnly",
 });
 
 // const isMainnet = process.env.NEXT_PUBLIC_BLOCKCHAIN_ENV === "mainnet";

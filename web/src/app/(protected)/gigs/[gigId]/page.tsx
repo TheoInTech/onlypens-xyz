@@ -27,7 +27,7 @@ interface IGigIdPage {
 
 const GigIdPage = ({ params }: IGigIdPage) => {
   const { gigId } = use(params as unknown as Usable<{ gigId: string }>);
-  const { gigData, isLoadingGig } = useGig(gigId);
+  const { gigData, isLoadingGig, refetchGig } = useGig(gigId);
 
   if (isLoadingGig) {
     return (
@@ -128,8 +128,11 @@ const GigIdPage = ({ params }: IGigIdPage) => {
                   {metadata.deadline === null ||
                   metadata.deadline === undefined ? (
                     <>Deadline not set</>
-                  ) : metadata.deadline > Date.now() ? (
-                    <>Ending in {getTimeUntil(metadata.deadline)}</>
+                  ) : new Date(metadata.deadline).getTime() > Date.now() ? (
+                    <>
+                      Ending in{" "}
+                      {getTimeUntil(new Date(metadata.deadline).getTime())}
+                    </>
                   ) : (
                     <>Gig has ended</>
                   )}
@@ -155,7 +158,7 @@ const GigIdPage = ({ params }: IGigIdPage) => {
           </GridCol>
         </Grid>
       </GlassCard>
-      <InviteGhostwriters gig={gigData} />
+      <InviteGhostwriters gig={gigData} refetchGig={refetchGig} />
     </Stack>
   );
 };

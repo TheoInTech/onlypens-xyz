@@ -1,13 +1,16 @@
 import { z } from "zod";
-import {
-  EContentTypes,
-  ENicheKeywords,
-  EToneKeywords,
-} from "@/schema/enum.schema";
+import { EContentTypes, ENicheKeywords } from "@/schema/enum.schema";
+import { UserSchema } from "@/schema/user.schema";
 
 export enum EMatchmakerSource {
   ONBOARDING = "onboarding",
   GIG_CREATION = "gig-creation",
+}
+
+export enum EInvitationStatus {
+  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  DECLINED = "DECLINED",
 }
 
 export const MatchmakerSchema = z.object({
@@ -19,17 +22,52 @@ export const MatchmakerSchema = z.object({
   source: z.nativeEnum(EMatchmakerSource),
 });
 
-export const MatchmakerResponseSchema = z.object({
-  topTone: z.array(z.nativeEnum(EToneKeywords)),
-  topNiches: z.array(z.nativeEnum(ENicheKeywords)),
-  complexityLevel: z.enum(["basic", "intermediate", "advanced"]),
-  preferredContentTypes: z.array(z.nativeEnum(EContentTypes)),
-  writingPersona: z.string(),
-  strengths: z.array(z.string()),
-  weaknesses: z.array(z.string()),
-  idealMatchDescription: z.string(),
-  tags: z.array(z.string()),
+export const MatchmakerMatchResponseSchema = z.object({
+  data: z.object({
+    gigId: z.string(),
+    matchedGhostwriterAddresses: z.array(z.string()),
+  }),
+  success: z.boolean(),
+  error: z.string().optional(),
+});
+
+// Schema for invitation data
+export const InvitationSchema = z.object({
+  id: z.string(),
+  status: z.nativeEnum(EInvitationStatus),
+  invitedAt: z.string(),
+  respondedAt: z.string().nullable().optional(),
+  ghostwriter: z.union([
+    UserSchema, // Full user object
+    z.object({
+      // OR just a simple address reference
+      address: z.string(),
+    }),
+  ]),
+  transactionHash: z.string(),
+});
+
+// Schema for the invited ghostwriters response
+export const InvitedGhostwritersResponseSchema = z.object({
+  success: z.boolean(),
+  data: z
+    .object({
+      allInvited: z.array(InvitationSchema),
+      accepted: z.array(InvitationSchema),
+      declined: z.array(InvitationSchema),
+    })
+    .nullable(),
+  error: z.string().nullable(),
 });
 
 export type IMatchmaker = z.infer<typeof MatchmakerSchema>;
-export type IMatchmakerResponse = z.infer<typeof MatchmakerResponseSchema>;
+export type IMatchmakerMatchResponse = z.infer<
+  typeof MatchmakerMatchResponseSchema
+>;
+export type IInvitation = z.infer<typeof InvitationSchema>;
+export type IInvitedGhostwritersResponse = z.infer<
+  typeof InvitedGhostwritersResponseSchema
+>;
+
+// Re-export the type from shared schema
+export type { IMatchmakerResponse } from "@/schema/shared.schema";
