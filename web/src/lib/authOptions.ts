@@ -28,7 +28,7 @@ export const authOptions: NextAuthOptions = {
 
           // For app router we need to get the CSRF token differently
           const csrfToken = await getCsrfToken({
-            req,
+            req: { headers: req.headers },
           });
 
           const result = await siwe.verify({

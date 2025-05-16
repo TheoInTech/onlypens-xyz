@@ -9,7 +9,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { WagmiProvider, useAccount, useChainId, useConfig } from "wagmi";
 import { SessionProvider } from "next-auth/react";
 import { config } from "@/lib/wagmi";
-import { baseSepolia } from "wagmi/chains";
+import { baseSepolia, base } from "wagmi/chains";
 import { switchChain } from "wagmi/actions";
 
 function makeQueryClient() {
@@ -52,10 +52,10 @@ function NetworkValidator({ children }: { children: ReactNode }) {
     // Only check network if wallet is connected
     if (isConnected) {
       console.log(
-        `Connected to chain ID: ${chainId}, Base Sepolia ID: ${baseSepolia.id}`
+        `Connected to chain ID: ${chainId}, Base Sepolia ID: ${baseSepolia.id}, Base ID: ${base.id}`
       );
 
-      if (chainId !== baseSepolia.id) {
+      if (chainId !== baseSepolia.id && chainId !== base.id) {
         setIsCorrectNetwork(false);
 
         // Auto-switch to the correct network
@@ -77,6 +77,9 @@ function NetworkValidator({ children }: { children: ReactNode }) {
         }
       } else if (chainId === baseSepolia.id) {
         console.log("Already connected to Base Sepolia");
+        setIsCorrectNetwork(true);
+      } else if (chainId === base.id) {
+        console.log("Already connected to Base");
         setIsCorrectNetwork(true);
       }
     }
@@ -100,8 +103,9 @@ function NetworkValidator({ children }: { children: ReactNode }) {
             fontSize: "14px",
           }}
         >
-          Please switch to Base Sepolia network (Chain ID: {baseSepolia.id}).
-          Currently connected to Chain ID: {chainId}.
+          Please switch to Base Sepolia network (Chain ID: {baseSepolia.id}) or
+          Base network (Chain ID: {base.id}). Currently connected to Chain ID:{" "}
+          {chainId}.
         </div>
       )}
       {children}
