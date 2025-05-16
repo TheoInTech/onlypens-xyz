@@ -84,10 +84,19 @@ _Reference_: [Deploying Smart Contracts with Hardhat](https://docs.base.org/cook
 
 The OnlyPens platform utilizes the following smart contracts:
 
+#### Testnet
+
 | Contract Name             | Contract Address                           | Description                                                                                          |
 | ------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
 | OnlyPensHelpers           | 0xbde1F236a030a0257ef83c43F289FE5107Ae9c74 | Library contract containing helper functions for deliverable validation and other utility operations |
 | OnlyPens (Implementation) | 0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062 | Core contract containing the business logic for gig management, deliverables, and payment release    |
+
+#### Mainnet
+
+| Contract Name             | Contract Address                           | Description                                                                                          |
+| ------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| OnlyPensHelpers           | 0x91F5D7107B919f6566694ec649583Eb42d6E40eA | Library contract containing helper functions for deliverable validation and other utility operations |
+| OnlyPens (Implementation) | 0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4 | Core contract containing the business logic for gig management, deliverables, and payment release    |
 
 ---
 

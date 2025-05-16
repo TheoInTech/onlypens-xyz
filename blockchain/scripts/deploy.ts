@@ -20,8 +20,8 @@ async function main() {
 
   // Constants
   const TREASURY_ADDRESS = "0xA996b471e6D161c776ac88b82cB55F3BC490a356";
-  // const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // Base Mainnet USDC
-  const USDC_ADDRESS = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"; // Base Testnet USDC
+  const USDC_ADDRESS = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"; // Base Mainnet USDC
+  // const USDC_ADDRESS = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"; // Base Testnet USDC
 
   const PLATFORM_FEE_BPS = process.env.PLATFORM_FEE_BPS || 1000; // 10%
 

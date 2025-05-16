@@ -4,7 +4,6 @@ import {
 } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { Signer } from "ethers";
 import { MockERC20 } from "../typechain-types/contracts/MockERC20";
 import { OnlyPens } from "../typechain-types/contracts/OnlyPens.sol/OnlyPens";
 import "./helpers"; // Import the helper functions
@@ -583,6 +582,21 @@ describe("OnlyPens", function () {
       expect(activeInvitees).to.include(writer1.address);
       expect(activeInvitees).to.include(writer2.address);
     });
+
+    it("Should revert when re-inviting an already invited ghostwriter", async function () {
+      const { onlyPens, creator, writer1, packageId } =
+        await createTestPackage();
+
+      // Invite writer1
+      await onlyPens
+        .connect(creator)
+        .inviteGhostwriter(packageId, writer1.address);
+
+      // Try to invite writer1 again
+      await expect(
+        onlyPens.connect(creator).inviteGhostwriter(packageId, writer1.address)
+      ).to.be.revertedWith("Already invited");
+    });
   });
 
   describe("Invitation Acceptance and Declination", function () {
@@ -720,6 +734,43 @@ describe("OnlyPens", function () {
       // Check package status reverted to PENDING
       const packageDetails = await onlyPens.getPackageDetails(packageId);
       expect(packageDetails[6]).to.equal(0); // status: PENDING
+    });
+
+    it("Should revert if a writer tries to accept an invitation multiple times", async function () {
+      const { onlyPens, writer1, packageId } = await createAndInvite();
+
+      // Writer1 accepts the invitation
+      await onlyPens.connect(writer1).acceptInvitation(packageId);
+
+      // Writer1 tries to accept the invitation again
+      await expect(
+        onlyPens.connect(writer1).acceptInvitation(packageId)
+      ).to.be.revertedWith("Already assigned");
+    });
+
+    it("Should revert if an assigned writer tries to decline an invitation", async function () {
+      const { onlyPens, writer1, packageId } = await createAndInvite();
+
+      // Writer1 accepts the invitation
+      await onlyPens.connect(writer1).acceptInvitation(packageId);
+
+      // Writer1 tries to decline the invitation after accepting
+      // The package status is now ASSIGNED, so declineInvitation should fail
+      await expect(
+        onlyPens.connect(writer1).declineInvitation(packageId)
+      ).to.be.revertedWith("Invalid status");
+    });
+
+    it("Should revert if a writer who declined tries to accept an invitation", async function () {
+      const { onlyPens, writer1, packageId } = await createAndInvite();
+
+      // Writer1 declines the invitation
+      await onlyPens.connect(writer1).declineInvitation(packageId);
+
+      // Writer1 tries to accept the invitation after declining
+      await expect(
+        onlyPens.connect(writer1).acceptInvitation(packageId)
+      ).to.be.revertedWith("Invite removed");
     });
   });
 

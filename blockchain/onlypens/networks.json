@@ -4,5 +4,11 @@
       "address": "0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062",
       "startBlock": 25559167
     }
+  },
+  "base": {
+    "OnlyPens": {
+      "address": "0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4",
+      "startBlock": 30292404
+    }
   }
 }

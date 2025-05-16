@@ -10,7 +10,7 @@ import {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const onlyPensAbi = [
   {
@@ -730,14 +730,14 @@ export const onlyPensAbi = [
 ] as const
 
 /**
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const onlyPensAddress = {
-  84532: '0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062',
+  8453: '0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4',
 } as const
 
 /**
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const onlyPensConfig = {
   address: onlyPensAddress,
@@ -751,7 +751,7 @@ export const onlyPensConfig = {
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPens = /*#__PURE__*/ createUseReadContract({
   abi: onlyPensAbi,
@@ -761,7 +761,7 @@ export const useReadOnlyPens = /*#__PURE__*/ createUseReadContract({
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"RELEASE_TIMEOUT"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensReleaseTimeout =
   /*#__PURE__*/ createUseReadContract({
@@ -773,7 +773,7 @@ export const useReadOnlyPensReleaseTimeout =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"deliverableIndexInPackage"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensDeliverableIndexInPackage =
   /*#__PURE__*/ createUseReadContract({
@@ -785,7 +785,7 @@ export const useReadOnlyPensDeliverableIndexInPackage =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"getActiveInvitees"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensGetActiveInvitees =
   /*#__PURE__*/ createUseReadContract({
@@ -797,7 +797,7 @@ export const useReadOnlyPensGetActiveInvitees =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"getPackageDeliverables"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensGetPackageDeliverables =
   /*#__PURE__*/ createUseReadContract({
@@ -809,7 +809,7 @@ export const useReadOnlyPensGetPackageDeliverables =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"getPackageDetails"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensGetPackageDetails =
   /*#__PURE__*/ createUseReadContract({
@@ -821,7 +821,7 @@ export const useReadOnlyPensGetPackageDetails =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"getUserPackageDetails"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensGetUserPackageDetails =
   /*#__PURE__*/ createUseReadContract({
@@ -833,7 +833,7 @@ export const useReadOnlyPensGetUserPackageDetails =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"getUserPackages"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensGetUserPackages =
   /*#__PURE__*/ createUseReadContract({
@@ -845,7 +845,7 @@ export const useReadOnlyPensGetUserPackages =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"isInvited"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensIsInvited = /*#__PURE__*/ createUseReadContract({
   abi: onlyPensAbi,
@@ -856,7 +856,7 @@ export const useReadOnlyPensIsInvited = /*#__PURE__*/ createUseReadContract({
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"isPackageExpired"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensIsPackageExpired =
   /*#__PURE__*/ createUseReadContract({
@@ -868,7 +868,7 @@ export const useReadOnlyPensIsPackageExpired =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"nextDeliverableId"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensNextDeliverableId =
   /*#__PURE__*/ createUseReadContract({
@@ -880,7 +880,7 @@ export const useReadOnlyPensNextDeliverableId =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"nextPackageId"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensNextPackageId = /*#__PURE__*/ createUseReadContract(
   { abi: onlyPensAbi, address: onlyPensAddress, functionName: 'nextPackageId' },
@@ -889,7 +889,7 @@ export const useReadOnlyPensNextPackageId = /*#__PURE__*/ createUseReadContract(
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"owner"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensOwner = /*#__PURE__*/ createUseReadContract({
   abi: onlyPensAbi,
@@ -900,7 +900,7 @@ export const useReadOnlyPensOwner = /*#__PURE__*/ createUseReadContract({
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"packageDeliverableIds"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensPackageDeliverableIds =
   /*#__PURE__*/ createUseReadContract({
@@ -912,7 +912,7 @@ export const useReadOnlyPensPackageDeliverableIds =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"packageDeliverables"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensPackageDeliverables =
   /*#__PURE__*/ createUseReadContract({
@@ -924,7 +924,7 @@ export const useReadOnlyPensPackageDeliverables =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"packageExists"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensPackageExists = /*#__PURE__*/ createUseReadContract(
   { abi: onlyPensAbi, address: onlyPensAddress, functionName: 'packageExists' },
@@ -933,7 +933,7 @@ export const useReadOnlyPensPackageExists = /*#__PURE__*/ createUseReadContract(
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"packageInvitees"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensPackageInvitees =
   /*#__PURE__*/ createUseReadContract({
@@ -945,7 +945,7 @@ export const useReadOnlyPensPackageInvitees =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"packages"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensPackages = /*#__PURE__*/ createUseReadContract({
   abi: onlyPensAbi,
@@ -956,7 +956,7 @@ export const useReadOnlyPensPackages = /*#__PURE__*/ createUseReadContract({
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"platformFeeBps"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensPlatformFeeBps =
   /*#__PURE__*/ createUseReadContract({
@@ -968,7 +968,7 @@ export const useReadOnlyPensPlatformFeeBps =
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"treasury"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensTreasury = /*#__PURE__*/ createUseReadContract({
   abi: onlyPensAbi,
@@ -979,7 +979,7 @@ export const useReadOnlyPensTreasury = /*#__PURE__*/ createUseReadContract({
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"usdc"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensUsdc = /*#__PURE__*/ createUseReadContract({
   abi: onlyPensAbi,
@@ -990,7 +990,7 @@ export const useReadOnlyPensUsdc = /*#__PURE__*/ createUseReadContract({
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"userPackages"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useReadOnlyPensUserPackages = /*#__PURE__*/ createUseReadContract({
   abi: onlyPensAbi,
@@ -1001,7 +1001,7 @@ export const useReadOnlyPensUserPackages = /*#__PURE__*/ createUseReadContract({
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link onlyPensAbi}__
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWriteOnlyPens = /*#__PURE__*/ createUseWriteContract({
   abi: onlyPensAbi,
@@ -1011,7 +1011,7 @@ export const useWriteOnlyPens = /*#__PURE__*/ createUseWriteContract({
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"acceptInvitation"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWriteOnlyPensAcceptInvitation =
   /*#__PURE__*/ createUseWriteContract({
@@ -1023,7 +1023,7 @@ export const useWriteOnlyPensAcceptInvitation =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"approveAllDeliverables"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWriteOnlyPensApproveAllDeliverables =
   /*#__PURE__*/ createUseWriteContract({
@@ -1035,7 +1035,7 @@ export const useWriteOnlyPensApproveAllDeliverables =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"approveDeliverable"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWriteOnlyPensApproveDeliverable =
   /*#__PURE__*/ createUseWriteContract({
@@ -1047,7 +1047,7 @@ export const useWriteOnlyPensApproveDeliverable =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"cancelExpiredPackage"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWriteOnlyPensCancelExpiredPackage =
   /*#__PURE__*/ createUseWriteContract({
@@ -1059,7 +1059,7 @@ export const useWriteOnlyPensCancelExpiredPackage =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"cancelGigPackage"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWriteOnlyPensCancelGigPackage =
   /*#__PURE__*/ createUseWriteContract({
@@ -1071,7 +1071,7 @@ export const useWriteOnlyPensCancelGigPackage =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"createGigPackage"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWriteOnlyPensCreateGigPackage =
   /*#__PURE__*/ createUseWriteContract({
@@ -1083,7 +1083,7 @@ export const useWriteOnlyPensCreateGigPackage =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"declineInvitation"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWriteOnlyPensDeclineInvitation =
   /*#__PURE__*/ createUseWriteContract({
@@ -1095,7 +1095,7 @@ export const useWriteOnlyPensDeclineInvitation =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"inviteGhostwriter"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWriteOnlyPensInviteGhostwriter =
   /*#__PURE__*/ createUseWriteContract({
@@ -1107,7 +1107,7 @@ export const useWriteOnlyPensInviteGhostwriter =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"recoverERC20"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWriteOnlyPensRecoverErc20 =
   /*#__PURE__*/ createUseWriteContract({
@@ -1119,7 +1119,7 @@ export const useWriteOnlyPensRecoverErc20 =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"rejectDeliverable"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWriteOnlyPensRejectDeliverable =
   /*#__PURE__*/ createUseWriteContract({
@@ -1131,7 +1131,7 @@ export const useWriteOnlyPensRejectDeliverable =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"renounceOwnership"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWriteOnlyPensRenounceOwnership =
   /*#__PURE__*/ createUseWriteContract({
@@ -1143,7 +1143,7 @@ export const useWriteOnlyPensRenounceOwnership =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"setPlatformFee"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWriteOnlyPensSetPlatformFee =
   /*#__PURE__*/ createUseWriteContract({
@@ -1155,7 +1155,7 @@ export const useWriteOnlyPensSetPlatformFee =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"submitDeliverable"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWriteOnlyPensSubmitDeliverable =
   /*#__PURE__*/ createUseWriteContract({
@@ -1167,7 +1167,7 @@ export const useWriteOnlyPensSubmitDeliverable =
 /**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"transferOwnership"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWriteOnlyPensTransferOwnership =
   /*#__PURE__*/ createUseWriteContract({
@@ -1179,7 +1179,7 @@ export const useWriteOnlyPensTransferOwnership =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link onlyPensAbi}__
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useSimulateOnlyPens = /*#__PURE__*/ createUseSimulateContract({
   abi: onlyPensAbi,
@@ -1189,7 +1189,7 @@ export const useSimulateOnlyPens = /*#__PURE__*/ createUseSimulateContract({
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"acceptInvitation"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useSimulateOnlyPensAcceptInvitation =
   /*#__PURE__*/ createUseSimulateContract({
@@ -1201,7 +1201,7 @@ export const useSimulateOnlyPensAcceptInvitation =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"approveAllDeliverables"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useSimulateOnlyPensApproveAllDeliverables =
   /*#__PURE__*/ createUseSimulateContract({
@@ -1213,7 +1213,7 @@ export const useSimulateOnlyPensApproveAllDeliverables =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"approveDeliverable"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useSimulateOnlyPensApproveDeliverable =
   /*#__PURE__*/ createUseSimulateContract({
@@ -1225,7 +1225,7 @@ export const useSimulateOnlyPensApproveDeliverable =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"cancelExpiredPackage"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useSimulateOnlyPensCancelExpiredPackage =
   /*#__PURE__*/ createUseSimulateContract({
@@ -1237,7 +1237,7 @@ export const useSimulateOnlyPensCancelExpiredPackage =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"cancelGigPackage"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useSimulateOnlyPensCancelGigPackage =
   /*#__PURE__*/ createUseSimulateContract({
@@ -1249,7 +1249,7 @@ export const useSimulateOnlyPensCancelGigPackage =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"createGigPackage"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useSimulateOnlyPensCreateGigPackage =
   /*#__PURE__*/ createUseSimulateContract({
@@ -1261,7 +1261,7 @@ export const useSimulateOnlyPensCreateGigPackage =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"declineInvitation"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useSimulateOnlyPensDeclineInvitation =
   /*#__PURE__*/ createUseSimulateContract({
@@ -1273,7 +1273,7 @@ export const useSimulateOnlyPensDeclineInvitation =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"inviteGhostwriter"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useSimulateOnlyPensInviteGhostwriter =
   /*#__PURE__*/ createUseSimulateContract({
@@ -1285,7 +1285,7 @@ export const useSimulateOnlyPensInviteGhostwriter =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"recoverERC20"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useSimulateOnlyPensRecoverErc20 =
   /*#__PURE__*/ createUseSimulateContract({
@@ -1297,7 +1297,7 @@ export const useSimulateOnlyPensRecoverErc20 =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"rejectDeliverable"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useSimulateOnlyPensRejectDeliverable =
   /*#__PURE__*/ createUseSimulateContract({
@@ -1309,7 +1309,7 @@ export const useSimulateOnlyPensRejectDeliverable =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"renounceOwnership"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useSimulateOnlyPensRenounceOwnership =
   /*#__PURE__*/ createUseSimulateContract({
@@ -1321,7 +1321,7 @@ export const useSimulateOnlyPensRenounceOwnership =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"setPlatformFee"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useSimulateOnlyPensSetPlatformFee =
   /*#__PURE__*/ createUseSimulateContract({
@@ -1333,7 +1333,7 @@ export const useSimulateOnlyPensSetPlatformFee =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"submitDeliverable"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useSimulateOnlyPensSubmitDeliverable =
   /*#__PURE__*/ createUseSimulateContract({
@@ -1345,7 +1345,7 @@ export const useSimulateOnlyPensSubmitDeliverable =
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link onlyPensAbi}__ and `functionName` set to `"transferOwnership"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useSimulateOnlyPensTransferOwnership =
   /*#__PURE__*/ createUseSimulateContract({
@@ -1357,7 +1357,7 @@ export const useSimulateOnlyPensTransferOwnership =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link onlyPensAbi}__
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWatchOnlyPensEvent = /*#__PURE__*/ createUseWatchContractEvent({
   abi: onlyPensAbi,
@@ -1367,7 +1367,7 @@ export const useWatchOnlyPensEvent = /*#__PURE__*/ createUseWatchContractEvent({
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link onlyPensAbi}__ and `eventName` set to `"DeliverableApproved"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWatchOnlyPensDeliverableApprovedEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -1379,7 +1379,7 @@ export const useWatchOnlyPensDeliverableApprovedEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link onlyPensAbi}__ and `eventName` set to `"DeliverableCreated"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWatchOnlyPensDeliverableCreatedEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -1391,7 +1391,7 @@ export const useWatchOnlyPensDeliverableCreatedEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link onlyPensAbi}__ and `eventName` set to `"DeliverableRejected"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWatchOnlyPensDeliverableRejectedEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -1403,7 +1403,7 @@ export const useWatchOnlyPensDeliverableRejectedEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link onlyPensAbi}__ and `eventName` set to `"DeliverableRevised"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWatchOnlyPensDeliverableRevisedEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -1415,7 +1415,7 @@ export const useWatchOnlyPensDeliverableRevisedEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link onlyPensAbi}__ and `eventName` set to `"DeliverableSubmitted"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWatchOnlyPensDeliverableSubmittedEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -1427,7 +1427,7 @@ export const useWatchOnlyPensDeliverableSubmittedEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link onlyPensAbi}__ and `eventName` set to `"GhostwriterInvited"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWatchOnlyPensGhostwriterInvitedEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -1439,7 +1439,7 @@ export const useWatchOnlyPensGhostwriterInvitedEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link onlyPensAbi}__ and `eventName` set to `"GigPackageCancelled"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWatchOnlyPensGigPackageCancelledEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -1451,7 +1451,7 @@ export const useWatchOnlyPensGigPackageCancelledEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link onlyPensAbi}__ and `eventName` set to `"GigPackageCompleted"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWatchOnlyPensGigPackageCompletedEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -1463,7 +1463,7 @@ export const useWatchOnlyPensGigPackageCompletedEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link onlyPensAbi}__ and `eventName` set to `"GigPackageCreated"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWatchOnlyPensGigPackageCreatedEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -1475,7 +1475,7 @@ export const useWatchOnlyPensGigPackageCreatedEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link onlyPensAbi}__ and `eventName` set to `"GigPackageExpired"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWatchOnlyPensGigPackageExpiredEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -1487,7 +1487,7 @@ export const useWatchOnlyPensGigPackageExpiredEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link onlyPensAbi}__ and `eventName` set to `"InvitationAccepted"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWatchOnlyPensInvitationAcceptedEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -1499,7 +1499,7 @@ export const useWatchOnlyPensInvitationAcceptedEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link onlyPensAbi}__ and `eventName` set to `"InvitationDeclined"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWatchOnlyPensInvitationDeclinedEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -1511,7 +1511,7 @@ export const useWatchOnlyPensInvitationDeclinedEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link onlyPensAbi}__ and `eventName` set to `"OwnershipTransferred"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWatchOnlyPensOwnershipTransferredEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -1523,7 +1523,7 @@ export const useWatchOnlyPensOwnershipTransferredEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link onlyPensAbi}__ and `eventName` set to `"PaymentReleased"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWatchOnlyPensPaymentReleasedEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
@@ -1535,7 +1535,7 @@ export const useWatchOnlyPensPaymentReleasedEvent =
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link onlyPensAbi}__ and `eventName` set to `"PlatformFeeUpdated"`
  *
- * [__View Contract on Base Sepolia Basescan__](https://sepolia.basescan.org/address/0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062)
+ * [__View Contract on Base Basescan__](https://basescan.org/address/0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4)
  */
 export const useWatchOnlyPensPlatformFeeUpdatedEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
