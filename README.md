@@ -86,7 +86,7 @@ _Reference_: [Deploying Smart Contracts with Hardhat](https://docs.base.org/cook
 
 The OnlyPens platform utilizes the following smart contracts:
 
-#### Testnet
+#### Sepolia Testnet
 
 | Contract Name             | Contract Address                           | Description                                                                                          |
 | ------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
