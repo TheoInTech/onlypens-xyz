@@ -54,6 +54,12 @@
 
 ---
 
+## 🔗 Tech stack
+
+![OnlyPens Tech Stack](https://github.com/TheoInTech/onlypens-xyz/blob/hackathon-mvp/web/public/assets/techstack.png?raw=true)
+
+---
+
 ## 🔗 Base Integration
 
 ### 🧠 Smart Wallet
@@ -97,12 +103,6 @@ The OnlyPens platform utilizes the following smart contracts:
 | ------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
 | OnlyPensHelpers           | 0x91F5D7107B919f6566694ec649583Eb42d6E40eA | Library contract containing helper functions for deliverable validation and other utility operations |
 | OnlyPens (Implementation) | 0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4 | Core contract containing the business logic for gig management, deliverables, and payment release    |
-
----
-
-## 📄 License
-
-[MIT](LICENSE)
 
 ---
 
