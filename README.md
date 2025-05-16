@@ -54,7 +54,7 @@
 
 ---
 
-## 🔗 Tech stack
+## 🛠️ Tech stack
 
 ![OnlyPens Tech Stack](https://github.com/TheoInTech/onlypens-xyz/blob/hackathon-mvp/web/public/assets/techstack.png?raw=true)
 
