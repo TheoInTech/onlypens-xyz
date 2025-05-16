@@ -450,7 +450,7 @@ const CreatePackagePage = () => {
 
         // Wait for blockchain indexing (can be adjusted based on network speed)
         console.log("Waiting for transaction confirmation...");
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+        await new Promise((resolve) => setTimeout(resolve, 8000));
 
         // Fetch the latest gig created to get the packageId
         setProgressModalContent("Fetching recent indexed gig data onchain...");

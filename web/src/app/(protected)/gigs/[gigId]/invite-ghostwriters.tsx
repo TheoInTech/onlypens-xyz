@@ -168,7 +168,7 @@ export const InviteGhostwriters = ({
           args: [BigInt(gig.onchainGig.gigId), ghostwriter.address],
         });
 
-        await new Promise((resolve) => setTimeout(resolve, 4000));
+        await new Promise((resolve) => setTimeout(resolve, 8000));
 
         setProgressModalContent("Invited ghostwriter! Refreshing list...");
         setIsRefetching(true);
