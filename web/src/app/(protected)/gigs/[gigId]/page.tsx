@@ -30,13 +30,8 @@ import { ERoles } from "@/stores/constants";
 import { useGlobalStore } from "@/stores";
 import { IconNumber1, IconNumber2, IconNumber3 } from "@tabler/icons-react";
 
-interface IGigIdPage {
-  params: {
-    gigId: string;
-  };
-}
-
-const GigIdPage = ({ params }: IGigIdPage) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const GigIdPage = ({ params }: any) => {
   const { gigId } = use(params as unknown as Usable<{ gigId: string }>);
   const { gigData, isLoadingGig, refetchGig } = useGig(gigId);
   const { role } = useGlobalStore();

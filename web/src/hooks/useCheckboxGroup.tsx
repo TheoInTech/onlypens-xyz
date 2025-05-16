@@ -145,7 +145,7 @@ export const useCheckboxGroup = () => {
         -1, // Max allowed niche keywords
         contentTypeWarningVisible,
         setContentTypeWarningVisible,
-        nicheWarningTimeoutRef
+        contentTypeWarningTimeoutRef
       );
     },
     [
@@ -214,14 +214,20 @@ export const useCheckboxGroup = () => {
   // Clear timeouts on unmount
   React.useEffect(() => {
     return () => {
-      if (toneWarningTimeoutRef.current) {
-        clearTimeout(toneWarningTimeoutRef.current);
+      // Capture the current ref values when the cleanup function is created
+      const currentToneWarningTimeout = toneWarningTimeoutRef.current;
+      const currentNicheWarningTimeout = nicheWarningTimeoutRef.current;
+      const currentContentTypeWarningTimeout =
+        contentTypeWarningTimeoutRef.current;
+
+      if (currentToneWarningTimeout) {
+        clearTimeout(currentToneWarningTimeout);
       }
-      if (nicheWarningTimeoutRef.current) {
-        clearTimeout(nicheWarningTimeoutRef.current);
+      if (currentNicheWarningTimeout) {
+        clearTimeout(currentNicheWarningTimeout);
       }
-      if (contentTypeWarningTimeoutRef.current) {
-        clearTimeout(contentTypeWarningTimeoutRef.current);
+      if (currentContentTypeWarningTimeout) {
+        clearTimeout(currentContentTypeWarningTimeout);
       }
     };
   }, []);

@@ -2,7 +2,7 @@ import { openai } from "@/lib/openai";
 import {
   EMatchmakerSource,
   IMatchmaker,
-  MatchmakerResponseSchema,
+  MatchmakerMatchResponseSchema,
 } from "@/schema/matchmaker.schema";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
 
       // Validate the response against the schema
       const validatedResponse =
-        MatchmakerResponseSchema.safeParse(matchmakerJson);
+        MatchmakerMatchResponseSchema.safeParse(matchmakerJson);
 
       if (!validatedResponse.success) {
         return NextResponse.json(

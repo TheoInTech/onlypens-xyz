@@ -130,6 +130,25 @@ const CreatePackagePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useSavedReferences, form.values.referenceWritings]);
 
+  // Calculate total amount from all deliverables' custom prices
+  const calculateTotalAmount = () => {
+    let total = 0;
+
+    // Make sure we're using the latest deliverables from the form
+    const currentDeliverables = form.values.deliverables;
+    console.log("Calculating total from deliverables:", currentDeliverables);
+
+    currentDeliverables.forEach((deliverable) => {
+      const price = parseFloat(deliverable.price);
+      if (!isNaN(price)) {
+        total += price;
+      }
+    });
+
+    console.log("New total amount:", total);
+    form.setFieldValue("totalAmount", total.toFixed(2));
+  };
+
   // Keep selectedContentTypes in sync with form.values.deliverables
   useEffect(() => {
     // Map deliverables to content type strings for UI state
@@ -140,6 +159,7 @@ const CreatePackagePage = () => {
     if (contentTypes.length > 0) {
       calculateTotalAmount();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.values.deliverables]);
 
   // Calculate AI suggested price
@@ -280,25 +300,6 @@ const CreatePackagePage = () => {
 
     form.setFieldValue("deliverables", deliverables);
     calculateTotalAmount();
-  };
-
-  // Calculate total amount from all deliverables' custom prices
-  const calculateTotalAmount = () => {
-    let total = 0;
-
-    // Make sure we're using the latest deliverables from the form
-    const currentDeliverables = form.values.deliverables;
-    console.log("Calculating total from deliverables:", currentDeliverables);
-
-    currentDeliverables.forEach((deliverable) => {
-      const price = parseFloat(deliverable.price);
-      if (!isNaN(price)) {
-        total += price;
-      }
-    });
-
-    console.log("New total amount:", total);
-    form.setFieldValue("totalAmount", total.toFixed(2));
   };
 
   // Check if a content type is selected
@@ -531,11 +532,15 @@ const CreatePackagePage = () => {
   // Clear timeouts on unmount
   useEffect(() => {
     return () => {
-      if (toneWarningTimeoutRef.current) {
-        clearTimeout(toneWarningTimeoutRef.current);
+      // Capture the ref value at the time the cleanup function is created
+      const currentToneWarningTimeout = toneWarningTimeoutRef.current;
+      const currentNicheWarningTimeout = nicheWarningTimeoutRef.current;
+
+      if (currentToneWarningTimeout) {
+        clearTimeout(currentToneWarningTimeout);
       }
-      if (nicheWarningTimeoutRef.current) {
-        clearTimeout(nicheWarningTimeoutRef.current);
+      if (currentNicheWarningTimeout) {
+        clearTimeout(currentNicheWarningTimeout);
       }
     };
   }, []);
