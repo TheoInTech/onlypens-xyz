@@ -78,6 +78,7 @@ export const GigSchema = z.object({
       declined: z.array(InvitationSchema).optional().default([]),
     })
     .nullish(),
+  isInvitedGhostwriter: z.boolean().nullable().optional(),
 });
 
 export type IGig = z.infer<typeof GigSchema>;
@@ -145,6 +146,7 @@ export const GigApiResponseSchema = z.object({
   toneKeywords: z.array(z.string()).nullable().optional(),
   submissions: z.array(z.any()).nullable().optional(),
   history: z.array(z.any()).nullable().optional(),
+  isInvitedGhostwriter: z.boolean().nullable().optional(),
 });
 
 export type IGigApiResponse = z.infer<typeof GigApiResponseSchema>;

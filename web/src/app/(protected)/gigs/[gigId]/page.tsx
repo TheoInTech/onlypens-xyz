@@ -9,15 +9,26 @@ import {
   Group,
   Loader,
   Stack,
+  Tabs,
   Text,
   Tooltip,
 } from "@mantine/core";
 import React, { Usable, use } from "react";
-import { AmountPill, GlassCard, StatusPill, ToneNichePill } from "@/components";
+import {
+  AmountPill,
+  Button,
+  GlassCard,
+  StatusPill,
+  Textarea,
+  ToneNichePill,
+} from "@/components";
 import useGig from "@/hooks/useGig";
 import Image from "next/image";
 import classes from "./page.module.css";
 import { InviteGhostwriters } from "./invite-ghostwriters";
+import { ERoles } from "@/stores/constants";
+import { useGlobalStore } from "@/stores";
+import { IconNumber1, IconNumber2, IconNumber3 } from "@tabler/icons-react";
 
 interface IGigIdPage {
   params: {
@@ -28,6 +39,7 @@ interface IGigIdPage {
 const GigIdPage = ({ params }: IGigIdPage) => {
   const { gigId } = use(params as unknown as Usable<{ gigId: string }>);
   const { gigData, isLoadingGig, refetchGig } = useGig(gigId);
+  const { role } = useGlobalStore();
 
   if (isLoadingGig) {
     return (
@@ -73,8 +85,41 @@ const GigIdPage = ({ params }: IGigIdPage) => {
     ...new Set(metadata.deliverables.map((d) => d.contentType)),
   ];
 
+  const handleAcceptInvitation = () => {
+    console.log("Accepting invitation");
+    // TODO: Add another confirmation prompt
+    // For MVP, just proceed
+  };
+
+  const handleDeclineInvitation = () => {
+    console.log("Declining invitation");
+    // TODO: Add another confirmation prompt
+    // For MVP, just proceed
+  };
+
   return (
     <Stack gap="xl">
+      {role === ERoles.GHOSTWRITER && (
+        <Stack gap="xs" w="100%" justify="center" align="center">
+          <Text size="xs">You are invited to this gig!</Text>
+          <Group gap="xs">
+            <Button
+              variant="outline"
+              size="small"
+              onClick={handleDeclineInvitation}
+            >
+              Decline
+            </Button>
+            <Button
+              variant="white"
+              size="small"
+              onClick={handleAcceptInvitation}
+            >
+              Accept
+            </Button>
+          </Group>
+        </Stack>
+      )}
       <GlassCard>
         <Grid gutter="xl">
           <GridCol span={4}>
@@ -158,7 +203,64 @@ const GigIdPage = ({ params }: IGigIdPage) => {
           </GridCol>
         </Grid>
       </GlassCard>
-      <InviteGhostwriters gig={gigData} refetchGig={refetchGig} />
+      {/* Sample writing style */}
+      <Stack gap="xs">
+        <Text size="md" fw={500}>
+          Creator&apos;s sample writing
+        </Text>
+        <Tabs
+          variant="pills"
+          radius="md"
+          orientation="vertical"
+          defaultValue="sample-1"
+          color="purple.9"
+        >
+          <Tabs.List className={classes.tabsList}>
+            <Tabs.Tab
+              value="sample-1"
+              leftSection={<IconNumber1 size={24} />}
+              className={classes.tab}
+            ></Tabs.Tab>
+            <Tabs.Tab
+              value="sample-2"
+              leftSection={<IconNumber2 size={24} />}
+              className={classes.tab}
+            ></Tabs.Tab>
+            <Tabs.Tab
+              value="sample-3"
+              leftSection={<IconNumber3 size={24} />}
+              className={classes.tab}
+            ></Tabs.Tab>
+          </Tabs.List>
+
+          <Tabs.Panel value="sample-1">
+            <Textarea
+              h={240}
+              value={gigData.metadata?.referenceWritings?.[0]}
+              disabled
+            />
+          </Tabs.Panel>
+
+          <Tabs.Panel value="sample-2">
+            <Textarea
+              h={240}
+              value={gigData.metadata?.referenceWritings?.[1]}
+              disabled
+            />
+          </Tabs.Panel>
+
+          <Tabs.Panel value="sample-3">
+            <Textarea
+              h={240}
+              value={gigData.metadata?.referenceWritings?.[2]}
+              disabled
+            />
+          </Tabs.Panel>
+        </Tabs>
+      </Stack>
+      {role === ERoles.CREATOR && (
+        <InviteGhostwriters gig={gigData} refetchGig={refetchGig} />
+      )}
     </Stack>
   );
 };

@@ -24,6 +24,7 @@ import Image from "next/image";
 import { GhostwriterProfile } from "./ghostwriter-profile";
 import { IUser } from "@/schema/user.schema";
 import { useWriteOnlyPensInviteGhostwriter } from "@/hooks/abi-generated";
+import { useGlobalStore } from "@/stores";
 
 // TODO:
 // 1. / Empty state - "You haven't matched with ghostwriters yet" -> Button to match ghostwriters
@@ -47,10 +48,7 @@ export const InviteGhostwriters = ({
     useInviteGhostwriters(gig.onchainGig.gigId);
   const { writeContractAsync: inviteGhostwriter } =
     useWriteOnlyPensInviteGhostwriter();
-
-  // Debug: Log the entire gig object to inspect the structure
-  console.log("Current gig object:", gig);
-  console.log("Invitations data:", gig.invitations);
+  const { role } = useGlobalStore();
 
   const [isMatchingGhostwriters, setIsMatchingGhostwriters] =
     useState<boolean>(false);
@@ -91,7 +89,7 @@ export const InviteGhostwriters = ({
     (address: string): boolean => {
       return alreadyInvitedAddresses.includes(address.toLowerCase());
     },
-    [alreadyInvitedAddresses]
+    [alreadyInvitedAddresses, role, gig.isInvitedGhostwriter]
   );
 
   // Memoized function to determine if invite button should be disabled

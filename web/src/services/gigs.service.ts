@@ -321,6 +321,7 @@ export const getGig = async (gigId: string): Promise<IGig> => {
       event: EActivityType.GIG_CREATED,
       // Include invitations data if available
       invitations: apiGig.invitations || null,
+      isInvitedGhostwriter: apiGig.isInvitedGhostwriter || false,
     };
   } catch (error) {
     console.error(`Error fetching gig ${gigId}:`, error);

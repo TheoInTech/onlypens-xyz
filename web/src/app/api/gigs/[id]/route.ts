@@ -135,7 +135,7 @@ export async function GET(
       gigData?.creatorAddress.toLowerCase() === walletAddress.toLowerCase();
 
     // Check if the ghostwriter has access to this gig via the subgraph
-    let isAssignedGhostwriter = false;
+    let isInvitedGhostwriter = false;
 
     // If user is a ghostwriter, we need to check the subgraph to see if they're associated with this gig
     if (isGhostwriter && !isGigCreator && SUBGRAPH_URL) {
@@ -149,7 +149,7 @@ export async function GET(
         );
 
         // Check if any invitation matches this gig's packageId
-        isAssignedGhostwriter =
+        isInvitedGhostwriter =
           invitationsResponse.invitations?.some((invitation) => {
             const packageId = gigData?.packageId?.toString();
             return packageId && invitation.package?.packageId === packageId;
@@ -160,7 +160,7 @@ export async function GET(
     }
 
     // User should be either the creator or an invited ghostwriter
-    if (!isGigCreator && !isAssignedGhostwriter) {
+    if (!isGigCreator && !isInvitedGhostwriter) {
       return NextResponse.json(
         {
           success: false,
@@ -443,7 +443,7 @@ export async function GET(
         id: gigId,
         ...gigData,
         invitations: invitationData,
-        isAssignedGhostwriter,
+        isInvitedGhostwriter,
       },
       error: null,
     });
