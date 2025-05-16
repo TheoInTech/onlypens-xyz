@@ -1,0 +1,249 @@
+# Event entities (keeping for historical record but making non-queryable)
+type DeliverableApprovedEvent @entity(immutable: true) {
+  id: Bytes!
+  packageId: BigInt! # uint256
+  deliverableId: BigInt! # uint256
+  writer: Bytes! # address
+  approvedQuantity: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type DeliverableCreatedEvent @entity(immutable: true) {
+  id: Bytes!
+  packageId: BigInt! # uint256
+  deliverableId: BigInt! # uint256
+  contentType: String! # string
+  amount: BigInt! # uint256
+  quantity: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type DeliverableRejectedEvent @entity(immutable: true) {
+  id: Bytes!
+  packageId: BigInt! # uint256
+  deliverableId: BigInt! # uint256
+  writer: Bytes! # address
+  submittedQuantity: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type DeliverableRevisedEvent @entity(immutable: true) {
+  id: Bytes!
+  packageId: BigInt! # uint256
+  deliverableId: BigInt! # uint256
+  writer: Bytes! # address
+  submittedQuantity: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type DeliverableSubmittedEvent @entity(immutable: true) {
+  id: Bytes!
+  packageId: BigInt! # uint256
+  deliverableId: BigInt! # uint256
+  writer: Bytes! # address
+  submittedQuantity: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type GhostwriterInvitedEvent @entity(immutable: true) {
+  id: Bytes!
+  packageId: BigInt! # uint256
+  ghostwriter: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type GigPackageCancelledEvent @entity(immutable: true) {
+  id: Bytes!
+  packageId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type GigPackageCompletedEvent @entity(immutable: true) {
+  id: Bytes!
+  packageId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type GigPackageCreatedEvent @entity(immutable: true) {
+  id: Bytes!
+  packageId: BigInt! # uint256
+  creator: Bytes! # address
+  amount: BigInt! # uint256
+  expiresAt: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type GigPackageExpiredEvent @entity(immutable: true) {
+  id: Bytes!
+  packageId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type InvitationAcceptedEvent @entity(immutable: true) {
+  id: Bytes!
+  packageId: BigInt! # uint256
+  ghostwriter: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type InvitationDeclinedEvent @entity(immutable: true) {
+  id: Bytes!
+  packageId: BigInt! # uint256
+  ghostwriter: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnershipTransferredEvent @entity(immutable: true) {
+  id: Bytes!
+  previousOwner: Bytes! # address
+  newOwner: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type PaymentReleasedEvent @entity(immutable: true) {
+  id: Bytes!
+  packageId: BigInt! # uint256
+  deliverableId: BigInt! # uint256
+  to: Bytes! # address
+  amount: BigInt! # uint256
+  platformFee: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type PlatformFeeUpdatedEvent @entity(immutable: true) {
+  id: Bytes!
+  newFeeBps: BigInt! # uint16
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+# State entities (queryable)
+
+enum PackageStatus {
+  PENDING
+  INVITED
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  EXPIRED
+}
+
+enum DeliverableStatus {
+  PENDING
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+# Entity for users (both creators and ghostwriters)
+type User @entity(immutable: false) {
+  id: Bytes! # address
+  createdPackages: [Package!]! @derivedFrom(field: "creator")
+  writtenPackages: [Package!]! @derivedFrom(field: "writer")
+  invitations: [Invitation!]! @derivedFrom(field: "ghostwriter")
+  submittedDeliverables: [Deliverable!]! @derivedFrom(field: "writer")
+  totalPaymentsReceived: BigInt!
+  totalPaymentsSent: BigInt!
+  createdAt: BigInt!
+  lastUpdated: BigInt!
+}
+
+# Entity for gig packages
+type Package @entity(immutable: false) {
+  id: ID! # packageId
+  packageId: BigInt!
+  creator: User!
+  writer: User
+  totalAmount: BigInt!
+  amountReleased: BigInt!
+  createdAt: BigInt!
+  lastUpdated: BigInt!
+  expiresAt: BigInt!
+  status: PackageStatus!
+  deliverables: [Deliverable!]! @derivedFrom(field: "package")
+  invitations: [Invitation!]! @derivedFrom(field: "package")
+  numDeliverables: BigInt!
+  numApproved: BigInt!
+  isExpired: Boolean!
+  transactionHash: Bytes!
+}
+
+# Entity for deliverables
+type Deliverable @entity(immutable: false) {
+  id: ID! # packageId-deliverableId
+  deliverableId: BigInt!
+  package: Package!
+  contentType: String!
+  status: DeliverableStatus!
+  amount: BigInt!
+  quantity: BigInt!
+  submittedQuantity: BigInt
+  approvedQuantity: BigInt
+  writer: User
+  submittedAt: BigInt
+  approvedAt: BigInt
+  rejectedAt: BigInt
+  revisedAt: BigInt
+  createdAt: BigInt!
+  transactionHash: Bytes!
+}
+
+# Entity for invitations
+type Invitation @entity(immutable: false) {
+  id: ID! # packageId-ghostwriter
+  package: Package!
+  ghostwriter: User!
+  status: InvitationStatus!
+  invitedAt: BigInt!
+  respondedAt: BigInt
+  transactionHash: Bytes!
+}
+
+# Entity for payments
+type Payment @entity(immutable: true) {
+  id: Bytes!
+  package: Package!
+  deliverable: Deliverable
+  from: User!
+  to: User!
+  amount: BigInt!
+  platformFee: BigInt!
+  timestamp: BigInt!
+  transactionHash: Bytes!
+}

@@ -1,0 +1,240 @@
+.gradientBanner {
+  position: relative;
+  width: 100%;
+  border-radius: 20px;
+  margin: 5px;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.gradientBanner:hover {
+  transform: translateY(-2px);
+}
+
+/* Inner content container with gradient background and glass effect */
+.inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  padding: 24px;
+  overflow: hidden;
+  z-index: 2;
+  /* Enhanced glass emboss effect with more pronounced shadows */
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.5),
+    0px 2px 4px rgba(255, 255, 255, 0.4) inset,
+    0px -2px 4px rgba(0, 0, 0, 0.4) inset;
+}
+
+/* Adjusted glossy overlay - reduced middle brightness */
+.inner::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 20px;
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.05) 20%,
+    rgba(255, 255, 255, 0) 50%,
+    rgba(255, 255, 255, 0.05) 85%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+  pointer-events: none;
+  z-index: 4;
+}
+
+.content {
+  position: relative;
+  z-index: 3;
+}
+
+/* Much more pronounced glossy border */
+.glossyBorder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  z-index: 3;
+  pointer-events: none;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+/* Additional chrome effect on the border - top only */
+.glossyBorder::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  height: 30%;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  z-index: 1;
+}
+
+/* Gradient variations with embossed effect */
+.purple .inner {
+  background: rgba(162, 100, 255, 0.9);
+  border: 2px solid rgba(200, 150, 255, 0.6);
+  border-bottom: 2px solid rgba(100, 50, 150, 0.6);
+  filter: brightness(1.05) contrast(1.1);
+  backdrop-filter: blur(5px);
+}
+
+.blue .inner {
+  background: rgba(56, 123, 254, 0.9);
+  border: 2px solid rgba(130, 170, 255, 0.6);
+  border-bottom: 2px solid rgba(20, 70, 200, 0.6);
+  filter: brightness(1.15);
+  backdrop-filter: blur(5px);
+}
+
+.purple-blue .inner {
+  background: linear-gradient(
+    135deg,
+    rgba(162, 100, 255, 0.9) 0%,
+    rgba(56, 123, 254, 0.9) 100%
+  );
+  border: 2px solid rgba(170, 130, 255, 0.6);
+  border-bottom: 2px solid rgba(20, 70, 200, 0.6);
+  filter: brightness(1.1) contrast(1.05);
+  backdrop-filter: blur(5px);
+}
+
+.blue-purple .inner {
+  background: linear-gradient(
+    135deg,
+    rgba(56, 123, 254, 0.9) 0%,
+    rgba(162, 100, 255, 0.9) 100%
+  );
+  border: 2px solid rgba(130, 170, 255, 0.6);
+  border-bottom: 2px solid rgba(100, 50, 150, 0.6);
+  filter: brightness(1.1) contrast(1.05);
+  backdrop-filter: blur(5px);
+}
+
+/* Mouse-following glow effect */
+.glowEffect {
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  left: var(--mouse-x, 0);
+  top: var(--mouse-y, 0);
+  opacity: var(--glow-opacity, 0);
+  pointer-events: none;
+  z-index: 3;
+  transition: opacity 0.2s ease;
+  mix-blend-mode: overlay;
+  filter: blur(8px);
+}
+
+/* BACK-GLOW EFFECT - smaller, brighter, faster moving */
+.glowingBorder {
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  right: -15px;
+  bottom: -15px;
+  border-radius: 28px;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* Show glow when hasGlow class is present */
+.hasGlow .glowingBorder {
+  opacity: 1;
+}
+
+/* The back-glow effect */
+.glowingBorder::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 28px;
+  filter: blur(15px);
+  opacity: 0.8;
+  animation: moveGlow 5.5s ease-in-out infinite alternate;
+}
+
+/* Variant-specific colors for back-glow */
+.purple .glowingBorder::before {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(220, 150, 255, 0.9) 0%,
+    rgba(162, 100, 255, 0.5) 40%,
+    rgba(162, 100, 255, 0) 70%
+  );
+}
+
+.blue .glowingBorder::before {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(130, 180, 255, 0.9) 0%,
+    rgba(56, 123, 254, 0.5) 40%,
+    rgba(56, 123, 254, 0) 70%
+  );
+}
+
+.purple-blue .glowingBorder::before {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(220, 150, 255, 0.9) 0%,
+    rgba(56, 123, 254, 0.5) 40%,
+    rgba(56, 123, 254, 0) 70%
+  );
+}
+
+.blue-purple .glowingBorder::before {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(130, 180, 255, 0.9) 0%,
+    rgba(162, 100, 255, 0.5) 40%,
+    rgba(162, 100, 255, 0) 70%
+  );
+}
+
+/* Animation for the back-glow */
+@keyframes moveGlow {
+  0% {
+    transform: translate(-8%, -8%) scale(0.95);
+  }
+  100% {
+    transform: translate(8%, 8%) scale(1.15);
+  }
+}
+
+/* Old moving gradient animation - keeping as fallback */
+@keyframes movingGradient {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 0%;
+  }
+}

@@ -8,16 +8,17 @@
 
 ### 🎯 Core Features
 
-- **User Authentication**: Wallet connect (e.g., Coinbase Smart Wallet) or email login.
-- **Role Selection**: Users choose to be either an Influencer or a Ghostwriter.
+- **User Authentication**: Wallet connect using Coinbase Smart Wallet.
+- **Role Selection**: Users choose to be either a Creator or a Ghostwriter.
+- **Gig Creation**: Create gig packages with an AI-assisted pricing and start inviting the best-matched ghostwriters
 - **Dashboard**:
   - _creators_:
-    - Post new briefs.
+    - Post new gigs in packages (e.g. 2 Thread, 4 short-post, 4 image caption).
     - View and manage submitted drafts.
     - Approve submissions and release payments.
-  - _Ghostwriters_:
-    - Browse available briefs.
-    - Submit drafts for assigned briefs.
+  - _ghostwriters_:
+    - Accept gig invitations from creators
+    - Submit drafts for accepted gigs.
     - Track earnings.
 - **AI-Powered Tone Matching**:
   - creators provide sample content to capture their unique tone.
@@ -28,10 +29,13 @@
 
 ### 🛠️ Tech Stack
 
-- **Frontend**: Next.js
-- **Backend**: Supabase (for storing briefs and AI matchmaking data)
+![OnlyPens Tech Stack](https://github.com/TheoInTech/onlypens-xyz/blob/hackathon-mvp/web/public/assets/techstack.png?raw=true)
+
+- **Frontend**: Next.js, Zod, Mantine UI
+- **Backend**: Firebase's Firestore (for storing gigs metadata and AI matchmaking data)
 - **Blockchain**: Base network
 - **Smart Contracts**: Solidity (using Hardhat for development and deployment)
+- **Indexing**: TheGraph Protocol's Subgraph
 
 ---
 
@@ -47,7 +51,8 @@
   - Customizable notification preferences allowing users to filter by opportunity type, budget range, and urgency.
   - Push notifications for mobile users to ensure timely responses to time-sensitive opportunities.
 - **Reputation System**: Implement on-chain reputation scores for both creators and ghostwriters.
-- **Improve AI Matchmaking with Vector**: Improve matchmaking algorithms using advanced AI models and vector databases.
+- **Commission-based Payments**: Implement a flexible royalty system allowing creators to offer ghostwriters a percentage of revenue generated from content, enabling profit-sharing arrangements alongside or instead of fixed payments.
+- **Improved AI Matchmaking with Vector**: Improve matchmaking algorithms using advanced AI models and vector databases.
 
 ---
 
@@ -75,21 +80,25 @@ Develop and deploy smart contracts on the Base network using Hardhat and Solidit
 
 _Reference_: [Deploying Smart Contracts with Hardhat](https://docs.base.org/cookbook/smart-contract-development/hardhat/deploy-with-hardhat)
 
-### 🌾 Earn Component
-
-Integrate Base's Earn component to allow escrowed funds to earn yield until they are released to ghostwriters.
-
-- **Benefits**:
-  - Maximizes the utility of idle funds.
-  - Provides additional value to users.
-
-_Reference_: [Base Earn Component Documentation](https://docs.base.org/identity/smart-wallet/concepts/what-is-smart-wallet)
-
 ---
 
-## 📄 License
+## 📜 Smart Contracts
 
-[MIT](LICENSE)
+The OnlyPens platform utilizes the following smart contracts:
+
+#### Sepolia Testnet
+
+| Contract Name             | Contract Address                           | Description                                                                                          |
+| ------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| OnlyPensHelpers           | 0xbde1F236a030a0257ef83c43F289FE5107Ae9c74 | Library contract containing helper functions for deliverable validation and other utility operations |
+| OnlyPens (Implementation) | 0x8d7c222d2F0D8bf9ceFbA02Cd01ab46C47C33062 | Core contract containing the business logic for gig management, deliverables, and payment release    |
+
+#### Mainnet
+
+| Contract Name             | Contract Address                           | Description                                                                                          |
+| ------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| OnlyPensHelpers           | 0x91F5D7107B919f6566694ec649583Eb42d6E40eA | Library contract containing helper functions for deliverable validation and other utility operations |
+| OnlyPens (Implementation) | 0x88566d8202EaD5a6D6b96E4a37A1D197f0d94BC4 | Core contract containing the business logic for gig management, deliverables, and payment release    |
 
 ---
 

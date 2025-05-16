@@ -4,6 +4,8 @@
 import "@mantine/core/styles.css";
 import "@mantine/carousel/styles.css";
 import "@mantine/nprogress/styles.css";
+import "@mantine/tiptap/styles.css";
+
 import classes from "./layout.module.css";
 import type { Metadata } from "next";
 import meta from "@/lib/metadata.json";
@@ -15,6 +17,9 @@ import {
   MantineProvider,
 } from "@mantine/core";
 import { theme } from "@/theme";
+import { Menu, NProgress } from "@/components";
+import { WalletProvider } from "@/providers/wallet.provider";
+import AuthProvider from "@/providers/auth.provider";
 
 const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
   ? process.env.NEXT_PUBLIC_SITE_URL
@@ -93,9 +98,15 @@ export default function RootLayout({
       </head>
       <body>
         <MantineProvider theme={theme}>
-          <Box component="main" className={classes.main}>
-            {children}
-          </Box>
+          <WalletProvider>
+            <AuthProvider>
+              <NProgress />
+              <Menu />
+              <Box component="main" className={classes.main}>
+                <Box className={classes.wrapper}>{children}</Box>
+              </Box>
+            </AuthProvider>
+          </WalletProvider>
         </MantineProvider>
       </body>
     </html>

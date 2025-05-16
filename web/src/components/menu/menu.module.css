@@ -1,0 +1,109 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  margin: 16px 24px;
+  min-height: 80px;
+  padding-left: var(--mantine-spacing-md);
+  padding-right: var(--mantine-spacing-md);
+  background-color: rgba(162, 100, 255, 0.05);
+  padding: 16px 40px;
+  border-radius: var(--mantine-radius-xl);
+  box-shadow: var(--mantine-shadow-md);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.buttonLogo {
+  cursor: pointer;
+  background-color: transparent;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.logoText {
+  font-family: var(--mantine-font-family-headings);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--mantine-color-white);
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-left: var(--mantine-spacing-md);
+  padding-right: var(--mantine-spacing-md);
+  text-decoration: none;
+  color: var(--mantine-color-white);
+  font-weight: 500;
+  font-size: var(--mantine-font-size-xs);
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    height: 42px;
+    width: 100%;
+  }
+
+  &:hover:not(.linkActive) {
+    background-color: var(--mantine-color-purple-1);
+    color: var(--mantine-color-midnight-9);
+    transition: all 0.3s ease;
+    padding: 8px 16px;
+    border-radius: var(--mantine-radius-md);
+  }
+}
+
+.logo {
+  width: 60px;
+  height: 60px;
+}
+
+.drawer {
+  background-color: var(--mantine-color-midnight-9);
+}
+
+.linkActive {
+  background-color: var(--mantine-color-purple-9);
+  color: var(--mantine-color-purple-0);
+  border-radius: var(--mantine-radius-md);
+  padding: 8px 16px;
+}
+
+.roleIndicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--mantine-color-green-9);
+  box-shadow: 0 0 8px 2px var(--mantine-color-green-5);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 8px 2px var(--mantine-color-green-5);
+  }
+  50% {
+    box-shadow: 0 0 12px 4px var(--mantine-color-green-4);
+  }
+  100% {
+    box-shadow: 0 0 8px 2px var(--mantine-color-green-5);
+  }
+}
+
+.role {
+  margin-left: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 500;
+  color: var(--mantine-color-white);
+  font-weight: 700;
+  text-transform: capitalize;
+}

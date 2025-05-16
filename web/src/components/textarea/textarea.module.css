@@ -1,0 +1,36 @@
+.textarea {
+  transition: border-color 0.2s ease;
+  background-color: var(--mantine-color-midnight-8);
+  color: var(--mantine-color-white);
+  padding: 16px;
+  width: 100%;
+  min-height: 160px;
+  resize: none;
+}
+
+.textarea:disabled {
+  background-color: var(--mantine-color-midnight-9);
+  color: var(--mantine-color-gray-6);
+  opacity: 0.9;
+  border: 1px solid var(--mantine-color-gray-7);
+}
+
+.textarea:focus {
+  border: 1px solid var(--mantine-color-white);
+  outline: none;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  margin-bottom: 8px;
+}
+
+.description {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: var(--mantine-font-size-xs);
+}

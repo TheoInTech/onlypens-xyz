@@ -1,0 +1,139 @@
+.tilesContainer {
+  width: 1000px;
+  gap: 1rem;
+}
+
+.valueWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+}
+
+.amount {
+  font-size: var(--mantine-font-size-xl);
+  font-weight: 700;
+}
+
+.currency {
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 400;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+}
+
+.gigCard {
+  height: 400px;
+  width: 100%;
+}
+
+.gigImage {
+  object-fit: cover;
+  opacity: 0.5;
+}
+
+.realtimeWallet {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--mantine-color-gray-1);
+}
+
+.realtimeAmount {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--mantine-color-white);
+}
+
+.processContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  gap: 2rem;
+}
+
+.processStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  position: relative;
+  flex: 1;
+}
+
+.processCircle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(20, 20, 30, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+.processCircle::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.processArrow {
+  position: absolute;
+  right: -45%;
+  top: 48px;
+  transform: translateY(-50%);
+  opacity: 0.5;
+  width: 90%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+}
+
+.processArrow::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+  border-right: 2px solid rgba(255, 255, 255, 0.1);
+  transform: rotate(45deg);
+}
+
+.processText {
+  text-align: center;
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 500;
+  color: var(--mantine-color-white);
+  opacity: 0.8;
+  max-width: 160px;
+  line-height: 1.4;
+}
+
+.fullWidthGlassCard {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

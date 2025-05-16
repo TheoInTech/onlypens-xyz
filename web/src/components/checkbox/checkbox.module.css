@@ -1,0 +1,59 @@
+.pillCheckbox {
+  display: inline-flex;
+  margin: 2px;
+}
+
+.pillCheckbox input {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.pillLabel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  border-radius: 50px;
+  height: 32px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: transparent;
+  color: var(--mantine-color-gray-4);
+  transition: all 0.15s ease;
+  cursor: pointer;
+  border: 1px solid var(--mantine-color-gray-7);
+  position: relative;
+}
+
+.pillLabel:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: var(--mantine-color-gray-6);
+}
+
+/* Checked state */
+.checked {
+  background-color: var(--mantine-color-purple-5);
+  border-color: var(--mantine-color-purple-5);
+  color: white;
+  padding-right: 32px; /* Extra space for the icon */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.checked:hover {
+  background-color: var(--mantine-color-purple-6);
+  border-color: var(--mantine-color-purple-6);
+}
+
+.checkIcon {
+  position: absolute;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

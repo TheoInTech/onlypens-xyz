@@ -1,0 +1,51 @@
+.tabsList {
+  margin-right: 1.5rem;
+  gap: 1rem;
+}
+
+.tab {
+  border: 1px solid var(--mantine-color-gray-8);
+  transition: all 0.2s ease-in-out;
+
+  &:hover:not([data-active]) {
+    background-color: var(--mantine-color-midnight-8);
+  }
+
+  &[data-active] {
+    border: 1px solid transparent;
+    box-shadow:
+      0 0 0 2px var(--mantine-color-purple-8),
+      inset 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.buttonGroup {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background-color: var(--mantine-color-midnight-8);
+  z-index: 100;
+}
+
+.errorText {
+  color: var(--mantine-color-red-5);
+  font-size: 18px;
+  margin-top: 0;
+}
+
+.progressModalContent {
+  color: var(--mantine-color-midnight-9);
+  border-radius: var(--mantine-radius-xl);
+  padding: var(--mantine-spacing-xl);
+
+  .mantine-Modal-content {
+    background-color: var(--mantine-color-midnight-8);
+  }
+}
+
+.progressModalOverlay {
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(3px);
+}

@@ -1,0 +1,37 @@
+.amountPill {
+  font-weight: 700;
+  color: var(--mantine-color-black);
+  text-align: center;
+  width: fit-content;
+  background: linear-gradient(
+    135deg,
+    var(--mantine-color-gray-4) 0%,
+    var(--mantine-color-white) 60%,
+    var(--mantine-color-gray-5) 100%
+  );
+  border-radius: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+/* Size variants */
+.sm {
+  font-size: 12px;
+  padding: 4px 12px;
+}
+
+.md {
+  font-size: 14px;
+  padding: 6px 20px;
+}
+
+.lg {
+  font-size: 16px;
+  padding: 8px 24px;
+}

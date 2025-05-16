@@ -1,18 +1,20 @@
 .home {
   width: 100%;
-  min-height: 100vh;
-  background: radial-gradient(circle at 25% 50%, #0a1025 0%, #000510 100%);
+  min-height: calc(100vh - 180px);
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .home::before {
   content: "";
   position: absolute;
-  top: 10%;
-  left: 10%;
-  width: 40vmin;
-  height: 40vmin;
+  top: 0%;
+  left: 0%;
+  width: 80vmin;
+  height: 80vmin;
   background: radial-gradient(
     circle at center,
     rgba(0, 80, 255, 0.15) 0%,
@@ -26,10 +28,10 @@
 .home::after {
   content: "";
   position: absolute;
-  bottom: 10%;
-  right: 10%;
-  width: 40vmin;
-  height: 40vmin;
+  bottom: 0%;
+  right: 0%;
+  width: 80vmin;
+  height: 80vmin;
   background: radial-gradient(
     circle at center,
     rgba(128, 0, 255, 0.15) 0%,
@@ -38,4 +40,12 @@
   filter: blur(15px);
   border-radius: 50%;
   z-index: 0;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
