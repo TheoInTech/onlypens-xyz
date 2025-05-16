@@ -71,7 +71,7 @@ interface IPackageInvitationsResponse {
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verify authentication
@@ -113,7 +113,7 @@ export async function GET(
     const isGhostwriter = userData.role === ERoles.GHOSTWRITER;
 
     // Get the gig from Firebase
-    const { id: gigId } = params;
+    const { id: gigId } = await params;
     const gigRef = adminDb.collection("gigs").doc(gigId);
     const gigDoc = await gigRef.get();
 
@@ -466,7 +466,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verify authentication
@@ -489,7 +489,7 @@ export async function PATCH(
     const walletAddress = token.sub;
 
     // Get the gig from Firebase
-    const { id: gigId } = params;
+    const { id: gigId } = await params;
     const gigRef = adminDb.collection("gigs").doc(gigId);
     const gigDoc = await gigRef.get();
 

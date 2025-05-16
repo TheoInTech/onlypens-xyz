@@ -38,12 +38,14 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, isFetched, isRefetching]);
+  }, [session, isFetched, isRefetching, fetchedUser]);
 
   useEffect(() => {
     (async () => {
       await refetch();
     })();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   return <>{children}</>;
