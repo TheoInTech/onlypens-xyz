@@ -29,6 +29,8 @@
 
 ### 🛠️ Tech Stack
 
+![OnlyPens Tech Stack](https://github.com/TheoInTech/onlypens-xyz/blob/hackathon-mvp/web/public/assets/techstack.png?raw=true)
+
 - **Frontend**: Next.js, Zod, Mantine UI
 - **Backend**: Firebase's Firestore (for storing gigs metadata and AI matchmaking data)
 - **Blockchain**: Base network
@@ -51,12 +53,6 @@
 - **Reputation System**: Implement on-chain reputation scores for both creators and ghostwriters.
 - **Commission-based Payments**: Implement a flexible royalty system allowing creators to offer ghostwriters a percentage of revenue generated from content, enabling profit-sharing arrangements alongside or instead of fixed payments.
 - **Improved AI Matchmaking with Vector**: Improve matchmaking algorithms using advanced AI models and vector databases.
-
----
-
-## 🛠️ Tech stack
-
-![OnlyPens Tech Stack](https://github.com/TheoInTech/onlypens-xyz/blob/hackathon-mvp/web/public/assets/techstack.png?raw=true)
 
 ---
 
