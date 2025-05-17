@@ -214,20 +214,14 @@ export const useCheckboxGroup = () => {
   // Clear timeouts on unmount
   React.useEffect(() => {
     return () => {
-      // Capture the current ref values when the cleanup function is created
-      const currentToneWarningTimeout = toneWarningTimeoutRef.current;
-      const currentNicheWarningTimeout = nicheWarningTimeoutRef.current;
-      const currentContentTypeWarningTimeout =
-        contentTypeWarningTimeoutRef.current;
-
-      if (currentToneWarningTimeout) {
-        clearTimeout(currentToneWarningTimeout);
+      if (toneWarningTimeoutRef.current) {
+        clearTimeout(toneWarningTimeoutRef.current);
       }
-      if (currentNicheWarningTimeout) {
-        clearTimeout(currentNicheWarningTimeout);
+      if (nicheWarningTimeoutRef.current) {
+        clearTimeout(nicheWarningTimeoutRef.current);
       }
-      if (currentContentTypeWarningTimeout) {
-        clearTimeout(currentContentTypeWarningTimeout);
+      if (contentTypeWarningTimeoutRef.current) {
+        clearTimeout(contentTypeWarningTimeoutRef.current);
       }
     };
   }, []);
