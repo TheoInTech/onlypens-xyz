@@ -1,9 +1,5 @@
 import { openai } from "@/lib/openai";
-import {
-  EMatchmakerSource,
-  IMatchmaker,
-  MatchmakerMatchResponseSchema,
-} from "@/schema/matchmaker.schema";
+import { EMatchmakerSource, IMatchmaker } from "@/schema/matchmaker.schema";
 import { MatchmakerResponseSchema } from "@/schema/shared.schema";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
