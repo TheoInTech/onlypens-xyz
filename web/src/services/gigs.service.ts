@@ -103,6 +103,29 @@ export const getGig = async (gigId: string): Promise<IGig> => {
 
     const responseJson = await response.json();
 
+    // Early guard: Ensure data exists and is not empty
+    if (!responseJson.data || Object.keys(responseJson.data).length === 0) {
+      console.error(
+        "API returned empty or missing data for gig",
+        gigId,
+        responseJson
+      );
+      throw new Error(`Gig data is missing or empty for ID ${gigId}`);
+    }
+
+    // Patch ghostwriters: ensure it's always an array or null
+    if (typeof responseJson.data.ghostwriters === "undefined") {
+      responseJson.data.ghostwriters = [];
+    }
+
+    // Patch updatedAt: ensure it's always an object with _seconds/_nanoseconds
+    if (typeof responseJson.data.updatedAt === "number") {
+      responseJson.data.updatedAt = {
+        _seconds: responseJson.data.updatedAt,
+        _nanoseconds: 0,
+      };
+    }
+
     // Handle the case where invitations might contain simplified ghostwriter objects
     if (responseJson.data && responseJson.data.invitations) {
       try {
@@ -273,8 +296,6 @@ export const getGig = async (gigId: string): Promise<IGig> => {
     }
 
     const apiGig = result.data as IGigApiResponse;
-
-    console.log("getGig data ===>", apiGig);
 
     if (!apiGig) {
       throw new Error(`Gig with ID ${gigId} not found`);

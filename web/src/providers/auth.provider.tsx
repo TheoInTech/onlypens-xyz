@@ -13,13 +13,14 @@ interface AuthProviderProps {
 
 const AuthProvider = ({ children }: AuthProviderProps) => {
   const pathname = usePathname();
-  const { setUser } = useGlobalStore();
+  const { setUser, setIsLoadingUser } = useGlobalStore();
   const { data: session } = useSession();
 
   const {
     data: fetchedUser,
     isFetched,
     isRefetching,
+    isFetching,
     refetch,
   } = useQuery({
     queryKey: ["user"],
@@ -35,6 +36,14 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         console.error("Auth check failed:", error);
         setUser(null);
       }
+    }
+
+    if (isRefetching || isFetching) {
+      setIsLoadingUser(true);
+    }
+
+    if (isFetched && !isRefetching && !isFetching && !!fetchedUser) {
+      setIsLoadingUser(false);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

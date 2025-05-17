@@ -34,9 +34,9 @@ import { IconNumber1, IconNumber2, IconNumber3 } from "@tabler/icons-react";
 const GigIdPage = ({ params }: any) => {
   const { gigId } = use(params as unknown as Usable<{ gigId: string }>);
   const { gigData, isLoadingGig, refetchGig } = useGig(gigId);
-  const { role } = useGlobalStore();
+  const { user, isLoadingUser } = useGlobalStore();
 
-  if (isLoadingGig) {
+  if (isLoadingGig || isLoadingUser) {
     return (
       <Container
         p="sm"
@@ -94,7 +94,7 @@ const GigIdPage = ({ params }: any) => {
 
   return (
     <Stack gap="xl">
-      {role === ERoles.GHOSTWRITER && (
+      {user && user?.role === ERoles.GHOSTWRITER && (
         <Stack gap="xs" w="100%" justify="center" align="center">
           <Text size="xs">You are invited to this gig!</Text>
           <Group gap="xs">
@@ -253,7 +253,7 @@ const GigIdPage = ({ params }: any) => {
           </Tabs.Panel>
         </Tabs>
       </Stack>
-      {role === ERoles.CREATOR && (
+      {user && user?.role === ERoles.CREATOR && (
         <InviteGhostwriters gig={gigData} refetchGig={refetchGig} />
       )}
     </Stack>
