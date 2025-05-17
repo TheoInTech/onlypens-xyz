@@ -4,6 +4,7 @@ import {
   IMatchmaker,
   MatchmakerMatchResponseSchema,
 } from "@/schema/matchmaker.schema";
+import { MatchmakerResponseSchema } from "@/schema/shared.schema";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -148,7 +149,7 @@ export async function POST(request: NextRequest) {
 
       // Validate the response against the schema
       const validatedResponse =
-        MatchmakerMatchResponseSchema.safeParse(matchmakerJson);
+        MatchmakerResponseSchema.safeParse(matchmakerJson);
 
       if (!validatedResponse.success) {
         return NextResponse.json(
