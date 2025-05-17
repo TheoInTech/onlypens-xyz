@@ -3,7 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { db as clientDb } from "@/lib/firebase-client";
 import { doc as clientDoc, getDoc as clientGetDoc } from "firebase/firestore";
 import { createPublicClient, http } from "viem";
-import { baseSepolia } from "viem/chains";
+import { baseSepolia, base } from "viem/chains";
 import { onlyPensAbi } from "@/hooks/abi-generated";
 import { request as graphqlRequest } from "graphql-request";
 import { GET_CREATOR_RECENT_GIG } from "@/graphql/creator-queries";
@@ -119,7 +119,10 @@ export async function GET(request: NextRequest) {
 
     // Create a viem public client to get additional details
     const publicClient = createPublicClient({
-      chain: baseSepolia,
+      chain:
+        process.env.NEXT_PUBLIC_BLOCKCHAIN_ENV === "mainnet"
+          ? base
+          : baseSepolia,
       transport: http(process.env.NEXT_PUBLIC_RPC_URL),
     });
 
