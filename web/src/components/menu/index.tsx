@@ -29,6 +29,10 @@ export function Menu() {
 
   return (
     <>
+      <Box className={classes.banner}>
+        SmartWallet is still being fixed for signing. Please use Coinbase wallet
+        for now.
+      </Box>
       <header className={classes.header}>
         <Group justify="space-between" h="100%">
           <UnstyledButton

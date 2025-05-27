@@ -71,9 +71,14 @@ export const ConnectWallet = ({ size = "default" }: IConnectWallet) => {
   // Connected but not signed in
   if (account.isConnected && !!account.address && !session) {
     return (
-      <Button variant="secondary" onClick={handleSignin} size={size}>
-        Sign in
-      </Button>
+      <Group gap="md">
+        <Button variant="outline" onClick={handleDisconnect} size={size}>
+          Disconnect
+        </Button>
+        <Button variant="secondary" onClick={handleSignin} size={size}>
+          Sign in
+        </Button>
+      </Group>
     );
   }
 
