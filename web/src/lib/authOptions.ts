@@ -2,6 +2,18 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { SiweMessage } from "siwe";
 import { getCsrfToken } from "next-auth/react";
+import { createPublicClient, http, Hex } from "viem";
+import { baseSepolia, base } from "viem/chains";
+
+const isMainnet = process.env.NEXT_PUBLIC_BLOCKCHAIN_ENV === "mainnet";
+
+// Create a public client for signature verification
+const publicClient = createPublicClient({
+  chain: isMainnet ? base : baseSepolia,
+  transport: http(
+    `https://base-${isMainnet ? "mainnet" : "sepolia"}.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
+  ),
+});
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -31,13 +43,24 @@ export const authOptions: NextAuthOptions = {
             req: { headers: req.headers },
           });
 
-          const result = await siwe.verify({
-            signature: credentials?.signature || "",
-            domain: nextAuthUrl.host,
-            nonce: csrfToken,
+          // Verify the nonce matches
+          if (siwe.nonce !== csrfToken) {
+            return null;
+          }
+
+          // Verify the domain matches
+          if (siwe.domain !== nextAuthUrl.host) {
+            return null;
+          }
+
+          // Verify the signature using Viem's verifyMessage which supports both EOA and EIP-1271
+          const isValid = await publicClient.verifyMessage({
+            address: siwe.address as Hex,
+            message: siwe.prepareMessage(),
+            signature: (credentials?.signature || "") as Hex,
           });
 
-          if (result.success) {
+          if (isValid) {
             return {
               id: siwe.address,
             };
