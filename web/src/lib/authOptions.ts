@@ -6,10 +6,11 @@ import { createPublicClient, http, Hex } from "viem";
 import { baseSepolia, base } from "viem/chains";
 
 const isMainnet = process.env.NEXT_PUBLIC_BLOCKCHAIN_ENV === "mainnet";
+const CHAIN = isMainnet ? base : baseSepolia;
 
 // Create a public client for signature verification
 const publicClient = createPublicClient({
-  chain: isMainnet ? base : baseSepolia,
+  chain: CHAIN,
   transport: http(
     `https://base-${isMainnet ? "mainnet" : "sepolia"}.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
   ),
@@ -33,41 +34,53 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         try {
-          const siwe = new SiweMessage(
-            JSON.parse(credentials?.message || "{}")
-          );
+          if (!credentials?.message || !credentials?.signature) {
+            console.error("Missing message or signature");
+            return null;
+          }
+
+          // Parse the SIWE message
+          const siweMessage = new SiweMessage(JSON.parse(credentials.message));
           const nextAuthUrl = new URL(process.env.NEXTAUTH_URL!);
 
-          // For app router we need to get the CSRF token differently
+          // Get CSRF token
           const csrfToken = await getCsrfToken({
             req: { headers: req.headers },
           });
 
-          // Verify the nonce matches
-          if (siwe.nonce !== csrfToken) {
+          // Basic SIWE checks
+          if (siweMessage.nonce !== csrfToken) {
+            console.error("Invalid nonce");
             return null;
           }
 
-          // Verify the domain matches
-          if (siwe.domain !== nextAuthUrl.host) {
+          if (siweMessage.domain !== nextAuthUrl.host) {
+            console.error("Invalid domain");
             return null;
           }
 
-          // Verify the signature using Viem's verifyMessage which supports both EOA and EIP-1271
-          const isValid = await publicClient.verifyMessage({
-            address: siwe.address as Hex,
-            message: siwe.prepareMessage(),
-            signature: (credentials?.signature || "") as Hex,
-          });
+          // Verify the signature using Base's recommended method
+          try {
+            const valid = await publicClient.verifyMessage({
+              address: siweMessage.address as Hex,
+              message: siweMessage.prepareMessage(),
+              signature: credentials.signature as Hex,
+            });
 
-          if (isValid) {
-            return {
-              id: siwe.address,
-            };
+            console.log("Signature verification result:", valid);
+
+            if (valid) {
+              return {
+                id: siweMessage.address,
+              };
+            }
+          } catch (verifyError) {
+            console.error("Error during signature verification:", verifyError);
           }
+
           return null;
-        } catch (e: unknown) {
-          console.error(e);
+        } catch (e) {
+          console.error("Authorization error:", e);
           return null;
         }
       },

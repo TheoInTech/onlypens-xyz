@@ -10,7 +10,7 @@ import { IconCopy, IconLogout } from "@tabler/icons-react";
 import { shortenAddress } from "@/lib/utils";
 import classes from "./connect-wallet.module.css";
 import { getCsrfToken, signIn, signOut, useSession } from "next-auth/react";
-import { baseSepolia } from "viem/chains";
+import { base, baseSepolia } from "viem/chains";
 
 interface IConnectWallet {
   size?: "default" | "small";
@@ -27,6 +27,8 @@ export const ConnectWallet = ({ size = "default" }: IConnectWallet) => {
 
   const handleSignin = async () => {
     try {
+      const isMainnet = process.env.NEXT_PUBLIC_BLOCKCHAIN_ENV === "mainnet";
+
       const callbackUrl = `/onboarding`;
       const message = new SiweMessage({
         domain: window.location.host,
@@ -34,7 +36,7 @@ export const ConnectWallet = ({ size = "default" }: IConnectWallet) => {
         statement: "Sign in to OnlyPens.",
         uri: window.location.origin,
         version: "1",
-        chainId: baseSepolia.id,
+        chainId: isMainnet ? base.id : baseSepolia.id,
         nonce: await getCsrfToken(),
       });
       const signature = await signMessageAsync({
